@@ -128,6 +128,10 @@ Load documents based on what the session requires:
 - `CURRENT_SPEC.md` — replace per task. No need to preserve history unless you want it.
 - `DECISION_LOG.md` — append only. Never delete past entries; mark them as superseded instead.
 
+### Saved prompt workflows
+
+For agents that support saved prompts or slash commands (e.g. Antigravity, Cursor, continue.dev), see [WORKFLOWS.md](./WORKFLOWS.md) for the recommended PXOS workflow set covering the full operating cycle: open → plan → execute → review → close.
+
 ---
 
 ## Extended context files (optional)
