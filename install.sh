@@ -5,6 +5,9 @@
 #   bash install.sh --full        (includes ROADMAP.md and SPRINT.md)
 #   bash install.sh --ide cursor  (also generates Cursor rules)
 #   bash install.sh --ide windsurf
+#
+# Flags can be combined:
+#   curl -sSL .../install.sh | bash -s -- --full --ide cursor
 
 set -e
 
@@ -20,16 +23,16 @@ CYAN=$(tput setaf 6 2>/dev/null || echo '')
 YELLOW=$(tput setaf 3 2>/dev/null || echo '')
 RESET=$(tput sgr0 2>/dev/null || echo '')
 
-log()    { echo "${CYAN}[PXOS]${RESET} $1"; }
-ok()     { echo "${GREEN}[PXOS]${RESET} $1"; }
-warn()   { echo "${YELLOW}[PXOS]${RESET} $1"; }
+log()  { echo "${CYAN}[PXOS]${RESET} $1"; }
+ok()   { echo "${GREEN}[PXOS]${RESET} $1"; }
+warn() { echo "${YELLOW}[PXOS]${RESET} $1"; }
 
 # ─── Parse flags ──────────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --full) FULL=true; shift ;;
-    --ide) IDE="$2"; shift 2 ;;
-    *) warn "Unknown flag: $1"; shift ;;
+    --ide)  IDE="$2"; shift 2 ;;
+    *)      warn "Unknown flag: $1"; shift ;;
   esac
 done
 
@@ -72,7 +75,16 @@ if [[ "$FULL" == true ]]; then
   download_file "templates/SPRINT.md"  "SPRINT.md"
 fi
 
-# ─── IDE rules ────────────────────────────────────────────────────────────────
+# ─── Auto-detect IDE (if --ide not passed) ───────────────────────────────────
+if [[ -z "$IDE" ]]; then
+  if [[ -d ".cursor" ]]; then
+    warn "Detected Cursor project. Run with --ide cursor to also install rules."
+  elif [[ -d ".windsurf" ]]; then
+    warn "Detected Windsurf project. Run with --ide windsurf to also install rules."
+  fi
+fi
+
+# ─── IDE rules ───────────────────────────────────────────────────────────────────
 if [[ -n "$IDE" ]]; then
   AI_BASE_CONTENT=$(cat "${TARGET_DIR}/AI_BASE.md" 2>/dev/null || curl -sSL "${PXOS_REPO}/templates/.ai/AI_BASE.md")
 
@@ -85,13 +97,7 @@ if [[ -n "$IDE" ]]; then
       if [[ -f "$RULES_FILE" ]]; then
         warn "Skipping ${RULES_FILE} — already exists."
       else
-        cat > "$RULES_FILE" << MDRULES
----
-alwaysApply: true
----
-
-${AI_BASE_CONTENT}
-MDRULES
+        printf '%s\n' "---" "alwaysApply: true" "---" "" "$AI_BASE_CONTENT" > "$RULES_FILE"
         ok "Created ${RULES_FILE}"
       fi
       ;;
@@ -103,7 +109,7 @@ MDRULES
       if [[ -f "$RULES_FILE" ]]; then
         warn "Skipping ${RULES_FILE} — already exists."
       else
-        echo "${AI_BASE_CONTENT}" > "$RULES_FILE"
+        printf '%s\n' "$AI_BASE_CONTENT" > "$RULES_FILE"
         ok "Created ${RULES_FILE}"
       fi
       ;;
@@ -111,15 +117,6 @@ MDRULES
       warn "Unknown IDE: ${IDE}. Supported: cursor, windsurf"
       ;;
   esac
-fi
-
-# ─── Auto-detect IDE (if --ide not passed) ────────────────────────────────────
-if [[ -z "$IDE" ]]; then
-  if [[ -d ".cursor" ]]; then
-    warn "Detected Cursor project. Run with --ide cursor to also install rules."
-  elif [[ -d ".windsurf" ]]; then
-    warn "Detected Windsurf project. Run with --ide windsurf to also install rules."
-  fi
 fi
 
 # ─── Done ─────────────────────────────────────────────────────────────────────
