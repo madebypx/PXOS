@@ -141,6 +141,45 @@ Read them before proceeding. Do not implement until you have completed the Disco
 
 ---
 
+## Extended context files (optional)
+
+Some projects need additional, stable documents that do not fit cleanly into the four base files. Examples:
+
+- `DESIGN.md` or `DESIGN_SYSTEM.md` – detailed design language, components, tokens, interaction patterns.
+- `DOMAIN_RULES.md` – domain-specific constraints (legal, financial, medical, etc.).
+- `DATA_MODEL.md` – stable description of entities, relationships, and invariants.
+- `GLOSSARY.md` – domain language, naming decisions, and definitions.
+
+These files are **not** part of the universal core. They are project-specific modules.
+
+### Where to put them
+
+You can either:
+
+- Place them under `.ai/`:
+
+  - `.ai/DESIGN.md`
+  - `.ai/DOMAIN_RULES.md`
+  - `.ai/DATA_MODEL.md`
+
+  and reference them explicitly when they are relevant to a task.
+
+or
+
+- Keep them in their natural place (for example, `docs/design/DESIGN.md`) and only include them in context when the task touches that area.
+
+### How to load them in AI sessions
+
+Treat extended files as on-demand context:
+
+- Only load them when the task actually depends on them.
+- Avoid loading all extended files by default to prevent context noise and token waste.
+- Refer to them explicitly in the prompt when they matter, for example:
+
+  > You also have access to `.ai/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
+
+This keeps the **base system small and reusable**, while still allowing rich, project-specific documentation where it makes sense.
+
 ## Principles
 
 The system is built on five operational beliefs:
