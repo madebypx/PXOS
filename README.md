@@ -1,4 +1,4 @@
-# PX OS
+# PXOS
 
 A reusable AI operating system for software and product development. A compact, framework-agnostic base that defines how an AI agent should behave, reason, and operate — across any project.
 
@@ -6,7 +6,7 @@ A reusable AI operating system for software and product development. A compact, 
 
 ## What it is
 
-PX OS is a four-document system designed to be adopted as a base layer in any project that uses AI agents for development work. It keeps universal operating rules separate from project-specific context, making it easy to reuse, adapt, and maintain over time.
+PXOS is a four-document system designed to be adopted as a base layer in any project that uses AI agents for development work. It keeps universal operating rules separate from project-specific context, making it easy to reuse, adapt, and maintain over time.
 
 It is not a prompt library. It is not a collection of tips. It is an operational contract between the human and the AI — defining priorities, workflow, autonomy boundaries, and quality standards that remain stable across projects.
 
@@ -22,7 +22,7 @@ AI agents produce inconsistent results not because they lack capability, but bec
 - They make architectural decisions that should belong to the human.
 - They lose coherence across long sessions.
 
-PX OS addresses this with a minimal, durable operating layer.
+PXOS addresses this with a minimal, durable operating layer.
 
 ---
 
@@ -179,6 +179,8 @@ Treat extended files as on-demand context:
   > You also have access to `.ai/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
 
 This keeps the **base system small and reusable**, while still allowing rich, project-specific documentation where it makes sense.
+
+---
 
 ## Principles
 
