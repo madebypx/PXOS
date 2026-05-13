@@ -175,6 +175,96 @@ This keeps the **base system small and reusable**, while still allowing rich, pr
 
 ---
 
+## Planning and progress files (optional)
+
+For projects with active development cycles, two additional files help maintain shared awareness between human and AI across sessions.
+
+### `ROADMAP.md`
+
+The product direction layer. Lives at the project root (not inside `.ai/`).
+
+**Ownership: human.** The AI can help draft or restructure it, but does not update it autonomously.
+
+Contains:
+
+- Planned features and improvements
+- Priority order
+- Status per item (planned / in progress / done / dropped)
+- High-level dependencies between items
+
+The AI reads `ROADMAP.md` when it needs product direction context, but never modifies it without explicit instruction. When a decision affects the roadmap, the AI flags it and asks the human to update the file.
+
+Template:
+
+```md
+# Roadmap — [Project name]
+
+## In progress
+- [ ] Feature A — brief description
+
+## Planned
+- [ ] Feature B — brief description
+- [ ] Feature C — brief description
+
+## Completed
+- [x] Feature D
+
+## Dropped
+- Feature E — reason
+```
+
+### `SPRINT.md`
+
+The active sprint layer. Lives inside `.ai/`.
+
+**Ownership: shared.** The human defines the sprint goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
+
+Contains:
+
+- Sprint name or date range
+- Goals with completion status
+- What is currently in progress
+- Blockers
+- What was completed this sprint
+- Immediate next steps
+
+This file is short-lived — replace it when a new sprint begins. Optionally archive past sprints in a `/sprints` folder.
+
+Template:
+
+```md
+# Sprint — [name or date range]
+
+## Status
+In progress
+
+## Goals
+- [ ] Goal A
+- [ ] Goal B
+- [x] Goal C
+
+## In progress
+- Goal A — discovery done, plan approved, execution started
+
+## Blockers
+- Awaiting design decision on modal behavior
+
+## Completed this sprint
+- Goal C — simplified state management in checkout flow
+
+## Next
+- Start Goal B spec after Goal A is validated
+```
+
+### Ownership rules at a glance
+
+| File | Who defines | Who updates | Life span |
+|---|---|---|---|
+| `ROADMAP.md` | Human | Human (AI flags changes) | Weeks / months |
+| `.ai/SPRINT.md` | Human | Human + AI via `/compact` | Days / sprint |
+
+---
+
 ## Prompt templates
 
 PXOS does not prescribe a prompt library. The `CURRENT_SPEC.md` file already serves as the task prompt — a well-filled spec eliminates the need for verbose task descriptions in the prompt itself.
