@@ -17,7 +17,7 @@ Read the following files before doing anything:
 - .ai/PROJECT_CONTEXT.md
 - .ai/CURRENT_SPEC.md
 
-If .ai/SPRINT.md exists, read it as well.
+If SPRINT.md exists at the project root, read it as well.
 
 Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
 ```
@@ -77,14 +77,14 @@ Summarize this session in a compact format:
 
 Keep it short, factual, and reusable as future context.
 
-If the file .ai/SPRINT.md exists, also update it:
+If the file SPRINT.md exists at the project root, also update it:
 - Mark completed goals as done [x]
 - Update the "In progress" section to reflect current state
 - Add any new blockers
 - Update "Next" with the immediate next steps
 - Do not change the sprint goal or remove completed items — only append and update status
 
-If .ai/SPRINT.md does not exist but this project has a sprint in progress, ask me if I want to create it.
+If SPRINT.md does not exist but this project has a sprint in progress, ask me if I want to create it.
 ```
 
 ---

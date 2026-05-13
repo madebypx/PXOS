@@ -30,14 +30,16 @@ PXOS addresses this with a minimal, durable operating layer.
 
 ```
 your-project/
-└── .ai/
-    ├── AI_BASE.md          # Universal operating rules — shared across all projects
-    ├── PROJECT_CONTEXT.md  # Durable project facts — product, stack, architecture, conventions
-    ├── CURRENT_SPEC.md     # Active task or feature spec — replaced per task
-    └── DECISION_LOG.md     # Long-term architectural and product decisions
+├── .ai/                    # core — required
+│   ├── AI_BASE.md
+│   ├── PROJECT_CONTEXT.md
+│   ├── CURRENT_SPEC.md
+│   └── DECISION_LOG.md
+├── ROADMAP.md              # optional — product direction
+└── SPRINT.md               # optional — active sprint
 ```
 
-The `.ai/` folder lives at the root of each project. Only the relevant documents are loaded into context for a given session.
+The `.ai/` folder contains only the four required files. Optional planning files live at the project root.
 
 ---
 
@@ -118,6 +120,7 @@ cp -r PXOS/templates/.ai ./
 
 # Optionally copy planning files
 cp PXOS/templates/ROADMAP.md ./
+cp PXOS/templates/SPRINT.md ./
 ```
 
 ### Starting an AI session
@@ -157,19 +160,7 @@ These files are **not** part of the universal core. They are project-specific mo
 
 ### Where to put them
 
-You can either:
-
-- Place them under `.ai/`:
-
-  - `.ai/DESIGN.md`
-  - `.ai/DOMAIN_RULES.md`
-  - `.ai/DATA_MODEL.md`
-
-  and reference them explicitly when they are relevant to a task.
-
-or
-
-- Keep them in their natural place (for example, `docs/design/DESIGN.md`) and only include them in context when the task touches that area.
+You can either place them under `.ai/` and reference them explicitly when relevant to a task, or keep them in their natural place in the project (e.g. `docs/design/DESIGN.md`) and load them only when the task touches that area.
 
 ### How to load them in AI sessions
 
@@ -181,39 +172,33 @@ Treat extended files as on-demand context:
 
   > You also have access to `.ai/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
 
-This keeps the **base system small and reusable**, while still allowing rich, project-specific documentation where it makes sense.
-
 ---
 
 ## Planning and progress files (optional)
 
-For projects with active development cycles, two additional files help maintain shared awareness between human and AI across sessions.
+For projects with active development cycles, two additional files help maintain shared awareness between human and AI across sessions. Both live at the **project root**, not inside `.ai/`.
 
 ### `ROADMAP.md`
 
-The product direction layer. Lives at the project root (not inside `.ai/`).
+The product direction layer.
 
-**Ownership: human.** The AI can help draft or restructure it, but does not update it autonomously.
+**Ownership: human.** The AI reads it for product direction context but does not update it autonomously. When a session decision affects the roadmap, the AI flags it and asks the human to update the file.
 
 Contains:
-
 - Planned features and improvements
 - Priority order
 - Status per item (planned / in progress / done / dropped)
 - High-level dependencies between items
 
-The AI reads `ROADMAP.md` when it needs product direction context, but never modifies it without explicit instruction. When a decision affects the roadmap, the AI flags it and asks the human to update the file.
-
 Template: [`templates/ROADMAP.md`](./templates/ROADMAP.md)
 
 ### `SPRINT.md`
 
-The active sprint layer. Lives inside `.ai/`.
+The active sprint layer.
 
-**Ownership: shared.** The human defines the sprint goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
+**Ownership: shared.** The human defines sprint goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
 
 Contains:
-
 - Sprint name or date range
 - Goals with completion status
 - What is currently in progress
@@ -223,14 +208,14 @@ Contains:
 
 This file is short-lived — replace it when a new sprint begins. Optionally archive past sprints in a `/sprints` folder.
 
-Template: [`templates/.ai/SPRINT.md`](./templates/.ai/SPRINT.md)
+Template: [`templates/SPRINT.md`](./templates/SPRINT.md)
 
 ### Ownership rules at a glance
 
 | File | Who defines | Who updates | Life span |
 |---|---|---|---|
 | `ROADMAP.md` | Human | Human (AI flags changes) | Weeks / months |
-| `.ai/SPRINT.md` | Human | Human + AI via `/compact` | Days / sprint |
+| `SPRINT.md` | Human | Human + AI via `/compact` | Days / sprint |
 
 ---
 
@@ -244,8 +229,8 @@ templates/
 │   ├── AI_BASE.md
 │   ├── PROJECT_CONTEXT.md
 │   ├── CURRENT_SPEC.md
-│   ├── DECISION_LOG.md
-│   └── SPRINT.md          # optional
+│   └── DECISION_LOG.md
+├── SPRINT.md              # optional
 └── ROADMAP.md             # optional
 ```
 
