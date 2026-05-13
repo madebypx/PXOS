@@ -4,6 +4,52 @@ A reusable AI operating system for software and product development. A compact, 
 
 ---
 
+## Quick Install
+
+Run this in the root of any project:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash
+```
+
+This creates the `.ai/` folder with the four core files. No dependencies beyond `curl`.
+
+### Options
+
+```bash
+# Also install ROADMAP.md and SPRINT.md
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --full
+
+# Also configure your IDE (workspace only)
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide cursor
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide windsurf
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide claude
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide gemini
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide copilot
+
+# Install IDE rules globally (all projects in that IDE)
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --global --ide cursor
+
+# Everything at once
+curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --full --ide cursor
+```
+
+### IDE rules behavior
+
+| IDE | Scope | File created |
+|---|---|---|
+| Cursor | workspace | `.cursor/rules/pxos.mdc` |
+| Windsurf | workspace | `.windsurf/rules/pxos.md` |
+| Claude Code | workspace or `~/.claude/` | `CLAUDE.md` |
+| Gemini CLI | workspace or `~/.gemini/` | `GEMINI.md` |
+| GitHub Copilot | workspace only | `.github/copilot-instructions.md` |
+
+For `claude`, `gemini`, and `copilot`: if the file already exists, PXOS **appends** its rules instead of replacing your content. Safe to run multiple times.
+
+After installing, fill in `.ai/PROJECT_CONTEXT.md` with your project facts and you're ready to start a session.
+
+---
+
 ## What it is
 
 PXOS is a four-document system designed to be adopted as a base layer in any project that uses AI agents for development work. It keeps universal operating rules separate from project-specific context, making it easy to reuse, adapt, and maintain over time.
@@ -111,22 +157,11 @@ Only durable decisions belong here — architectural choices, dependency replace
 
 ### Setting up a new project
 
-1. Copy the `.ai/` folder into the root of your project.
+1. Run the installer (see Quick Install above).
 2. Fill in `PROJECT_CONTEXT.md` with your product and technical facts.
 3. Keep `AI_BASE.md` as-is unless you have a strong reason to adjust it.
 4. Leave `DECISION_LOG.md` empty until real decisions accumulate.
 5. Use `CURRENT_SPEC.md` as the active task spec before each meaningful session.
-
-For a faster setup, use the ready-to-copy templates in the [`/templates`](./templates) folder:
-
-```bash
-# Copy core files into your project
-cp -r PXOS/templates/.ai ./
-
-# Optionally copy planning files
-cp PXOS/templates/ROADMAP.md ./
-cp PXOS/templates/SPRINT.md ./
-```
 
 ### Starting an AI session
 
