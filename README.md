@@ -110,6 +110,16 @@ Only durable decisions belong here — architectural choices, dependency replace
 4. Leave `DECISION_LOG.md` empty until real decisions accumulate.
 5. Use `CURRENT_SPEC.md` as the active task spec before each meaningful session.
 
+For a faster setup, use the ready-to-copy templates in the [`/templates`](./templates) folder:
+
+```bash
+# Copy core files into your project
+cp -r PXOS/templates/.ai ./
+
+# Optionally copy planning files
+cp PXOS/templates/ROADMAP.md ./
+```
+
 ### Starting an AI session
 
 Load documents based on what the session requires:
@@ -194,24 +204,7 @@ Contains:
 
 The AI reads `ROADMAP.md` when it needs product direction context, but never modifies it without explicit instruction. When a decision affects the roadmap, the AI flags it and asks the human to update the file.
 
-Template:
-
-```md
-# Roadmap — [Project name]
-
-## In progress
-- [ ] Feature A — brief description
-
-## Planned
-- [ ] Feature B — brief description
-- [ ] Feature C — brief description
-
-## Completed
-- [x] Feature D
-
-## Dropped
-- Feature E — reason
-```
+Template: [`templates/ROADMAP.md`](./templates/ROADMAP.md)
 
 ### `SPRINT.md`
 
@@ -230,31 +223,7 @@ Contains:
 
 This file is short-lived — replace it when a new sprint begins. Optionally archive past sprints in a `/sprints` folder.
 
-Template:
-
-```md
-# Sprint — [name or date range]
-
-## Status
-In progress
-
-## Goals
-- [ ] Goal A
-- [ ] Goal B
-- [x] Goal C
-
-## In progress
-- Goal A — discovery done, plan approved, execution started
-
-## Blockers
-- Awaiting design decision on modal behavior
-
-## Completed this sprint
-- Goal C — simplified state management in checkout flow
-
-## Next
-- Start Goal B spec after Goal A is validated
-```
+Template: [`templates/.ai/SPRINT.md`](./templates/.ai/SPRINT.md)
 
 ### Ownership rules at a glance
 
@@ -262,6 +231,25 @@ In progress
 |---|---|---|---|
 | `ROADMAP.md` | Human | Human (AI flags changes) | Weeks / months |
 | `.ai/SPRINT.md` | Human | Human + AI via `/compact` | Days / sprint |
+
+---
+
+## Templates
+
+The [`/templates`](./templates) folder contains ready-to-copy versions of all PXOS files — core and optional.
+
+```
+templates/
+├── .ai/
+│   ├── AI_BASE.md
+│   ├── PROJECT_CONTEXT.md
+│   ├── CURRENT_SPEC.md
+│   ├── DECISION_LOG.md
+│   └── SPRINT.md          # optional
+└── ROADMAP.md             # optional
+```
+
+All files include placeholder instructions and comments to guide setup.
 
 ---
 
