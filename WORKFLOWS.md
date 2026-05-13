@@ -6,6 +6,49 @@ This file contains the recommended workflow set for PXOS. Each workflow maps to 
 
 ---
 
+## `/install` — Install PXOS in a project
+
+**When to use:**
+When setting up PXOS in a new project. The agent detects the environment, picks the right flags, and runs the installer in one step. Use this instead of manually composing the `curl` command.
+
+```
+Install PXOS in this project by following these steps:
+
+1. Detect the environment:
+   - Check if a .cursor/ folder exists → IDE is Cursor
+   - Check if a .windsurf/ folder exists → IDE is Windsurf
+   - Check if a CLAUDE.md file exists, or if you are Claude Code → IDE is claude
+   - Check if a GEMINI.md file exists, or if you are Gemini CLI → IDE is gemini
+   - Check if .github/copilot-instructions.md exists → IDE is copilot
+   - If none of the above → no --ide flag
+
+2. Compose and run the install command:
+   - Always include the base install (no extra flags needed for core files)
+   - Add --ide <detected> if an IDE was identified
+   - Add --full only if I explicitly asked for ROADMAP.md and SPRINT.md
+
+   Examples:
+     No IDE detected:
+       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash
+
+     Cursor detected:
+       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide cursor
+
+     Claude Code detected:
+       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide claude
+
+     Full install with Cursor:
+       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --full --ide cursor
+
+3. After the install completes:
+   - Open .ai/PROJECT_CONTEXT.md
+   - Ask me to describe the project so you can help fill it in
+
+Do not run the command until you have confirmed which IDE was detected and which flags will be used.
+```
+
+---
+
 ## `/start` — Open a work session
 
 **When to use:**
@@ -116,6 +159,6 @@ Ask me questions if anything is unclear before filling it in.
 
 ## Usage notes
 
-- These five workflows cover the full PXOS operating cycle: open → plan → execute → review → close.
+- These workflows cover the full PXOS operating cycle: install → open → plan → execute → review → close.
 - Do not create workflows for individual feature types or component patterns — that becomes a prompt library, which contradicts the PXOS principle of keeping the system minimal.
 - If a task requires unusual framing, write it inline. Only promote something to a workflow if it is genuinely reused across sessions.
