@@ -35,11 +35,16 @@ your-project/
 │   ├── PROJECT_CONTEXT.md
 │   ├── CURRENT_SPEC.md
 │   └── DECISION_LOG.md
-├── ROADMAP.md              # optional — product direction
-└── SPRINT.md               # optional — active sprint
+├── ROADMAP.md              # optional — product direction (root, high visibility)
+├── SPRINT.md               # optional — active sprint (root, high visibility)
+└── docs/                   # optional — specialized technical context
+    ├── DESIGN.md
+    ├── DOMAIN_RULES.md
+    ├── DATA_MODEL.md
+    └── GLOSSARY.md
 ```
 
-The `.ai/` folder contains only the four required files. Optional planning files live at the project root.
+Each layer has a clear role: `.ai/` is the AI operational core, the root holds files every collaborator should find immediately, and `docs/` holds specialized context loaded on demand.
 
 ---
 
@@ -149,18 +154,24 @@ For agents that support saved prompts or slash commands (e.g. Antigravity, Curso
 
 ## Extended context files (optional)
 
-Some projects need additional, stable documents that do not fit cleanly into the four base files. Examples:
+Some projects need additional, stable documents beyond the four core files. PXOS recommends a consistent placement convention based on the nature of each file.
 
-- `DESIGN.md` or `DESIGN_SYSTEM.md` – detailed design language, components, tokens, interaction patterns.
-- `DOMAIN_RULES.md` – domain-specific constraints (legal, financial, medical, etc.).
-- `DATA_MODEL.md` – stable description of entities, relationships, and invariants.
-- `GLOSSARY.md` – domain language, naming decisions, and definitions.
+### Placement convention
 
-These files are **not** part of the universal core. They are project-specific modules.
+| Location | What belongs there | Examples |
+|---|---|---|
+| **Project root** | Files every collaborator should find immediately — product and sprint visibility | `ROADMAP.md`, `SPRINT.md` |
+| **`docs/`** | Specialized technical context loaded on demand — not needed in every session | `DESIGN.md`, `DOMAIN_RULES.md`, `DATA_MODEL.md`, `GLOSSARY.md` |
+| **`.ai/`** | The four core files only | `AI_BASE.md`, `PROJECT_CONTEXT.md`, `CURRENT_SPEC.md`, `DECISION_LOG.md` |
 
-### Where to put them
+`.ai/` is reserved exclusively for the PXOS core. Do not add project-specific extended files there — it blurs the boundary between the universal operating layer and project content.
 
-You can either place them under `.ai/` and reference them explicitly when relevant to a task, or keep them in their natural place in the project (e.g. `docs/design/DESIGN.md`) and load them only when the task touches that area.
+### Extended file examples
+
+- `docs/DESIGN.md` — design language, components, tokens, interaction patterns
+- `docs/DOMAIN_RULES.md` — domain-specific constraints (legal, financial, medical, etc.)
+- `docs/DATA_MODEL.md` — stable description of entities, relationships, and invariants
+- `docs/GLOSSARY.md` — domain language, naming decisions, and definitions
 
 ### How to load them in AI sessions
 
@@ -170,13 +181,13 @@ Treat extended files as on-demand context:
 - Avoid loading all extended files by default to prevent context noise and token waste.
 - Refer to them explicitly in the prompt when they matter, for example:
 
-  > You also have access to `.ai/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
+  > You also have access to `docs/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
 
 ---
 
 ## Planning and progress files (optional)
 
-For projects with active development cycles, two additional files help maintain shared awareness between human and AI across sessions. Both live at the **project root**, not inside `.ai/`.
+For projects with active development cycles, two additional files help maintain shared awareness between human and AI across sessions. Both live at the **project root** for immediate visibility.
 
 ### `ROADMAP.md`
 
@@ -268,7 +279,7 @@ You have access to the following context files. Read all of them before doing an
 - .ai/AI_BASE.md — your operating rules
 - .ai/PROJECT_CONTEXT.md — project context
 - .ai/CURRENT_SPEC.md — current task spec
-- .ai/[EXTENDED_FILE].md — [describe what it covers, e.g. "design system and visual language"]
+- docs/[EXTENDED_FILE].md — [describe what it covers, e.g. "design system and visual language"]
 
 Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
 ```
