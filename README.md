@@ -121,17 +121,6 @@ Load documents based on what the session requires:
 | Architectural decision | `AI_BASE.md` + `PROJECT_CONTEXT.md` + `DECISION_LOG.md` |
 | Isolated task | `AI_BASE.md` only |
 
-Sample prompt opening:
-
-```
-You have access to the following context files:
-- .ai/AI_BASE.md — your operating rules
-- .ai/PROJECT_CONTEXT.md — project facts
-- .ai/CURRENT_SPEC.md — current task spec
-
-Read them before proceeding. Do not implement until you have completed the Discover and Plan phases.
-```
-
 ### Updating documents
 
 - `AI_BASE.md` — update only when a universal behavioral rule needs to change. Propagate to other projects intentionally.
@@ -179,6 +168,49 @@ Treat extended files as on-demand context:
   > You also have access to `.ai/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
 
 This keeps the **base system small and reusable**, while still allowing rich, project-specific documentation where it makes sense.
+
+---
+
+## Prompt templates
+
+PXOS does not prescribe a prompt library. The `CURRENT_SPEC.md` file already serves as the task prompt — a well-filled spec eliminates the need for verbose task descriptions in the prompt itself.
+
+What is worth standardizing is the **session opener**: the short message that initializes any AI session under PXOS, establishes which files are in context, and enforces the workflow before any implementation begins.
+
+### Standard session opener
+
+Use this for most sessions — new features, bug fixes, refactors, and general development tasks.
+
+```
+You have access to the following context files. Read all of them before doing anything.
+
+- .ai/AI_BASE.md — your operating rules
+- .ai/PROJECT_CONTEXT.md — project context
+- .ai/CURRENT_SPEC.md — current task spec
+
+Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
+```
+
+### Extended session opener
+
+Use this when the task touches areas covered by extended context files.
+
+```
+You have access to the following context files. Read all of them before doing anything.
+
+- .ai/AI_BASE.md — your operating rules
+- .ai/PROJECT_CONTEXT.md — project context
+- .ai/CURRENT_SPEC.md — current task spec
+- .ai/[EXTENDED_FILE].md — [describe what it covers, e.g. "design system and visual language"]
+
+Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
+```
+
+Replace `[EXTENDED_FILE]` and the description with the actual file and what it governs. Only include extended files that are directly relevant to the current task.
+
+### Why only two templates
+
+Adding more prompt templates creates a prompt system that must be maintained separately from the documents it references. That adds overhead without proportional benefit. If a task requires unusual framing, write it inline — do not create a new template for it.
 
 ---
 
