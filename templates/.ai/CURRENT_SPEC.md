@@ -1,8 +1,6 @@
 # Current Spec
 
-This file defines the active task or feature.
-Replace it entirely when starting a new task.
-The AI reads this file at the start of every session to understand what is being built.
+This file defines the active task or feature. Replace it entirely when starting a new task. The AI reads this file at the start of every session to understand what is being built.
 
 ---
 
@@ -79,3 +77,12 @@ The AI reads this file at the start of every session to understand what is being
 ## Risks
 
 - [Anything that could go wrong during implementation or affect other parts of the system]
+
+---
+
+## Workflow state
+<!-- Updated by the agent during the session -->
+
+- **Current phase:** [ Discover / Plan / Execute / Validate / Review / Done ]
+- **Pending decision:** [What the human needs to decide before the next phase — leave blank if none]
+- **Execution blocked until:** [Condition or approval required — leave blank if none]

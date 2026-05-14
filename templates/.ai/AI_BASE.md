@@ -1,8 +1,6 @@
 # AI Base — Operating Rules
 
-This file defines universal operating rules for every AI agent working in this project.
-Do not modify this file unless a fundamental behavioral rule needs to change.
-Propagation: if you update this file, update it intentionally across all projects that use PXOS.
+This file defines universal operating rules for every AI agent working in this project. Do not modify this file unless a fundamental behavioral rule needs to change. Propagation: if you update this file, update it intentionally across all projects that use PXOS.
 
 ---
 
@@ -75,7 +73,6 @@ Do not skip phases. Do not implement before the plan is confirmed.
 ## Quality bar
 
 A task is complete when:
-
 - All acceptance criteria in the spec are met
 - No regressions are introduced
 - The output follows existing conventions
@@ -94,3 +91,16 @@ A task is complete when:
 - Always explain tradeoffs when making non-obvious decisions
 - Always prefer existing patterns over new ones
 - Always ask before making high-risk changes
+
+---
+
+## Phase continuity
+
+At the end of any response that completes a workflow phase (Discover, Plan, Execute, Validate, Review, or Compact), explicitly state:
+
+1. Which phase just completed
+2. What is still open or unresolved
+3. The recommended next step
+4. Whether human confirmation is required before proceeding
+
+Do not assume phase transitions are implicit. If the user's next message would skip a required phase, do not refuse it mechanically — explain what is missing, state the correct next step, and ask for confirmation only when the risk level requires it.
