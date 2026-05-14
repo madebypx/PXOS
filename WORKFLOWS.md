@@ -53,19 +53,25 @@ Read the following files before doing anything:
 
 If SPRINT.md exists at the project root, read it as well.
 
-After reading, assess the state of CURRENT_SPEC.md:
+After reading, ask me one question:
+"Is this session for a new feature or complex task — or a quick fix / small change?"
 
-- If it is populated with a clear goal and acceptance criteria:
-  Summarize your understanding of the task in 3–5 bullets and confirm
-  you are ready to move to the Plan phase. State what decision or
-  confirmation you need from me before proceeding.
+- If new feature or complex task:
+  Check the state of CURRENT_SPEC.md.
+  - If it is populated with a clear goal and acceptance criteria:
+    Summarize your understanding of the task in 3–5 bullets and confirm
+    you are ready to move to the Plan phase. State what decision or
+    confirmation you need from me before proceeding.
+  - If it is empty or only contains the template placeholders:
+    Recommend running /spec to define the task together before planning
+    or executing anything.
 
-- If it is empty or only contains the template placeholders:
-  Do not proceed to planning or execution.
-  Inform me that CURRENT_SPEC.md needs to be defined first,
-  and suggest running /spec to define the task together.
+- If quick fix or small change:
+  Ask me to describe the change in one or two sentences.
+  Confirm scope, identify affected files, and proceed directly to execution
+  following the autonomy rules in AI_BASE.md.
 
-Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
+Do not implement anything until you have a clear understanding of scope.
 ```
 
 ---
@@ -186,6 +192,6 @@ ask me if I want to create it.
 
 ## Usage notes
 
-- These workflows cover the full PXOS operating cycle: install → open → spec (when needed) → plan → execute → review → close.
+- These workflows cover the full PXOS operating cycle: `/install` → `/start` → `/spec` (when needed) → `/plan` → execute → `/review` → `/compact`.
 - Do not create workflows for individual feature types or component patterns — that becomes a prompt library, which contradicts the PXOS principle of keeping the system minimal.
 - If a task requires unusual framing, write it inline. Only promote something to a workflow if it is genuinely reused across sessions.
