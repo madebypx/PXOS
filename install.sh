@@ -2,7 +2,7 @@
 # PXOS Installer
 #
 # Basic usage:
-#   curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 #
 # With flags:
 #   bash -s -- --full                  (also installs ROADMAP.md and SPRINT.md)
@@ -18,7 +18,7 @@
 
 set -e
 
-PXOS_REPO="https://raw.githubusercontent.com/rodrigospena/PXOS/main"
+PXOS_REPO="https://raw.githubusercontent.com/madebypx/PXOS/main"
 TARGET_DIR=".ai"
 FULL=false
 IDE=""
@@ -77,11 +77,9 @@ append_pxos_block() {
       warn "PXOS block already present in $dest — skipping."
       return
     fi
-    # Append to existing file
     printf '\n\n---\n\n%s\n%s\n' "$MARKER" "$content" >> "$dest"
     ok "Appended PXOS rules to $dest"
   else
-    # Create new file
     mkdir -p "$(dirname "$dest")"
     printf '%s\n%s\n' "$MARKER" "$content" > "$dest"
     ok "Created $dest"
@@ -209,5 +207,5 @@ else
   echo "  To also set up a specific project, run the installer again without --global."
 fi
 echo ""
-echo "  Docs: https://github.com/rodrigospena/PXOS"
+echo "  Docs: https://github.com/madebypx/PXOS"
 echo ""

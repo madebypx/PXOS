@@ -29,16 +29,16 @@ Install PXOS in this project by following these steps:
 
    Examples:
      No IDE detected:
-       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash
+       curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 
      Cursor detected:
-       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide cursor
+       curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide cursor
 
      Claude Code detected:
-       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide claude
+       curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide claude
 
      Full install with Cursor:
-       curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --full --ide cursor
+       curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --full --ide cursor
 
 3. After the install completes:
    - Open .ai/PROJECT_CONTEXT.md
