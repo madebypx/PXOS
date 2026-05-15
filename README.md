@@ -1,6 +1,8 @@
 # PXOS
 
-A reusable AI operating system for software and product development. A compact, framework-agnostic base that defines how an AI agent should behave, reason, and operate — across any project.
+A reusable AI operating system for software and product development.
+
+A compact, framework-agnostic base that defines how an AI agent should behave, reason, and operate — across any project.
 
 ---
 
@@ -9,7 +11,7 @@ A reusable AI operating system for software and product development. A compact, 
 Run this in the root of any project:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 ```
 
 This creates the `.ai/` folder with the four core files. No dependencies beyond `curl`.
@@ -18,20 +20,20 @@ This creates the `.ai/` folder with the four core files. No dependencies beyond 
 
 ```bash
 # Also install ROADMAP.md and SPRINT.md
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --full
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --full
 
 # Also configure your IDE (workspace only)
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide cursor
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide windsurf
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide claude
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide gemini
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --ide copilot
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide cursor
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide windsurf
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide claude
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide gemini
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide copilot
 
 # Install IDE rules globally (all projects in that IDE)
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --global --ide cursor
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --global --ide cursor
 
 # Everything at once
-curl -sSL https://raw.githubusercontent.com/rodrigospena/PXOS/main/install.sh | bash -s -- --full --ide cursor
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --full --ide cursor
 ```
 
 ### IDE rules behavior
@@ -76,14 +78,14 @@ PXOS addresses this with a minimal, durable operating layer.
 
 ```
 your-project/
-├── .ai/                    # core — required
+├── .ai/                  # core — required
 │   ├── AI_BASE.md
 │   ├── PROJECT_CONTEXT.md
 │   ├── CURRENT_SPEC.md
 │   └── DECISION_LOG.md
-├── ROADMAP.md              # optional — product direction (root, high visibility)
-├── SPRINT.md               # optional — active sprint (root, high visibility)
-└── docs/                   # optional — specialized technical context
+├── ROADMAP.md            # optional — product direction (root, high visibility)
+├── SPRINT.md             # optional — active sprint (root, high visibility)
+└── docs/                 # optional — specialized technical context
     ├── DESIGN.md
     ├── DOMAIN_RULES.md
     ├── DATA_MODEL.md
@@ -183,7 +185,7 @@ Load documents based on what the session requires:
 
 ### Saved prompt workflows
 
-For agents that support saved prompts or slash commands (e.g. Antigravity, Cursor, continue.dev), see [WORKFLOWS.md](./WORKFLOWS.md) for the recommended PXOS workflow set covering the full operating cycle: open → plan → execute → review → close.
+For agents that support saved prompts or slash commands (e.g. Antigravity, Cursor, continue.dev), see [WORKFLOWS.md](./WORKFLOWS.md) for the recommended PXOS workflow set covering the full operating cycle: `/install` → `/start` → `/spec` (when needed) → `/plan` → execute → `/review` → `/compact`.
 
 ---
 
@@ -216,7 +218,7 @@ Treat extended files as on-demand context:
 - Avoid loading all extended files by default to prevent context noise and token waste.
 - Refer to them explicitly in the prompt when they matter, for example:
 
-  > You also have access to `docs/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
+> You also have access to `docs/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
 
 ---
 
@@ -226,11 +228,10 @@ For projects with active development cycles, two additional files help maintain 
 
 ### `ROADMAP.md`
 
-The product direction layer.
-
-**Ownership: human.** The AI reads it for product direction context but does not update it autonomously. When a session decision affects the roadmap, the AI flags it and asks the human to update the file.
+The product direction layer. **Ownership: human.** The AI reads it for product direction context but does not update it autonomously. When a session decision affects the roadmap, the AI flags it and asks the human to update the file.
 
 Contains:
+
 - Planned features and improvements
 - Priority order
 - Status per item (planned / in progress / done / dropped)
@@ -240,11 +241,10 @@ Template: [`templates/ROADMAP.md`](./templates/ROADMAP.md)
 
 ### `SPRINT.md`
 
-The active sprint layer.
-
-**Ownership: shared.** The human defines sprint goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
+The active sprint layer. **Ownership: shared.** The human defines sprint goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
 
 Contains:
+
 - Sprint name or date range
 - Goals with completion status
 - What is currently in progress
@@ -276,8 +276,8 @@ templates/
 │   ├── PROJECT_CONTEXT.md
 │   ├── CURRENT_SPEC.md
 │   └── DECISION_LOG.md
-├── SPRINT.md              # optional
-└── ROADMAP.md             # optional
+├── SPRINT.md             # optional
+└── ROADMAP.md            # optional
 ```
 
 All files include placeholder instructions and comments to guide setup.
