@@ -91,7 +91,11 @@ When multiple agents operate concurrently on the same repository:
    - **`DECISION_LOG.md`**: Do not commit durable architectural decisions directly on feature branches. Record proposals inside your local `SPEC-*.md`. Durable promotion to `DECISION_LOG.md` occurs upon merging to the main branch.
    - **`SPRINT.md`**: When running `/compact`, only update the row or checklist item corresponding to your specific task ID. Leave other tasks untouched.
 
-4. **Agent Roles & Token Efficiency:**
+4. **Autonomous Task Decomposition & Provisioning:**
+   - During the Plan phase, the agent should evaluate whether a complex goal can be decomposed into independent parallel tasks.
+   - If decomposed, the agent should propose the breakdown in the plan and, upon human approval, autonomously run the worktree provisioning script (`scripts/pxos-task.sh` or `scripts/pxos-task.ps1`), initialize the modular specs, and register tasks in `SPRINT.md` without requiring manual git commands from the developer.
+
+5. **Agent Roles & Token Efficiency:**
    - **Architect Role (Reasoning):** Focused on `/spec` and `/plan`. Prefers high-reasoning models (e.g. Gemini Pro / Claude Sonnet).
    - **Executor Role (Coding):** Focused on implementation inside the worktree. Prefers fast, high-throughput, low-cost models (e.g. Gemini Flash).
    - **Auditor Role (QA):** Focused on `/review` and diff validation against the base branch.

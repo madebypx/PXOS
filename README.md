@@ -187,16 +187,13 @@ Each agent operates in an independent physical directory using `git worktree` an
 - **Minimal context window usage** (agents do not process unrelated tasks).
 - **Clean Git history** with atomic pull requests.
 
-### 2. Task Helper (`pxos-task`)
-To automate worktree and spec creation:
+### 2. Autonomous Provisioning (Zero Manual Plumbing)
+You don't need to create branches or worktrees manually. During the **`/plan`** workflow, the AI agent:
+1. Automatically identifies if your request should be split into parallel sub-tasks.
+2. Proposes the sub-tasks (e.g. `T-01` on `feat/auth-oauth` and `T-02` on `feat/billing-stripe`).
+3. Upon your approval of the plan, **the agent itself executes the provisioning script** via terminal, scaffolds the modular specs, and updates `SPRINT.md`.
 
-```bash
-# On Linux / macOS / WSL:
-./scripts/pxos-task.sh new feat/auth-oauth T-01
-
-# On Windows (PowerShell):
-.\scripts\pxos-task.ps1 new feat/auth-oauth T-01
-```
+*Manual override is also supported via `scripts/pxos-task.sh` (Bash) or `scripts/pxos-task.ps1` (PowerShell).*
 
 This creates the branch, sets up `../trees/feat-auth-oauth`, copies `TEMPLATE_SPEC.md` to `.ai/specs/SPEC-auth-oauth.md`, and prepares the agent workspace.
 

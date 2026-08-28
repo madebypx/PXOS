@@ -147,15 +147,22 @@ After the spec is complete, explicitly state:
 
 ```
 Before writing any code, produce a plan based on the active spec that includes:
-1. What you understood from the task
-2. Which files will be affected (ensuring no unauthorized shared file mutations)
-3. What will change and why
-4. Main risks and potential cross-task collisions
-5. How success will be validated
+
+1. Task Scope & Decomposition:
+   - Determine if this is a Single-Task (monolithic implementation) or if it can be decoupled into 2+ independent parallel tasks.
+   - If parallelizable: Outline the sub-tasks (e.g. T-01 on `feat/auth`, T-02 on `feat/billing`) and propose creating dedicated worktrees automatically.
+
+2. Technical Implementation Plan:
+   - What you understood from the task
+   - Which files will be affected (ensuring no unauthorized shared file mutations)
+   - What will change and why
+   - Main risks and cross-task dependencies
+   - How success will be validated
 
 After presenting the plan, explicitly state:
 - What decision or confirmation you need from me before executing
 - What will NOT happen until I approve
+- (If parallel tasks were proposed): Confirm that upon approval, you will automatically execute the worktree provisioning script (`./scripts/pxos-task.sh` or `.\scripts\pxos-task.ps1`), initialize specs, and register them in SPRINT.md.
 
 Wait for my approval before executing.
 ```
