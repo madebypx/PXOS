@@ -60,7 +60,7 @@ switch ($Command) {
             New-Item -ItemType Directory -Path $treesDir -Force | Out-Null
         }
 
-        $branchExists = git show-ref --quiet --heads $Branch
+        git show-ref --quiet --heads $Branch 2>$null
         if ($LASTEXITCODE -eq 0) {
             git worktree add $targetPath $Branch
         } else {
