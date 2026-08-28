@@ -1,8 +1,11 @@
 # PXOS
 
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/madebypx/PXOS/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 A reusable AI operating system for software and product development.
 
-A compact, framework-agnostic base that defines how an AI agent should behave, reason, and operate — across any project.
+A compact, framework-agnostic base that defines how an AI agent should behave, reason, and operate — across any project, in single-agent or parallel multi-agent setups.
 
 ---
 
@@ -14,9 +17,18 @@ Run this in the root of any project:
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 ```
 
-This creates the `.ai/` folder with the four core files. No dependencies beyond `curl`.
+This creates the `.ai/` folder with the core files and modular spec templates. No dependencies beyond `curl`.
 
-### Options
+### Upgrading an Existing Project
+
+To safely upgrade an existing project to **PXOS v2.0** without touching your project context or existing specs:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
+```
+*(Or invoke the `/update` workflow directly from your AI agent).*
+
+### Installation Options
 
 ```bash
 # Also install ROADMAP.md and SPRINT.md
@@ -54,19 +66,20 @@ After installing, fill in `.ai/PROJECT_CONTEXT.md` with your project facts and y
 
 ## What it is
 
-PXOS is a four-document system designed to be adopted as a base layer in any project that uses AI agents for development work. It keeps universal operating rules separate from project-specific context, making it easy to reuse, adapt, and maintain over time.
+PXOS is a structured, document-driven operating system designed to be adopted as a base layer in any project that uses AI agents for development work. It keeps universal operating rules separate from project-specific context, making it easy to reuse, adapt, and maintain over time.
 
-It is not a prompt library. It is not a collection of tips. It is an operational contract between the human and the AI — defining priorities, workflow, autonomy boundaries, and quality standards that remain stable across projects.
+It is not a prompt library or an autonomous framework with infinite, expensive chat loops. It is an **operational contract** between the human developer and AI agents — defining priorities, workflow phases, concurrency isolation, and quality standards that remain stable across projects and toolchains.
 
 ---
 
 ## Why it exists
 
-AI agents produce inconsistent results not because they lack capability, but because they lack operational structure. Without clear rules:
+AI agents produce inconsistent results and waste tokens not because they lack capability, but because they lack operational structure. Without clear rules:
 
 - They implement before understanding the problem.
 - They over-engineer when simplicity would work.
-- They consume context inefficiently.
+- They consume context inefficiently through noisy chat loops.
+- In multi-agent scenarios, they collide on working files and overwrite specs.
 - They make architectural decisions that should belong to the human.
 - They lose coherence across long sessions.
 
@@ -78,14 +91,21 @@ PXOS addresses this with a minimal, durable operating layer.
 
 ```
 your-project/
-├── .ai/                  # core — required
-│   ├── AI_BASE.md
-│   ├── PROJECT_CONTEXT.md
-│   ├── CURRENT_SPEC.md
-│   └── DECISION_LOG.md
-├── ROADMAP.md            # optional — product direction (root, high visibility)
-├── SPRINT.md             # optional — active sprint (root, high visibility)
-└── docs/                 # optional — specialized technical context
+├── .ai/                            # core — required
+│   ├── AI_BASE.md                  # universal operating & concurrency rules
+│   ├── PROJECT_CONTEXT.md          # durable project facts & patterns
+│   ├── DECISION_LOG.md             # durable architectural decisions
+│   ├── CURRENT_SPEC.md             # active spec for single-agent mode
+│   └── specs/                      # [v2.0] modular specs for parallel multi-agent mode
+│       ├── TEMPLATE_SPEC.md        # standardized task spec template
+│       ├── SPEC-auth-oauth.md      # isolated task spec for branch feat/auth-oauth
+│       └── SPEC-billing-stripe.md  # isolated task spec for branch feat/billing-stripe
+├── SPRINT.md                       # optional — active sprint & multi-agent task matrix
+├── ROADMAP.md                      # optional — product direction (human-owned)
+├── scripts/                        # optional — lightweight DX helpers
+│   ├── pxos-task.sh                # POSIX bash worktree helper
+│   └── pxos-task.ps1               # PowerShell worktree helper
+└── docs/                           # optional — specialized technical context
     ├── DESIGN.md
     ├── DOMAIN_RULES.md
     ├── DATA_MODEL.md
@@ -105,194 +125,111 @@ The universal layer. Defines:
 - Core priorities (correctness, clarity, simplicity, maintainability, consistency, context efficiency)
 - Default workflow: Discover → Plan → Execute → Validate → Review → Compact Context
 - Autonomy rules by risk level (Low / Medium / High)
+- **Multi-Agent & Concurrency Rules** (worktree isolation, spec auto-resolution, shared file mutation rules)
+- **Agent Roles** (Architect, Executor, Auditor)
 - Context management rules
-- Quality bar for task completion
-- Behavioral constraints
-
-This file should change rarely. When it does, update it intentionally across all projects.
+- Quality bar and behavioral constraints
 
 ### `PROJECT_CONTEXT.md`
 
 The project-specific layer. Contains:
 
 - Product summary, target user, core value
-- Product priorities and anti-priorities
-- Technical stack
-- Architecture style and existing patterns
-- Code, UX, and design conventions
+- Technical stack, conventions, and existing architectural patterns
 - Known constraints and risks
 
-This file grows slowly and holds only durable facts. It is not a place for session notes or temporary plans.
+### `CURRENT_SPEC.md` & `.ai/specs/SPEC-<task>.md`
 
-### `CURRENT_SPEC.md`
-
-The task layer. Contains:
-
-- Goal and user value
-- Scope (in / out)
-- Constraints
-- Existing patterns relevant to the task
-- Proposed change
-- User flow
-- Edge cases
-- Acceptance criteria
-- Validation plan
-- Risks
-
-Replace or update this file per feature or task. Optionally version past specs in a `/specs` archive.
+The task specification layer:
+- **`CURRENT_SPEC.md`**: Used in traditional Single-Agent mode.
+- **`.ai/specs/SPEC-<task>.md`**: Used in Multi-Agent parallel mode, isolating requirements and state per branch/worktree.
 
 ### `DECISION_LOG.md`
 
-The memory layer. Records:
-
-- What was decided
-- Why, including options considered
-- Tradeoffs accepted
-- Impact on the system
-- Current status
-
-Only durable decisions belong here — architectural choices, dependency replacements, structural changes, product direction shifts.
+The durable memory layer:
+- Records significant architectural decisions, alternatives evaluated, tradeoffs, and system impacts.
+- In multi-agent parallel branches, decisions are drafted in the local spec and promoted to `DECISION_LOG.md` upon merge to `main`.
 
 ---
 
-## How to use
+## Multi-Agent Development with Git Worktrees
 
-### Setting up a new project
-
-1. Run the installer (see Quick Install above).
-2. Fill in `PROJECT_CONTEXT.md` with your product and technical facts.
-3. Keep `AI_BASE.md` as-is unless you have a strong reason to adjust it.
-4. Leave `DECISION_LOG.md` empty until real decisions accumulate.
-5. Use `CURRENT_SPEC.md` as the active task spec before each meaningful session.
-
-### Starting an AI session
-
-Load documents based on what the session requires:
-
-| Session type | Documents to load |
-|---|---|
-| New feature | `AI_BASE.md` + `PROJECT_CONTEXT.md` + `CURRENT_SPEC.md` |
-| Bug fix | `AI_BASE.md` + `PROJECT_CONTEXT.md` |
-| Architectural decision | `AI_BASE.md` + `PROJECT_CONTEXT.md` + `DECISION_LOG.md` |
-| Isolated task | `AI_BASE.md` only |
-
-### Updating documents
-
-- `AI_BASE.md` — update only when a universal behavioral rule needs to change. Propagate to other projects intentionally.
-- `PROJECT_CONTEXT.md` — update when product priorities, stack, or conventions change in a durable way.
-- `CURRENT_SPEC.md` — replace per task. No need to preserve history unless you want it.
-- `DECISION_LOG.md` — append only. Never delete past entries; mark them as superseded instead.
-
-### Saved prompt workflows
-
-For agents that support saved prompts or slash commands (e.g. Antigravity, Cursor, continue.dev), see [WORKFLOWS.md](./WORKFLOWS.md) for the recommended PXOS workflow set covering the full operating cycle: `/install` → `/start` → `/spec` (when needed) → `/plan` → execute → `/review` → `/compact`.
-
----
-
-## Extended context files (optional)
-
-Some projects need additional, stable documents beyond the four core files. PXOS recommends a consistent placement convention based on the nature of each file.
-
-### Placement convention
-
-| Location | What belongs there | Examples |
-|---|---|---|
-| **Project root** | Files every collaborator should find immediately — product and sprint visibility | `ROADMAP.md`, `SPRINT.md` |
-| **`docs/`** | Specialized technical context loaded on demand — not needed in every session | `DESIGN.md`, `DOMAIN_RULES.md`, `DATA_MODEL.md`, `GLOSSARY.md` |
-| **`.ai/`** | The four core files only | `AI_BASE.md`, `PROJECT_CONTEXT.md`, `CURRENT_SPEC.md`, `DECISION_LOG.md` |
-
-`.ai/` is reserved exclusively for the PXOS core. Do not add project-specific extended files there — it blurs the boundary between the universal operating layer and project content.
-
-### Extended file examples
-
-- `docs/DESIGN.md` — design language, components, tokens, interaction patterns
-- `docs/DOMAIN_RULES.md` — domain-specific constraints (legal, financial, medical, etc.)
-- `docs/DATA_MODEL.md` — stable description of entities, relationships, and invariants
-- `docs/GLOSSARY.md` — domain language, naming decisions, and definitions
-
-### How to load them in AI sessions
-
-Treat extended files as on-demand context:
-
-- Only load them when the task actually depends on them.
-- Avoid loading all extended files by default to prevent context noise and token waste.
-- Refer to them explicitly in the prompt when they matter, for example:
-
-> You also have access to `docs/DESIGN.md`. Use it as the source of truth for visual language and interaction patterns. Do not contradict it.
-
----
-
-## Planning and progress files (optional)
-
-For projects with active development cycles, two additional files help maintain shared awareness between human and AI across sessions. Both live at the **project root** for immediate visibility.
-
-### `ROADMAP.md`
-
-The product direction layer. **Ownership: human.** The AI reads it for product direction context but does not update it autonomously. When a session decision affects the roadmap, the AI flags it and asks the human to update the file.
-
-Contains:
-
-- Planned features and improvements
-- Priority order
-- Status per item (planned / in progress / done / dropped)
-- High-level dependencies between items
-
-Template: [`templates/ROADMAP.md`](./templates/ROADMAP.md)
-
-### `SPRINT.md`
-
-The active sprint layer. **Ownership: shared.** The human defines sprint goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
-
-Contains:
-
-- Sprint name or date range
-- Goals with completion status
-- What is currently in progress
-- Blockers
-- What was completed this sprint
-- Immediate next steps
-
-This file is short-lived — replace it when a new sprint begins. Optionally archive past sprints in a `/sprints` folder.
-
-Template: [`templates/SPRINT.md`](./templates/SPRINT.md)
-
-### Ownership rules at a glance
-
-| File | Who defines | Who updates | Life span |
-|---|---|---|---|
-| `ROADMAP.md` | Human | Human (AI flags changes) | Weeks / months |
-| `SPRINT.md` | Human | Human + AI via `/compact` | Days / sprint |
-
----
-
-## Templates
-
-The [`/templates`](./templates) folder contains ready-to-copy versions of all PXOS files — core and optional.
+PXOS v2.0 introduces native support for **parallel multi-agent development** with zero context collision and zero merge noise:
 
 ```
-templates/
-├── .ai/
-│   ├── AI_BASE.md
-│   ├── PROJECT_CONTEXT.md
-│   ├── CURRENT_SPEC.md
-│   └── DECISION_LOG.md
-├── SPRINT.md             # optional
-└── ROADMAP.md            # optional
+                  ┌────────────────────────────────────────────────────────┐
+                  │                 HUMAN ORCHESTRATOR                     │
+                  │             Coordinates: SPRINT.md                     │
+                  └───────────────────────────┬────────────────────────────┘
+                                              │
+                    ┌─────────────────────────┴─────────────────────────┐
+                    ▼                                                   ▼
+      ┌───────────────────────────┐                       ┌───────────────────────────┐
+      │   WORKTREE 1: feat/auth   │                       │  WORKTREE 2: feat/stripe  │
+      │   Role: Coding Executor   │                       │  Role: Coding Executor   │
+      │   Model: Fast / Flash ⚡  │                       │   Model: Fast / Flash ⚡  │
+      │   Spec: SPEC-auth.md      │                       │   Spec: SPEC-stripe.md    │
+      └─────────────┬─────────────┘                       └─────────────┬─────────────┘
+                    │                                                   │
+                    └─────────────────────────┬─────────────────────────┘
+                                              ▼
+                                ┌───────────────────────────┐
+                                │    REVIEW / PR GATEWAY    │
+                                │   Role: Auditor / QA      │
+                                │   Model: High-Reasoning 🧠 │
+                                │   Command: /review        │
+                                └───────────────────────────┘
 ```
 
-All files include placeholder instructions and comments to guide setup.
+### 1. Worktree & Spec Isolation
+Each agent operates in an independent physical directory using `git worktree` and reads only its assigned modular spec (`.ai/specs/SPEC-<task>.md`). This guarantees:
+- **Zero local file collisions** between concurrent agents.
+- **Minimal context window usage** (agents do not process unrelated tasks).
+- **Clean Git history** with atomic pull requests.
+
+### 2. Task Helper (`pxos-task`)
+To automate worktree and spec creation:
+
+```bash
+# On Linux / macOS / WSL:
+./scripts/pxos-task.sh new feat/auth-oauth T-01
+
+# On Windows (PowerShell):
+.\scripts\pxos-task.ps1 new feat/auth-oauth T-01
+```
+
+This creates the branch, sets up `../trees/feat-auth-oauth`, copies `TEMPLATE_SPEC.md` to `.ai/specs/SPEC-auth-oauth.md`, and prepares the agent workspace.
 
 ---
 
-## Prompt templates
+## Token & Cost Efficiency Guide (The 80/20 Rule)
 
-PXOS does not prescribe a prompt library. The `CURRENT_SPEC.md` file already serves as the task prompt — a well-filled spec eliminates the need for verbose task descriptions in the prompt itself.
+Multi-agent chatrooms (e.g. unconstrained conversational frameworks) waste tens of thousands of tokens per minute in conversational loops. PXOS is **document-driven**, meaning agents communicate asynchronously through structured Markdown artifacts:
 
-What is worth standardizing is the **session opener**: the short message that initializes any AI session under PXOS, establishes which files are in context, and enforces the workflow before any implementation begins.
+1. **The 80/20 Model Strategy:**
+   - **Use Fast/Cost-Efficient Models (e.g. Gemini 1.5/2.0 Flash) for 90% of execution:** Code writing, diff generation, and unit testing in worktrees.
+   - **Reserve High-Reasoning Models (e.g. Gemini 1.5/2.5 Pro, Claude Sonnet) for 10% of strategic tasks:** Writing the architectural spec (`/spec`) and auditing the diff (`/review`).
+2. **Artifact Passing vs. Chat History:**
+   - Instead of passing whole conversation transcripts between agents, agents produce clean specs and diffs. This reduces token consumption by **70% to 85%**.
 
-### Standard session opener
+---
 
-Use this for most sessions — new features, bug fixes, refactors, and general development tasks.
+## Saved Prompt Workflows
+
+For agents that support slash commands (e.g. Antigravity, Cursor, Claude Code, continue.dev), see [WORKFLOWS.md](./WORKFLOWS.md) for the complete workflow set:
+
+- **`/install`** — Detects environment and installs PXOS.
+- **`/start`** — Auto-resolves current branch, loads relevant spec, and establishes scope.
+- **`/spec`** — Collaboratively drafts modular or central task specifications.
+- **`/plan`** — Formulates a structured technical plan before writing code.
+- **`/review`** — Audits implemented diffs for overengineering, scope creep, and quality.
+- **`/compact`** — Compacts context, updates workflow status, and updates `SPRINT.md`.
+
+---
+
+## Prompt Templates
+
+### Standard Session Opener (Single-Agent)
 
 ```
 You have access to the following context files. Read all of them before doing anything.
@@ -304,47 +241,38 @@ You have access to the following context files. Read all of them before doing an
 Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
 ```
 
-### Extended session opener
-
-Use this when the task touches areas covered by extended context files.
+### Multi-Agent Worktree Session Opener
 
 ```
 You have access to the following context files. Read all of them before doing anything.
 
 - .ai/AI_BASE.md — your operating rules
 - .ai/PROJECT_CONTEXT.md — project context
-- .ai/CURRENT_SPEC.md — current task spec
-- docs/[EXTENDED_FILE].md — [describe what it covers, e.g. "design system and visual language"]
+- SPRINT.md — sprint coordination and task matrix
+
+Run `git branch --show-current` to identify your active branch and load the corresponding spec in `.ai/specs/`.
 
 Do not implement anything until you have completed the Discover and Plan phases and I have confirmed the plan.
 ```
-
-Replace `[EXTENDED_FILE]` and the description with the actual file and what it governs. Only include extended files that are directly relevant to the current task.
-
-### Why only two templates
-
-Adding more prompt templates creates a prompt system that must be maintained separately from the documents it references. That adds overhead without proportional benefit. If a task requires unusual framing, write it inline — do not create a new template for it.
 
 ---
 
 ## Principles
 
-The system is built on five operational beliefs:
+**1. Context is a limited resource.**  
+Excess context increases noise, reduces precision, and raises cost. Load only what the current task requires.
 
-**1. Context is a limited resource.**
-More context does not produce better results. Excess context increases noise, reduces precision, and raises cost. Load only what the current task requires.
+**2. Understanding before implementation.**  
+An agent that skips discovery produces solutions to the wrong problem. Discover and Plan preserve quality.
 
-**2. Understanding before implementation.**
-An agent that skips discovery produces solutions to the wrong problem. The Discover and Plan phases are not optional steps — they are how quality is preserved.
+**3. Simplicity is the output, not the method.**  
+The goal is for the AI to produce the simplest valid solution by reasoning about tradeoffs explicitly.
 
-**3. Simplicity is the output, not the method.**
-The goal is not to keep the codebase simple by restricting what the AI can do. The goal is for the AI to produce the simplest valid solution by reasoning about tradeoffs explicitly.
+**4. Autonomy requires boundaries.**  
+The Low / Medium / High risk model defines where human judgment is required without over-restricting execution.
 
-**4. Autonomy requires boundaries.**
-An agent with no constraints makes strategic decisions it should not make. An agent with too many constraints becomes slow and brittle. The Low / Medium / High risk model defines where human judgment is required without over-restricting execution.
-
-**5. Validation closes the loop.**
-A task that has not been validated has not been completed. The quality bar is not subjective — it is defined in advance by the spec's acceptance criteria.
+**5. Validation closes the loop.**  
+A task that has not been validated has not been completed. The quality bar is defined by the spec's acceptance criteria.
 
 ---
 

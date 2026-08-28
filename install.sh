@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
-# PXOS Installer
+# PXOS Installer & Updater
 #
-# Basic usage:
+# Basic installation:
 #   curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 #
+# Upgrade an existing project to latest PXOS version:
+#   curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
+#
 # With flags:
+#   bash -s -- --update                (safely updates AI_BASE.md, specs template, and IDE rules)
+#   bash -s -- --version               (prints current PXOS version)
 #   bash -s -- --full                  (also installs ROADMAP.md and SPRINT.md)
 #   bash -s -- --ide cursor            (also installs workspace IDE rules)
 #   bash -s -- --ide claude            (also installs CLAUDE.md in project root)
@@ -12,17 +17,16 @@
 #   bash -s -- --ide copilot           (also installs .github/copilot-instructions.md)
 #   bash -s -- --ide windsurf          (also installs .windsurf/rules/pxos.md)
 #   bash -s -- --global --ide cursor   (installs IDE rules globally, not per-project)
-#
-# Flags can be combined:
-#   curl -sSL .../install.sh | bash -s -- --full --ide cursor
 
 set -e
 
+PXOS_VERSION="2.0.0"
 PXOS_REPO="https://raw.githubusercontent.com/madebypx/PXOS/main"
 TARGET_DIR=".ai"
 FULL=false
 IDE=""
 GLOBAL=false
+UPDATE=false
 
 # ─── Colors ───────────────────────────────────────────────────────────────────
 BOLD=$(tput bold 2>/dev/null || echo '')
@@ -38,6 +42,14 @@ warn() { echo "${YELLOW}[PXOS]${RESET} $1"; }
 # ─── Parse flags ──────────────────────────────────────────────────────────────
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --version|-v)
+      echo "PXOS v${PXOS_VERSION}"
+      exit 0
+      ;;
+    --update|--upgrade|-u)
+      UPDATE=true
+      shift
+      ;;
     --full)   FULL=true; shift ;;
     --global) GLOBAL=true; shift ;;
     --ide)    IDE="$2"; shift 2 ;;
@@ -51,52 +63,86 @@ if ! command -v curl &>/dev/null; then
   exit 1
 fi
 
-# ─── Download function (skip if exists) ────────────────────────────────────────
+# ─── Download function (skip if exists unless updating) ────────────────────────
 download_file() {
   local src="$1"
   local dest="$2"
+  local overwrite="${3:-false}"
 
-  if [[ -f "$dest" ]]; then
+  if [[ -f "$dest" && "$overwrite" == false ]]; then
     warn "Skipping $(basename "$dest") — already exists."
     return
   fi
 
   mkdir -p "$(dirname "$dest")"
   curl -sSL "${PXOS_REPO}/${src}" -o "$dest"
-  ok "Created $dest"
-}
-
-# ─── Merge/append function (appends PXOS block if not already present) ────────────
-append_pxos_block() {
-  local dest="$1"
-  local content="$2"
-  local MARKER="<!-- pxos:start -->"
-
-  if [[ -f "$dest" ]]; then
-    if grep -qF "$MARKER" "$dest"; then
-      warn "PXOS block already present in $dest — skipping."
-      return
-    fi
-    printf '\n\n---\n\n%s\n%s\n' "$MARKER" "$content" >> "$dest"
-    ok "Appended PXOS rules to $dest"
+  if [[ "$overwrite" == true && -f "$dest" ]]; then
+    ok "Updated $dest"
   else
-    mkdir -p "$(dirname "$dest")"
-    printf '%s\n%s\n' "$MARKER" "$content" > "$dest"
     ok "Created $dest"
   fi
 }
 
-# ─── Core .ai/ files ──────────────────────────────────────────────────────────
+# ─── Merge/append function (appends or replaces PXOS block) ─────────────────────
+append_pxos_block() {
+  local dest="$1"
+  local content="$2"
+  local START_MARKER="<!-- pxos:start -->"
+  local END_MARKER="<!-- pxos:end -->"
+
+  mkdir -p "$(dirname "$dest")"
+
+  if [[ -f "$dest" ]]; then
+    if grep -qF "$START_MARKER" "$dest"; then
+      # Replace existing PXOS block
+      awk -v start="$START_MARKER" -v end="$END_MARKER" -v repl="$content" '
+        $0 ~ start { printing=0; print start "\n" repl "\n" end; next }
+        $0 ~ end   { printing=1; next }
+        !printing && !found_start { if ($0 ~ start) { found_start=1 } }
+        printing { print }
+      ' "$dest" > "${dest}.tmp" 2>/dev/null || true
+
+      if [[ -s "${dest}.tmp" ]]; then
+        mv "${dest}.tmp" "$dest"
+        ok "Updated PXOS rules block in $dest"
+        return
+      else
+        rm -f "${dest}.tmp"
+      fi
+    fi
+
+    printf '\n\n---\n\n%s\n%s\n%s\n' "$START_MARKER" "$content" "$END_MARKER" >> "$dest"
+    ok "Appended PXOS rules to $dest"
+  else
+    printf '%s\n%s\n%s\n' "$START_MARKER" "$content" "$END_MARKER" > "$dest"
+    ok "Created $dest"
+  fi
+}
+
+# ─── Main Execution ───────────────────────────────────────────────────────────
 echo ""
-echo "${BOLD}Installing PXOS...${RESET}"
+if [[ "$UPDATE" == true ]]; then
+  echo "${BOLD}Upgrading PXOS to v${PXOS_VERSION}...${RESET}"
+else
+  echo "${BOLD}Installing PXOS v${PXOS_VERSION}...${RESET}"
+fi
 echo ""
 
 if [[ "$GLOBAL" == false ]]; then
-  log "Setting up ${TARGET_DIR}/ (workspace)"
-  download_file "templates/.ai/AI_BASE.md"         "${TARGET_DIR}/AI_BASE.md"
-  download_file "templates/.ai/PROJECT_CONTEXT.md" "${TARGET_DIR}/PROJECT_CONTEXT.md"
-  download_file "templates/.ai/CURRENT_SPEC.md"    "${TARGET_DIR}/CURRENT_SPEC.md"
-  download_file "templates/.ai/DECISION_LOG.md"    "${TARGET_DIR}/DECISION_LOG.md"
+  log "Configuring ${TARGET_DIR}/"
+  
+  if [[ "$UPDATE" == true ]]; then
+    # In update mode, safely update universal rules and modular spec templates
+    download_file "templates/.ai/AI_BASE.md"               "${TARGET_DIR}/AI_BASE.md" true
+    download_file "templates/.ai/specs/TEMPLATE_SPEC.md"   "${TARGET_DIR}/specs/TEMPLATE_SPEC.md" true
+    log "Preserved PROJECT_CONTEXT.md, DECISION_LOG.md, and all active specs."
+  else
+    download_file "templates/.ai/AI_BASE.md"               "${TARGET_DIR}/AI_BASE.md"
+    download_file "templates/.ai/PROJECT_CONTEXT.md"       "${TARGET_DIR}/PROJECT_CONTEXT.md"
+    download_file "templates/.ai/CURRENT_SPEC.md"          "${TARGET_DIR}/CURRENT_SPEC.md"
+    download_file "templates/.ai/DECISION_LOG.md"          "${TARGET_DIR}/DECISION_LOG.md"
+    download_file "templates/.ai/specs/TEMPLATE_SPEC.md"   "${TARGET_DIR}/specs/TEMPLATE_SPEC.md"
+  fi
 fi
 
 # ─── Optional planning files ──────────────────────────────────────────────────
@@ -106,105 +152,72 @@ if [[ "$FULL" == true ]]; then
   download_file "templates/SPRINT.md"  "SPRINT.md"
 fi
 
-# ─── Auto-detect IDE (if --ide not passed) ───────────────────────────────────
+# ─── Auto-detect IDE ──────────────────────────────────────────────────────────
 if [[ -z "$IDE" ]]; then
   if [[ -d ".cursor" ]]; then
-    warn "Detected Cursor project. Run with --ide cursor to also install rules."
+    IDE="cursor"
   elif [[ -d ".windsurf" ]]; then
-    warn "Detected Windsurf project. Run with --ide windsurf to also install rules."
+    IDE="windsurf"
   elif [[ -f "CLAUDE.md" ]]; then
-    warn "Detected Claude Code project. Run with --ide claude to also install rules."
+    IDE="claude"
   elif [[ -f "GEMINI.md" ]]; then
-    warn "Detected Gemini CLI project. Run with --ide gemini to also install rules."
+    IDE="gemini"
   elif [[ -f ".github/copilot-instructions.md" ]]; then
-    warn "Detected GitHub Copilot project. Run with --ide copilot to also install rules."
+    IDE="copilot"
   fi
 fi
 
-# ─── IDE rules ───────────────────────────────────────────────────────────────────
+# ─── IDE rules ─────────────────────────────────────────────────────────────────
 if [[ -n "$IDE" ]]; then
   AI_BASE_CONTENT=$(cat "${TARGET_DIR}/AI_BASE.md" 2>/dev/null || curl -sSL "${PXOS_REPO}/templates/.ai/AI_BASE.md")
 
   case "$IDE" in
     cursor)
-      if [[ "$GLOBAL" == true ]]; then
-        RULES_FILE="${HOME}/.cursor/rules/pxos.mdc"
-        log "Installing Cursor rules globally at ${RULES_FILE}..."
-      else
-        RULES_FILE=".cursor/rules/pxos.mdc"
-        log "Installing Cursor rules (workspace) at ${RULES_FILE}..."
-      fi
+      RULES_FILE=".cursor/rules/pxos.mdc"
+      [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.cursor/rules/pxos.mdc"
       mkdir -p "$(dirname "$RULES_FILE")"
-      if [[ -f "$RULES_FILE" ]]; then
-        warn "Skipping ${RULES_FILE} — already exists."
-      else
-        printf '%s\n' "---" "alwaysApply: true" "---" "" "$AI_BASE_CONTENT" > "$RULES_FILE"
-        ok "Created ${RULES_FILE}"
-      fi
+      printf '%s\n' "---" "alwaysApply: true" "---" "" "$AI_BASE_CONTENT" > "$RULES_FILE"
+      ok "Configured Cursor rules at ${RULES_FILE}"
       ;;
     windsurf)
-      if [[ "$GLOBAL" == true ]]; then
-        RULES_FILE="${HOME}/.windsurf/rules/pxos.md"
-        log "Installing Windsurf rules globally at ${RULES_FILE}..."
-      else
-        RULES_FILE=".windsurf/rules/pxos.md"
-        log "Installing Windsurf rules (workspace) at ${RULES_FILE}..."
-      fi
+      RULES_FILE=".windsurf/rules/pxos.md"
+      [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.windsurf/rules/pxos.md"
       mkdir -p "$(dirname "$RULES_FILE")"
-      if [[ -f "$RULES_FILE" ]]; then
-        warn "Skipping ${RULES_FILE} — already exists."
-      else
-        printf '%s\n' "$AI_BASE_CONTENT" > "$RULES_FILE"
-        ok "Created ${RULES_FILE}"
-      fi
+      printf '%s\n' "$AI_BASE_CONTENT" > "$RULES_FILE"
+      ok "Configured Windsurf rules at ${RULES_FILE}"
       ;;
     claude)
-      if [[ "$GLOBAL" == true ]]; then
-        RULES_FILE="${HOME}/.claude/CLAUDE.md"
-        log "Installing Claude Code rules globally at ${RULES_FILE}..."
-      else
-        RULES_FILE="CLAUDE.md"
-        log "Installing Claude Code rules (workspace) at ${RULES_FILE}..."
-      fi
+      RULES_FILE="CLAUDE.md"
+      [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.claude/CLAUDE.md"
       append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
       ;;
     gemini)
-      if [[ "$GLOBAL" == true ]]; then
-        RULES_FILE="${HOME}/.gemini/GEMINI.md"
-        log "Installing Gemini CLI rules globally at ${RULES_FILE}..."
-      else
-        RULES_FILE="GEMINI.md"
-        log "Installing Gemini CLI rules (workspace) at ${RULES_FILE}..."
-      fi
+      RULES_FILE="GEMINI.md"
+      [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.gemini/GEMINI.md"
       append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
       ;;
     copilot)
-      if [[ "$GLOBAL" == true ]]; then
-        warn "GitHub Copilot does not support global instructions via file. Use workspace only."
-      else
-        RULES_FILE=".github/copilot-instructions.md"
-        log "Installing GitHub Copilot rules (workspace) at ${RULES_FILE}..."
-        append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
-      fi
-      ;;
-    *)
-      warn "Unknown IDE: ${IDE}. Supported: cursor, windsurf, claude, gemini, copilot"
+      RULES_FILE=".github/copilot-instructions.md"
+      append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
       ;;
   esac
 fi
 
 # ─── Done ─────────────────────────────────────────────────────────────────────
 echo ""
-echo "${BOLD}${GREEN}PXOS installed.${RESET}"
+if [[ "$UPDATE" == true ]]; then
+  echo "${BOLD}${GREEN}PXOS upgraded to v${PXOS_VERSION}.${RESET}"
+else
+  echo "${BOLD}${GREEN}PXOS v${PXOS_VERSION} installed.${RESET}"
+fi
 echo ""
+
 if [[ "$GLOBAL" == false ]]; then
   echo "  Next steps:"
-  echo "  1. Fill in ${BOLD}.ai/PROJECT_CONTEXT.md${RESET} with your project facts."
-  echo "  2. Before each session, update ${BOLD}.ai/CURRENT_SPEC.md${RESET} with the current task."
-  echo "  3. Start your AI session with the opener in the README."
+  echo "  1. Check ${BOLD}.ai/AI_BASE.md${RESET} for updated operating rules."
+  echo "  2. Run ${BOLD}/start${RESET} in any branch or worktree to auto-resolve specs."
 else
-  echo "  IDE rules installed globally. PXOS will apply to all projects in this IDE."
-  echo "  To also set up a specific project, run the installer again without --global."
+  echo "  Global IDE rules configured for v${PXOS_VERSION}."
 fi
 echo ""
 echo "  Docs: https://github.com/madebypx/PXOS"

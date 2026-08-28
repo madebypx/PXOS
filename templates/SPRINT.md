@@ -1,42 +1,41 @@
-# Sprint — [Name or date range, e.g. "May 13–24" or "Auth & Onboarding"]
+# Sprint — [Name or date range, e.g. "Sprint 14" or "Auth & Billing"]
 
-This file tracks the active sprint.
-The human defines goals. The AI updates task status and blockers via the `/compact` workflow at the end of each session.
-Replace this file when a new sprint begins. Archive the previous one in /sprints if history matters.
-
----
-
-## Status
-In progress
+This file tracks the active sprint and coordinates single or parallel agents.
+The human defines goals and task assignments. Agents update their specific task status via `/compact`.
+Replace this file when a new sprint begins. Archive the previous one in `/sprints` if history matters.
 
 ---
 
-## Goals
+## Sprint Goal
 
-- [ ] Goal A — brief description
-- [ ] Goal B — brief description
-- [ ] Goal C — brief description
+[High-level objective of this sprint]
 
 ---
 
-## In progress
+## Task Matrix (Multi-Agent Tracking)
 
-- Goal A — [current state, e.g. "discovery done, plan approved, execution started"]
+| ID | Task | Branch | Spec | Status | Assignee / Agent |
+|---|---|---|---|---|---|
+| T-01 | [Task Description] | `feat/[branch-name]` | [SPEC-name.md](.ai/specs/SPEC-name.md) | 📋 In Plan | Agent 1 |
+| T-02 | [Task Description] | `feat/[branch-name]` | [SPEC-name.md](.ai/specs/SPEC-name.md) | 🔄 Executing | Agent 2 |
+| T-03 | [Task Description] | `feat/[branch-name]` | [SPEC-name.md](.ai/specs/SPEC-name.md) | ⏸ Blocked | Human Dev |
+
+*Statuses: 📝 In Spec | 📋 In Plan | 🔄 Executing | 🔍 In Review | ✅ Ready for PR | 🎉 Done | ⏸ Blocked*
 
 ---
 
-## Blockers
+## Blockers & Cross-Task Dependencies
 
-- [Describe blocker and what is needed to unblock]
+- [Describe any blocker or dependency between parallel tasks, e.g. "T-02 depends on T-01 schema migration"]
 
 ---
 
 ## Completed this sprint
 
-- Goal X — [brief note on what was done or decided]
+- [x] T-00 — [Brief description of completed task or goal]
 
 ---
 
 ## Next
 
-- [Immediate next step after current in-progress work]
+- [Immediate next priority once active tasks are merged]

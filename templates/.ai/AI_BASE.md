@@ -1,4 +1,5 @@
 # AI Base — Operating Rules
+<!-- pxos:version 2.0.0 -->
 
 This file defines universal operating rules for every AI agent working in this project. Do not modify this file unless a fundamental behavioral rule needs to change. Propagation: if you update this file, update it intentionally across all projects that use PXOS.
 
@@ -67,6 +68,33 @@ Do not skip phases. Do not implement before the plan is confirmed.
 - Avoid repeating established context within the same session.
 - Break large tasks into smaller tasks if context grows noisy.
 - At the end of long sessions, run `/compact` to reduce future context load.
+
+---
+
+## Multi-Agent & Concurrency Rules
+
+When multiple agents operate concurrently on the same repository:
+
+1. **Environment and Branch Isolation:**
+   - Always operate strictly within your assigned `git worktree` directory and branch.
+   - Never switch branches, pull unrelated branches, or modify files belonging to another worktree.
+
+2. **Spec Auto-Resolution:**
+   - Identify your active task automatically:
+     a. Query the current branch name (`git branch --show-current`).
+     b. If a modular spec exists at `.ai/specs/SPEC-<branch-suffix>.md` or `.ai/specs/SPEC-<branch-name>.md`, load it as your active task spec.
+     c. If working in a single-agent setup or directly on `main`, fall back to `.ai/CURRENT_SPEC.md`.
+   - Never modify, overwrite, or delete a spec assigned to another branch or agent.
+
+3. **Shared File Mutation Etiquette:**
+   - **`PROJECT_CONTEXT.md`**: Strictly read-only during parallel execution. Must not be modified on feature branches.
+   - **`DECISION_LOG.md`**: Do not commit durable architectural decisions directly on feature branches. Record proposals inside your local `SPEC-*.md`. Durable promotion to `DECISION_LOG.md` occurs upon merging to the main branch.
+   - **`SPRINT.md`**: When running `/compact`, only update the row or checklist item corresponding to your specific task ID. Leave other tasks untouched.
+
+4. **Agent Roles & Token Efficiency:**
+   - **Architect Role (Reasoning):** Focused on `/spec` and `/plan`. Prefers high-reasoning models (e.g. Gemini Pro / Claude Sonnet).
+   - **Executor Role (Coding):** Focused on implementation inside the worktree. Prefers fast, high-throughput, low-cost models (e.g. Gemini Flash).
+   - **Auditor Role (QA):** Focused on `/review` and diff validation against the base branch.
 
 ---
 
