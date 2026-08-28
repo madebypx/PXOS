@@ -63,7 +63,8 @@ switch ($Command) {
         git show-ref --quiet --heads $Branch 2>$null
         if ($LASTEXITCODE -eq 0) {
             git worktree add $targetPath $Branch
-        } else {
+        }
+        else {
             git worktree add -b $Branch $targetPath
         }
 
@@ -86,7 +87,8 @@ switch ($Command) {
                 $specContent = $specContent -replace '\[e\.g\. feat/auth-oauth\]', $Branch
                 Set-Content $specFile $specContent
                 Write-PxosOk "Created modular spec at $specFile"
-            } else {
+            }
+            else {
                 New-Item -ItemType File -Path $specFile -Force | Out-Null
                 Write-PxosOk "Created empty spec at $specFile"
             }
@@ -119,7 +121,8 @@ switch ($Command) {
             Write-PxosLog "Removing worktree at $targetPath..."
             git worktree remove $targetPath --force
             Write-PxosOk "Worktree removed."
-        } else {
+        }
+        else {
             Write-PxosWarn "Worktree path $targetPath does not exist."
         }
     }
