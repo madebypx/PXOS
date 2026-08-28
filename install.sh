@@ -169,36 +169,36 @@ fi
 
 # ─── IDE rules ─────────────────────────────────────────────────────────────────
 if [[ -n "$IDE" ]]; then
-  AI_BASE_CONTENT=$(cat "${TARGET_DIR}/AI_BASE.md" 2>/dev/null || curl -sSL "${PXOS_REPO}/templates/.ai/AI_BASE.md")
+  IDE_RULES_CONTENT=$(cat "templates/rules/pxos.md" 2>/dev/null || curl -sSL "${PXOS_REPO}/templates/rules/pxos.md" 2>/dev/null || cat "${TARGET_DIR}/AI_BASE.md" 2>/dev/null)
 
   case "$IDE" in
     cursor)
       RULES_FILE=".cursor/rules/pxos.mdc"
       [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.cursor/rules/pxos.mdc"
       mkdir -p "$(dirname "$RULES_FILE")"
-      printf '%s\n' "---" "alwaysApply: true" "---" "" "$AI_BASE_CONTENT" > "$RULES_FILE"
+      printf '%s\n' "---" "alwaysApply: true" "---" "" "$IDE_RULES_CONTENT" > "$RULES_FILE"
       ok "Configured Cursor rules at ${RULES_FILE}"
       ;;
     windsurf)
       RULES_FILE=".windsurf/rules/pxos.md"
       [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.windsurf/rules/pxos.md"
       mkdir -p "$(dirname "$RULES_FILE")"
-      printf '%s\n' "$AI_BASE_CONTENT" > "$RULES_FILE"
+      printf '%s\n' "$IDE_RULES_CONTENT" > "$RULES_FILE"
       ok "Configured Windsurf rules at ${RULES_FILE}"
       ;;
     claude)
       RULES_FILE="CLAUDE.md"
       [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.claude/CLAUDE.md"
-      append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
+      append_pxos_block "$RULES_FILE" "$IDE_RULES_CONTENT"
       ;;
     gemini)
       RULES_FILE="GEMINI.md"
       [[ "$GLOBAL" == true ]] && RULES_FILE="${HOME}/.gemini/GEMINI.md"
-      append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
+      append_pxos_block "$RULES_FILE" "$IDE_RULES_CONTENT"
       ;;
     copilot)
       RULES_FILE=".github/copilot-instructions.md"
-      append_pxos_block "$RULES_FILE" "$AI_BASE_CONTENT"
+      append_pxos_block "$RULES_FILE" "$IDE_RULES_CONTENT"
       ;;
   esac
 fi
