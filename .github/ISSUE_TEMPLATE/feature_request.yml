@@ -1,0 +1,30 @@
+name: Feature Request
+description: Propose a new workflow, template extension, or tooling capability for PXOS
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We prioritize proposals that improve AI discipline, save tokens, prevent regressions, or enable cleaner multi-agent execution with zero external dependencies.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement / Friction
+      description: What challenge or limitation in AI-assisted coding does this solve?
+      placeholder: "When working across multiple agents, ..."
+    validations:
+      required: true
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution & Workflows
+      description: Describe your proposed changes, files touched, or new slash commands.
+    validations:
+      required: true
+  - type: textarea
+    id: tradeoffs
+    attributes:
+      label: Tradeoffs & Alternatives Considered
+      description: Did you consider alternative approaches? Why is this the cleanest solution?
+    validations:
+      required: false

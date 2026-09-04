@@ -23,6 +23,8 @@
 - [Architecture & Workspace Structure](#architecture--workspace-structure)
 - [Workflows & Slash Commands Directory](#workflows--slash-commands-directory)
 - [Quick Installation & IDE Integration](#quick-installation--ide-integration)
+- [Downstream Adoption Badges](#downstream-adoption-badges)
+- [Standard LLM Ingestion (llms.txt)](#standard-llm-ingestion-llmstxt)
 - [The PXOS Engineering Manifesto](#the-pxos-engineering-manifesto)
 - [Author & Portfolio Attribution](#author--portfolio-attribution)
 - [Changelog](./CHANGELOG.md)
@@ -284,10 +286,22 @@ For AI IDEs and tools supporting slash commands (Antigravity, Cursor, Windsurf, 
 
 ### One-Line Install
 
-Run this in the root directory of any repository:
+Run in the root directory of any project:
 
+**macOS / Linux (Bash):**
 ```bash
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
+```
+
+**Windows (PowerShell):**
+```powershell
+irm https://raw.githubusercontent.com/madebypx/PXOS/main/install.ps1 | iex
+```
+
+**Python (PyPI / Global CLI):**
+```bash
+pip install pxos
+pxos init --ide cursor
 ```
 
 ### Safe Upgrade for Existing Projects
@@ -295,7 +309,14 @@ curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 To upgrade an existing project to **PXOS v2.2.0** without touching your project context, active specs, or decision logs:
 
 ```bash
+# Bash
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
+
+# PowerShell
+& ./install.ps1 -Update
+
+# Python CLI
+pxos update
 ```
 
 *(Alternatively, run `/update` directly inside your AI assistant).*
@@ -305,6 +326,9 @@ curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 ```bash
 # Install core + SPRINT.md and ROADMAP.md
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --full
+
+# Windows PowerShell equivalent
+& ./install.ps1 -Full -Ide cursor
 
 # Configure specific IDE rules in your workspace
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --ide cursor
@@ -329,6 +353,41 @@ curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 
 ---
 
+## Downstream Adoption Badges
+
+If you use PXOS to govern your repository, showcase disciplined AI engineering and link back to the framework by adding an official badge to your `README.md`:
+
+### 1. Governed by PXOS (Standard)
+```markdown
+[![Governed by PXOS](https://img.shields.io/badge/Governed%20by-PXOS-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
+```
+> Rendered: [![Governed by PXOS](https://img.shields.io/badge/Governed%20by-PXOS-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
+
+### 2. Multi-Agent Git Worktrees
+```markdown
+[![PXOS Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)
+```
+> Rendered: [![PXOS Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)
+
+### 3. Token Efficiency Certified
+```markdown
+[![Context Cost -80%](https://img.shields.io/badge/Context%20Cost--80%25-emerald.svg?style=flat-square)](https://github.com/madebypx/PXOS)
+```
+> Rendered: [![Context Cost -80%](https://img.shields.io/badge/Context%20Cost--80%25-emerald.svg?style=flat-square)](https://github.com/madebypx/PXOS)
+
+---
+
+## Standard LLM Ingestion (llms.txt)
+
+PXOS strictly adheres to the [`llmstxt.org`](https://llmstxt.org) standard, ensuring AI search agents, IDE plugins, and web crawlers can read the entire operating framework without HTML or web overhead:
+
+- **Root Index:** [`https://raw.githubusercontent.com/madebypx/PXOS/main/llms.txt`](https://raw.githubusercontent.com/madebypx/PXOS/main/llms.txt) — Curated index of core rules, slash commands, and benchmarks.
+- **Full Reference:** [`https://raw.githubusercontent.com/madebypx/PXOS/main/llms-full.txt`](https://raw.githubusercontent.com/madebypx/PXOS/main/llms-full.txt) — Token-dense single-file reference for immediate context injection.
+- **Generator & Validator:** `python scripts/generate-llms-txt.py --check`
+
+
+---
+
 ## The PXOS Engineering Manifesto
 
 1. **Context is a scarce, high-entropy resource:** Excess context creates hallucination and noise. Load only what is needed for the immediate phase.
@@ -340,11 +399,12 @@ curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 
 ---
 
-## Author & Portfolio Attribution
+## Author & Company Attribution
 
-**PXOS** was designed and created by **Rodrigo (madebypx)** as a universal operational layer for high-velocity software engineering, product design, and autonomous AI development.
+**PXOS** is engineered and governed by **[PROJECT/X](https://madebypx.com)** (domain: `madebypx.com`), designed by **Rodrigo ([@madebypx](https://github.com/madebypx))** as a universal operational layer for high-velocity software engineering, product design, and autonomous AI development.
 
-- **Author:** Rodrigo ([@madebypx](https://github.com/madebypx))
+- **Company / Studio:** [PROJECT/X](https://madebypx.com)
+- **Author & Architect:** Rodrigo ([@rodrigospena](https://github.com/rodrigospena))
 - **Repository:** [https://github.com/madebypx/PXOS](https://github.com/madebypx/PXOS)
 - **Role in Portfolio:** Proprietary AI Operating Framework utilized across enterprise, mobile, web, and distributed systems to orchestrate autonomous multi-agent teams with zero regression and maximum token economy.
 

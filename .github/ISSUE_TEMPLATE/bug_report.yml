@@ -1,0 +1,65 @@
+name: Bug Report
+description: Report an issue or unexpected behavior in PXOS templates, CLI, or scripts
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve PXOS! Please provide concise details so we can reproduce and fix the issue.
+  - type: input
+    id: version
+    attributes:
+      label: PXOS Version
+      description: What version of PXOS are you using? (e.g. 2.2.0)
+      placeholder: "2.2.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Operating System & Shell
+      options:
+        - Linux (bash/zsh)
+        - macOS (zsh/bash)
+        - Windows (PowerShell/pwsh)
+        - Windows (Git Bash/WSL)
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: ide
+    attributes:
+      label: AI Coding Environment
+      options:
+        - Cursor
+        - Claude Code / Claude Desktop
+        - Google Antigravity / Gemini
+        - Windsurf
+        - GitHub Copilot
+        - Vanilla Terminal / CLI
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the Bug
+      description: A clear and concise description of what went wrong.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Exact commands or steps to trigger the issue.
+      placeholder: |
+        1. Run `pxos init --ide cursor`
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: What should have happened instead.
+    validations:
+      required: true

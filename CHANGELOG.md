@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.0] - 2026-09-04
+
+### Added
+- **AI Indexability Standard (`llms.txt` & `llms-full.txt`):**
+  - Root `llms.txt` compliant with `llmstxt.org` for direct AI crawler and search agent indexing.
+  - Dense single-file `llms-full.txt` aggregating complete framework reference for direct LLM context injection.
+  - Autonomous synchronization and validation utility (`scripts/generate-llms-txt.py`).
+- **Cross-Platform Native Distribution:**
+  - Native Windows PowerShell installer (`install.ps1`) enabling one-liner installation (`irm https://raw.githubusercontent.com/madebypx/PXOS/main/install.ps1 | iex`).
+  - PEP 517/621 packaging metadata (`pyproject.toml`) and pure Python stdlib CLI (`pxos/`) providing global `pxos init`, `pxos update`, `pxos benchmark`, `pxos monitor`.
+- **Downstream Adoption Badges & Community Infrastructure:**
+  - Official copy-paste badges for downstream repositories (`Governed by PXOS`, `PXOS Multi-Agent`, `Context Cost -80%`).
+  - GitHub community templates (`.github/CONTRIBUTING.md`, YAML issue templates, and PR template).
+- **Technical Authority Whitepaper & Web Metadata:**
+  - Ready-to-publish technical essay (`docs/LAUNCH_WHITEPAPER.md`) highlighting empirical benchmark results (-80% token waste).
+  - Schema.org `SoftwareApplication` JSON-LD and OpenGraph specification (`templates/site/metadata.json`) for `pxos.madebypx.com`.
+
+---
+
 ## [2.2.0] - 2026-09-04
 
 ### Added

@@ -38,7 +38,29 @@ Multi-Agent Note: Entries are strictly additive and chronological. If a Git merg
 
 <!-- Add decisions below this line, most recent first -->
 
-## 2026-09-04 — Zero-Dependency Telemetry Health & Submissions Monitor
+## 2026-09-04 — AI Indexability Standard (llms.txt) & Zero-Friction Multi-Channel Packaging (v2.3.0)
+
+**Decision:**
+Adopt the `llmstxt.org` specification (`llms.txt` and `llms-full.txt`) for direct machine ingestion by LLMs and autonomous web scrapers. Simultaneously introduce a pure Python standard library package (`pyproject.toml` + `pxos/` CLI) and native Windows PowerShell installer (`install.ps1`) to provide zero-friction 1-line installation across all operating systems. Explicitly establish `PROJECT/X` as the governing company/studio with `madebypx` acting as the domain and GitHub organization handle.
+
+**Context:**
+To make PXOS globally recognized by future AI models (pre-training datasets like The Stack, RAG agents, search crawlers), the framework needed standard machine-readable endpoints without HTML tags, viral repository backlink badges, and friction-free installation for developers regardless of OS.
+
+**Options considered:**
+- Option A — Rely solely on documentation site HTML crawling: Rejected because LLM crawlers suffer from token truncation, cookie banners, and CSS/HTML noise.
+- Option B — Heavy Node.js CLI (`npm i -g pxos`): Rejected to uphold PXOS Priority #2 (zero runtime dependencies, avoiding node_modules bloat for lightweight governance).
+- Chosen: Option C — `llmstxt.org` standard with automated sync (`scripts/generate-llms-txt.py`), native `install.ps1` for Windows, and pure stdlib PEP 517/621 Python CLI (`pip install pxos`).
+
+**Tradeoffs:**
+- Gains: Immediate indexing by modern AI crawlers (Claude, ChatGPT, Perplexity), 1-line bootstrap across Bash, PowerShell, and Python, zero external runtime dependencies, viral repository backlinks.
+- Cost: Requires maintaining synchronization between core docs and `llms-full.txt` (automated via `scripts/generate-llms-txt.py`).
+
+**Impact:**
+Added `llms.txt`, `llms-full.txt`, `install.ps1`, `pyproject.toml`, `pxos/`, `docs/LAUNCH_WHITEPAPER.md`, `.github/` templates, and updated `README.md` and `CHANGELOG.md` to v2.3.0.
+
+**Status:** Active
+
+---
 
 **Decision:**
 Implement a pure Python 3 standard library monitoring utility (`scripts/pxos-telemetry-monitor.py`) to poll `https://telemetry.madebypx.com` (`/api/v1/health` and `/api/v1/stats`) for daemon stability, ping latency, and real-time community submission tracking.
