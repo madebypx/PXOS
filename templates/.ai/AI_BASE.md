@@ -1,5 +1,5 @@
 # AI Base — Operating Rules
-<!-- pxos:version 2.1.0 -->
+<!-- pxos:version 2.2.0 -->
 
 This file defines universal operating rules for every AI agent working in this project. Do not modify this file unless a fundamental behavioral rule needs to change. Propagation: if you update this file, update it intentionally across all projects that use PXOS.
 

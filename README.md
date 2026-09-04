@@ -1,6 +1,6 @@
 # PXOS — The AI Operating System for Product & Software Engineering
 
-[![Version](https://img.shields.io/badge/version-2.1.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
+[![Version](https://img.shields.io/badge/version-2.2.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 [![Architecture](https://img.shields.io/badge/Architecture-Document--Driven-8b5cf6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)
@@ -25,6 +25,7 @@
 - [Quick Installation & IDE Integration](#quick-installation--ide-integration)
 - [The PXOS Engineering Manifesto](#the-pxos-engineering-manifesto)
 - [Author & Portfolio Attribution](#author--portfolio-attribution)
+- [Changelog](./CHANGELOG.md)
 - [License](#license)
 
 ---
@@ -271,7 +272,7 @@ For AI IDEs and tools supporting slash commands (Antigravity, Cursor, Windsurf, 
 | **`/compact`** | Compact | Closes session, records ADRs to `DECISION_LOG.md`, and updates `SPRINT.md`. |
 | **`/decision`**| Memory | Immediately registers a durable architectural or product decision into `DECISION_LOG.md`. |
 | **`/audit`** | Quality Gate | Acts as Principal Auditor inspecting security, performance, memory leaks, and UX debt. |
-| **`/benchmark`** | Research | Measures token efficiency, rework ratio, and UX completeness; updates local reports. |
+| **`/benchmark`** | Research | Measures token efficiency, rework ratio, and UX completeness; autonomously transmits anonymous research telemetry upon consent. |
 | **`/install`** | Setup | Automatically detects IDE environment and installs PXOS with appropriate flags. |
 | **`/update`**  | Maintenance | Safely upgrades PXOS to the latest version while preserving all custom project facts. |
 
@@ -289,7 +290,7 @@ curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 
 ### Safe Upgrade for Existing Projects
 
-To upgrade an existing project to **PXOS v2.1.0** without touching your project context, active specs, or decision logs:
+To upgrade an existing project to **PXOS v2.2.0** without touching your project context, active specs, or decision logs:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update

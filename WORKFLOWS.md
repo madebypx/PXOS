@@ -43,7 +43,7 @@ Do not run the command until you have confirmed which IDE was detected and which
 
 ## `/update` — Upgrade PXOS to latest version
 
-**When to use:** When upgrading an existing PXOS project to the latest version (v2.1.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
+**When to use:** When upgrading an existing PXOS project to the latest version (v2.2.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
 
 ```
 Upgrade PXOS in this project by following these steps:
@@ -56,11 +56,11 @@ Upgrade PXOS in this project by following these steps:
    curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
 
 3. Summarize what was updated:
-   - Report updated version (v2.1.0).
+   - Report updated version (v2.2.0).
    - Confirm that .ai/specs/TEMPLATE_SPEC.md includes Strategic & Audit Alignment.
    - Confirm that .ai/research/ and .ai/audits/ directories and starter guides are present.
    - Confirm that PROJECT_CONTEXT.md, DECISION_LOG.md, and all active specs remain untouched.
-   - State that the project is now ready for v2.1.0 workflows (/decision, /audit, UX reviews).
+   - State that the project is now ready for v2.2.0 workflows (/decision, /audit, /benchmark, UX reviews).
 ```
 
 ---
@@ -290,7 +290,7 @@ Act as a Principal Auditor to inspect codebase subsystems against quality, secur
 
 ## `/benchmark` — Empirical performance & telemetry audit
 
-**When to use:** After completing a feature or session. Measures token efficiency, code rework, and UX state completeness, saves empirical JSON telemetry locally, and optionally contributes anonymous metrics to the research study.
+**When to use:** After completing a feature or session. Measures token efficiency, code rework, and UX state completeness, saves empirical JSON telemetry cleanly within `.ai/audits/` (zero project root pollution), and autonomously contributes anonymous metrics to the research study upon user consent.
 
 ```
 Audit development performance on recent tasks:
@@ -301,14 +301,16 @@ Audit development performance on recent tasks:
    - Evaluate UX completeness (Universal 5-State Matrix: idle, loading, empty, error, destructive guard).
    - Check architectural fidelity (ADR retention, duplicate utilities prevented).
 
-2. Format & Save:
-   - Generate structured JSON matching benchmarks/AGENT_INTERVIEW_PROTOCOL.md.
-   - Save to benchmarks/data/task_<task-id>.json.
+2. Clean Storage (Zero Project Root Pollution):
+   - In consumer projects, save structured JSON strictly inside:
+     .ai/audits/BENCHMARK_<task_id>.json
+   - Never create a root benchmarks/ folder in consumer repositories.
 
-3. Recompute & Report:
-   - Run: python benchmarks/analyze.py --input benchmarks/data/ --report benchmarks/REPORT.md --json benchmarks/summary.json
-   - Run: python scripts/pxos-benchmark.py --file benchmarks/data/task_<task-id>.json
-   - Show me the summary and ask for consent before any network transmission.
+3. Interactive Consent & Autonomous Dispatch:
+   - Present the sanitized preview of numerical metrics to the human.
+   - Ask for explicit consent to transmit anonymous telemetry.
+   - If approved, autonomously POST the JSON payload to https://telemetry.madebypx.com/api/v1/telemetry.
+   - Report the resulting submission ID back to the user.
 ```
 
 ---
