@@ -1,65 +1,65 @@
 {
-  "sample_size": 3,
+  "sample_size": 4,
   "token_statistics": {
     "total_tokens": {
-      "n": 3,
-      "mean": 44833.33,
-      "median": 49300.0,
-      "std": 22633.01,
+      "n": 4,
+      "mean": 133725.0,
+      "median": 57100.0,
+      "std": 178741.2,
       "min": 20300.0,
-      "max": 64900.0
+      "max": 400400.0
     },
     "input_tokens": {
-      "n": 3,
-      "mean": 38900.0,
-      "median": 42500.0,
-      "std": 19155.42,
+      "n": 4,
+      "mean": 114675.0,
+      "median": 49250.0,
+      "std": 152354.92,
       "min": 18200.0,
-      "max": 56000.0
+      "max": 342000.0
     },
     "output_tokens": {
-      "n": 3,
-      "mean": 5933.33,
-      "median": 6800.0,
-      "std": 3481.86,
+      "n": 4,
+      "mean": 19050.0,
+      "median": 7850.0,
+      "std": 26386.93,
       "min": 2100.0,
-      "max": 8900.0
+      "max": 58400.0
     },
     "framework_overhead_tokens": {
-      "n": 3,
-      "mean": 4133.33,
-      "median": 4200.0,
-      "std": 1700.98,
+      "n": 4,
+      "mean": 8900.0,
+      "median": 5000.0,
+      "std": 9633.97,
       "min": 2400.0,
-      "max": 5800.0
+      "max": 23200.0
     },
-    "overhead_percentage": 9.22
+    "overhead_percentage": 6.66
   },
   "rework_and_code_churn": {
     "rework_ratio_pct": {
-      "n": 3,
-      "mean": 4.09,
-      "median": 5.85,
-      "std": 3.56,
+      "n": 4,
+      "mean": 3.37,
+      "median": 3.52,
+      "std": 3.25,
       "min": 0.0,
       "max": 6.43
     },
     "rework_turns": {
-      "n": 3,
-      "mean": 0.67,
+      "n": 4,
+      "mean": 1.0,
       "median": 1.0,
-      "std": 0.58,
+      "std": 0.82,
       "min": 0.0,
-      "max": 1.0
+      "max": 2.0
     }
   },
   "product_design_and_ux": {
-    "evaluated_ui_tasks": 2,
+    "evaluated_ui_tasks": 3,
     "ux_completeness_score": {
-      "n": 2,
+      "n": 3,
       "mean": 0.93,
-      "median": 0.93,
-      "std": 0.11,
+      "median": 0.95,
+      "std": 0.08,
       "min": 0.85,
       "max": 1.0
     }
@@ -69,40 +69,45 @@
     "total_duplicate_utils_created": 0,
     "total_invariants_violated": 0,
     "total_merge_conflicts": 0,
-    "total_audit_findings_resolved": 3
+    "total_audit_findings_resolved": 8
   },
   "cost_analysis_usd": {
     "aggregate_costs": {
-      "claude-3-5-sonnet": 0.6171,
-      "gemini-2-flash": 0.0188,
-      "gemini-1-5-pro": 0.2349,
-      "gpt-4o": 0.4698,
-      "default-blended": 0.2819
+      "claude-3-5-sonnet": 2.5191,
+      "gemini-2-flash": 0.0764,
+      "gemini-1-5-pro": 0.9544,
+      "gpt-4o": 1.9087,
+      "default-blended": 1.1452
     },
-    "mean_cost_per_task_blended": 0.094
+    "mean_cost_per_task_blended": 0.2863
   },
   "qualitative_assessment": {
     "net_utility_score": {
-      "n": 3,
-      "mean": 3.33,
-      "median": 4.0,
-      "std": 2.08,
+      "n": 4,
+      "mean": 3.75,
+      "median": 4.5,
+      "std": 1.89,
       "min": 1.0,
       "max": 5.0
     },
-    "overhead_justified_pct": 66.7,
+    "overhead_justified_pct": 75.0,
     "synthesized_frictions": [
       "Filling the Strategic & Audit Alignment block in SPEC-auth.md took an extra prompt turn when no audits were directly touching auth.",
       "Had to run pxos-task.sh to set up the worktree tree, which required verifying bash permissions on the developer machine.",
       "Running the full /spec and /plan sequence for a 20-line CSS change produced 2,400 tokens of documentation overhead (11.8% of total tokens), which felt excessive for a simple aesthetic adjustment.",
-      "The Low-Risk autonomy rule in AI_BASE.md should have allowed moving directly to execution without full spec scaffolding."
+      "The Low-Risk autonomy rule in AI_BASE.md should have allowed moving directly to execution without full spec scaffolding.",
+      "Maintaining separate SPEC files for all 7 milestones (.ai/specs/SPEC-*.md) created 23,200 tokens of documentation overhead, requiring explicit workflow state tracking turns.",
+      "Node.js native ESM execution without a runtime loader failed on test scripts until bundled via esbuild in package.json, which was not caught during initial script authoring."
     ],
     "synthesized_benefits": [
       "Mandatory error state in spec forced the implementation of OAuth callback timeout handling in auth/callback.ts#L48-L62, avoiding an uncaught promise rejection in production.",
       "Append-only DECISION_LOG.md preserved the cookie encryption strategy for future sessions.",
       "Worktree isolation allowed parallel work with feat/auth without touching shared package.json or src/index.ts until final merge.",
       "The Plan phase explicitly checked audit SEC-01 (raw body parsing requirement for Stripe webhooks), preventing a signature verification failure that typically requires multiple debugging turns.",
-      "Consulting docs/DESIGN.md ensured the button used the canonical --radius-md variable instead of hardcoding 6px."
+      "Consulting docs/DESIGN.md ensured the button used the canonical --radius-md variable instead of hardcoding 6px.",
+      "Strict Zero-Spoiler invariant specified in .ai/CURRENT_SPEC.md and enforced in src/shared/utils/sanitizer.ts completely prevented confidential narrative leaks to the Player View window.",
+      "The append-only DECISION_LOG.md entry for 2D Sweep-Line Raycasting prevented subsequent turns from attempting battery-draining WebGL fragment shaders.",
+      "Pre-specifying the 4-sub-bus Web Audio routing graph in Milestone 2 allowed Milestone 5 (3D Dice) to seamlessly hook collision SFX directly into AudioEngine without touching existing channel faders."
     ]
   },
   "tier_breakdown": {
@@ -114,11 +119,11 @@
       "overhead_pct": 8.5
     },
     "tier_3_complex": {
-      "count": 1,
-      "mean_tokens": 64900.0,
-      "mean_overhead": 5800.0,
-      "mean_rework_pct": 5.9,
-      "overhead_pct": 8.9
+      "count": 2,
+      "mean_tokens": 232650.0,
+      "mean_overhead": 14500.0,
+      "mean_rework_pct": 3.5,
+      "overhead_pct": 6.2
     },
     "tier_1_micro": {
       "count": 1,
