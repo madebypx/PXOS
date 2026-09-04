@@ -1,0 +1,131 @@
+{
+  "sample_size": 3,
+  "token_statistics": {
+    "total_tokens": {
+      "n": 3,
+      "mean": 44833.33,
+      "median": 49300.0,
+      "std": 22633.01,
+      "min": 20300.0,
+      "max": 64900.0
+    },
+    "input_tokens": {
+      "n": 3,
+      "mean": 38900.0,
+      "median": 42500.0,
+      "std": 19155.42,
+      "min": 18200.0,
+      "max": 56000.0
+    },
+    "output_tokens": {
+      "n": 3,
+      "mean": 5933.33,
+      "median": 6800.0,
+      "std": 3481.86,
+      "min": 2100.0,
+      "max": 8900.0
+    },
+    "framework_overhead_tokens": {
+      "n": 3,
+      "mean": 4133.33,
+      "median": 4200.0,
+      "std": 1700.98,
+      "min": 2400.0,
+      "max": 5800.0
+    },
+    "overhead_percentage": 9.22
+  },
+  "rework_and_code_churn": {
+    "rework_ratio_pct": {
+      "n": 3,
+      "mean": 4.09,
+      "median": 5.85,
+      "std": 3.56,
+      "min": 0.0,
+      "max": 6.43
+    },
+    "rework_turns": {
+      "n": 3,
+      "mean": 0.67,
+      "median": 1.0,
+      "std": 0.58,
+      "min": 0.0,
+      "max": 1.0
+    }
+  },
+  "product_design_and_ux": {
+    "evaluated_ui_tasks": 2,
+    "ux_completeness_score": {
+      "n": 2,
+      "mean": 0.93,
+      "median": 0.93,
+      "std": 0.11,
+      "min": 0.85,
+      "max": 1.0
+    }
+  },
+  "architectural_fidelity": {
+    "session_amnesia_rate_pct": 0.0,
+    "total_duplicate_utils_created": 0,
+    "total_invariants_violated": 0,
+    "total_merge_conflicts": 0,
+    "total_audit_findings_resolved": 3
+  },
+  "cost_analysis_usd": {
+    "aggregate_costs": {
+      "claude-3-5-sonnet": 0.6171,
+      "gemini-2-flash": 0.0188,
+      "gemini-1-5-pro": 0.2349,
+      "gpt-4o": 0.4698,
+      "default-blended": 0.2819
+    },
+    "mean_cost_per_task_blended": 0.094
+  },
+  "qualitative_assessment": {
+    "net_utility_score": {
+      "n": 3,
+      "mean": 3.33,
+      "median": 4.0,
+      "std": 2.08,
+      "min": 1.0,
+      "max": 5.0
+    },
+    "overhead_justified_pct": 66.7,
+    "synthesized_frictions": [
+      "Filling the Strategic & Audit Alignment block in SPEC-auth.md took an extra prompt turn when no audits were directly touching auth.",
+      "Had to run pxos-task.sh to set up the worktree tree, which required verifying bash permissions on the developer machine.",
+      "Running the full /spec and /plan sequence for a 20-line CSS change produced 2,400 tokens of documentation overhead (11.8% of total tokens), which felt excessive for a simple aesthetic adjustment.",
+      "The Low-Risk autonomy rule in AI_BASE.md should have allowed moving directly to execution without full spec scaffolding."
+    ],
+    "synthesized_benefits": [
+      "Mandatory error state in spec forced the implementation of OAuth callback timeout handling in auth/callback.ts#L48-L62, avoiding an uncaught promise rejection in production.",
+      "Append-only DECISION_LOG.md preserved the cookie encryption strategy for future sessions.",
+      "Worktree isolation allowed parallel work with feat/auth without touching shared package.json or src/index.ts until final merge.",
+      "The Plan phase explicitly checked audit SEC-01 (raw body parsing requirement for Stripe webhooks), preventing a signature verification failure that typically requires multiple debugging turns.",
+      "Consulting docs/DESIGN.md ensured the button used the canonical --radius-md variable instead of hardcoding 6px."
+    ]
+  },
+  "tier_breakdown": {
+    "tier_2_medium": {
+      "count": 1,
+      "mean_tokens": 49300.0,
+      "mean_overhead": 4200.0,
+      "mean_rework_pct": 6.4,
+      "overhead_pct": 8.5
+    },
+    "tier_3_complex": {
+      "count": 1,
+      "mean_tokens": 64900.0,
+      "mean_overhead": 5800.0,
+      "mean_rework_pct": 5.9,
+      "overhead_pct": 8.9
+    },
+    "tier_1_micro": {
+      "count": 1,
+      "mean_tokens": 20300.0,
+      "mean_overhead": 2400.0,
+      "mean_rework_pct": 0.0,
+      "overhead_pct": 11.8
+    }
+  }
+}

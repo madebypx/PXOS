@@ -288,6 +288,31 @@ Act as a Principal Auditor to inspect codebase subsystems against quality, secur
 
 ---
 
+## `/benchmark` — Empirical performance & telemetry audit
+
+**When to use:** After completing a feature or session. Measures token efficiency, code rework, and UX state completeness, saves empirical JSON telemetry locally, and optionally contributes anonymous metrics to the research study.
+
+```
+Audit development performance on recent tasks:
+
+1. Extract Telemetry:
+   - Calculate total turns, prompt tokens, completion tokens, and framework overhead.
+   - Calculate rework ratio (lines modified or deleted after initial diff).
+   - Evaluate UX completeness (Universal 5-State Matrix: idle, loading, empty, error, destructive guard).
+   - Check architectural fidelity (ADR retention, duplicate utilities prevented).
+
+2. Format & Save:
+   - Generate structured JSON matching benchmarks/AGENT_INTERVIEW_PROTOCOL.md.
+   - Save to benchmarks/data/task_<task-id>.json.
+
+3. Recompute & Report:
+   - Run: python benchmarks/analyze.py --input benchmarks/data/ --report benchmarks/REPORT.md --json benchmarks/summary.json
+   - Run: python scripts/pxos-benchmark.py --file benchmarks/data/task_<task-id>.json
+   - Show me the summary and ask for consent before any network transmission.
+```
+
+---
+
 ## Usage notes
 
 - These workflows cover the complete PXOS operating cycle: `/install` → `/start` → `/spec` → `/plan` → execute → `/review` → `/compact`, plus on-demand macro tools (`/decision`, `/audit`).
