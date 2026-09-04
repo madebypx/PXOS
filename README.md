@@ -1,6 +1,6 @@
 # PXOS
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/madebypx/PXOS/releases)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue.svg)](https://github.com/madebypx/PXOS/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 A reusable AI operating system for software and product development.
@@ -17,11 +17,11 @@ Run this in the root of any project:
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash
 ```
 
-This creates the `.ai/` folder with the core files and modular spec templates. No dependencies beyond `curl`.
+This creates the `.ai/` folder with the core files, research/audit scaffolding, and modular spec templates. No dependencies beyond `curl`.
 
 ### Upgrading an Existing Project
 
-To safely upgrade an existing project to **PXOS v2.0** without touching your project context or existing specs:
+To safely upgrade an existing project to **PXOS v2.1** without touching your project context or existing specs:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
@@ -68,7 +68,7 @@ After installing, fill in `.ai/PROJECT_CONTEXT.md` with your project facts and y
 
 PXOS is a structured, document-driven operating system designed to be adopted as a base layer in any project that uses AI agents for development work. It keeps universal operating rules separate from project-specific context, making it easy to reuse, adapt, and maintain over time.
 
-It is not a prompt library or an autonomous framework with infinite, expensive chat loops. It is an **operational contract** between the human developer and AI agents — defining priorities, workflow phases, concurrency isolation, and quality standards that remain stable across projects and toolchains.
+It is not a prompt library or an autonomous framework with infinite, expensive chat loops. It is an **operational contract** between the human developer and AI agents — defining priorities, workflow phases, concurrency isolation, macro-grounding, and quality standards that remain stable across projects and toolchains.
 
 ---
 
@@ -81,7 +81,8 @@ AI agents produce inconsistent results and waste tokens not because they lack ca
 - They consume context inefficiently through noisy chat loops.
 - In multi-agent scenarios, they collide on working files and overwrite specs.
 - They make architectural decisions that should belong to the human.
-- They lose coherence across long sessions.
+- They suffer from "architectural amnesia" across sessions, reintroducing resolved defects.
+- They execute in a vacuum without checking recent security audits or UX research.
 
 PXOS addresses this with a minimal, durable operating layer.
 
@@ -94,8 +95,13 @@ your-project/
 ├── .ai/                            # core — required
 │   ├── AI_BASE.md                  # universal operating & concurrency rules
 │   ├── PROJECT_CONTEXT.md          # durable project facts & patterns
-│   ├── DECISION_LOG.md             # durable architectural decisions
+│   ├── DECISION_LOG.md             # durable architectural decisions (ADRs)
 │   ├── CURRENT_SPEC.md             # active spec for single-agent mode
+│   ├── research/                   # [v2.1] domain research, UX benchmarks, tech spikes
+│   │   └── INDEX.md                # token-efficient research index
+│   ├── audits/                     # [v2.1] security, performance & memory audits
+│   │   ├── README.md               # audit guidelines and severity taxonomy
+│   │   └── PARTIAL_<subsystem>.md  # modular subsystem audits
 │   └── specs/                      # [v2.0] modular specs for parallel multi-agent mode
 │       ├── TEMPLATE_SPEC.md        # standardized task spec template
 │       ├── SPEC-auth-oauth.md      # isolated task spec for branch feat/auth-oauth
@@ -125,9 +131,9 @@ The universal layer. Defines:
 - Core priorities (correctness, clarity, simplicity, maintainability, consistency, context efficiency)
 - Default workflow: Discover → Plan → Execute → Validate → Review → Compact Context
 - Autonomy rules by risk level (Low / Medium / High)
-- **Multi-Agent & Concurrency Rules** (worktree isolation, spec auto-resolution, shared file mutation rules)
+- **Multi-Agent & Concurrency Rules** (worktree isolation, spec auto-resolution, append-only ADRs)
 - **Agent Roles** (Architect, Executor, Auditor)
-- Context management rules
+- Context management & **Audit & Strategic Grounding Protocol**
 - Quality bar and behavioral constraints
 
 ### `PROJECT_CONTEXT.md`
@@ -137,18 +143,26 @@ The project-specific layer. Contains:
 - Product summary, target user, core value
 - Technical stack, conventions, and existing architectural patterns
 - Known constraints and risks
+- Macro context path aliases (`.ai/research/`, `.ai/audits/`)
 
 ### `CURRENT_SPEC.md` & `.ai/specs/SPEC-<task>.md`
 
 The task specification layer:
 - **`CURRENT_SPEC.md`**: Used in traditional Single-Agent mode.
 - **`.ai/specs/SPEC-<task>.md`**: Used in Multi-Agent parallel mode, isolating requirements and state per branch/worktree.
+- Includes **Strategic & Audit Alignment**: auto-populated by the agent during `/spec` to ensure zero regressions against active audit findings.
 
 ### `DECISION_LOG.md`
 
 The durable memory layer:
-- Records significant architectural decisions, alternatives evaluated, tradeoffs, and system impacts.
-- In multi-agent parallel branches, decisions are drafted in the local spec and promoted to `DECISION_LOG.md` upon merge to `main`.
+- Records significant architectural decisions (ADRs), alternatives evaluated, tradeoffs, and system impacts.
+- Maintained automatically by AI agents during `/compact` and via `/decision`, eliminating session amnesia.
+- Append-only concurrency: safely mergeable across parallel worktrees.
+
+### `.ai/research/` & `.ai/audits/` (Macro Context Layer)
+
+- **`.ai/research/`**: Houses market benchmarks, user psychology, tech spikes, and domain research. An optional `INDEX.md` gives agents an instant overview during the Discover phase using minimal tokens.
+- **`.ai/audits/`**: Houses timestamped reports (`AUDIT_YYYY-MM-DD.md`) and modular subsystem audits (`PARTIAL_<subsystem>.md`) tracking security, memory leaks, and technical debt. Agents acting as Principal Auditors run `/audit` to populate this layer.
 
 ---
 
@@ -217,10 +231,12 @@ For agents that support slash commands (e.g. Antigravity, Cursor, Claude Code, c
 
 - **`/install`** — Detects environment and installs PXOS.
 - **`/start`** — Auto-resolves current branch, loads relevant spec, and establishes scope.
-- **`/spec`** — Collaboratively drafts modular or central task specifications.
-- **`/plan`** — Formulates a structured technical plan before writing code.
-- **`/review`** — Audits implemented diffs for overengineering, scope creep, and quality.
-- **`/compact`** — Compacts context, updates workflow status, and updates `SPRINT.md`.
+- **`/spec`** — Collaboratively drafts modular or central task specifications with auto-grounding.
+- **`/plan`** — Formulates a structured technical plan before writing code, checking audit blockers.
+- **`/review`** — Audits implemented diffs for quality, security, and UX heuristics.
+- **`/compact`** — Compacts context, logs durable decisions (ADRs) to `DECISION_LOG.md`, and updates tracking.
+- **`/decision`** — Instantly records an architectural or product decision into `DECISION_LOG.md`.
+- **`/audit`** — Runs an autonomous security, memory leak, and architectural health audit.
 
 ---
 

@@ -16,6 +16,13 @@ This file defines the active task or feature. Replace it entirely when starting 
 
 ---
 
+## Strategic & Audit Alignment
+
+- **Audit Findings Cross-Check:** [Explicitly list audit items addressed or affected (e.g. SEC-01, MEM-03), or "Clean — No active audit blockers touching this scope"]
+- **Strategic / Research Reference:** [Link to relevant document in .ai/research/, docs/, or "None / Clean"]
+
+---
+
 ## Scope
 
 **In:**

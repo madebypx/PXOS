@@ -2,7 +2,7 @@
 
 Workflows are saved prompts that an AI agent can follow on demand. In tools that support slash commands (e.g. Antigravity, Cursor, continue.dev, Claude Code), these can be triggered with `/workflow-name`.
 
-This file contains the recommended workflow set for PXOS v2.0. Each workflow maps to a phase of the [default operating cycle](./README.md#default-workflow) defined in `AI_BASE.md` and supports both Single-Agent and Multi-Agent parallel environments.
+This file contains the recommended workflow set for PXOS v2.1. Each workflow maps to a phase of the default operating cycle defined in `AI_BASE.md` and supports both Single-Agent and Multi-Agent parallel environments.
 
 ---
 
@@ -43,7 +43,7 @@ Do not run the command until you have confirmed which IDE was detected and which
 
 ## `/update` — Upgrade PXOS to latest version
 
-**When to use:** When upgrading an existing PXOS project to the latest version (e.g. from v1.x to v2.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
+**When to use:** When upgrading an existing PXOS project to the latest version (v2.1.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
 
 ```
 Upgrade PXOS in this project by following these steps:
@@ -56,10 +56,11 @@ Upgrade PXOS in this project by following these steps:
    curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
 
 3. Summarize what was updated:
-   - Report updated version (e.g. v2.0.0).
-   - Confirm that .ai/specs/TEMPLATE_SPEC.md is present.
+   - Report updated version (v2.1.0).
+   - Confirm that .ai/specs/TEMPLATE_SPEC.md includes Strategic & Audit Alignment.
+   - Confirm that .ai/research/ and .ai/audits/ directories and starter guides are present.
    - Confirm that PROJECT_CONTEXT.md, DECISION_LOG.md, and all active specs remain untouched.
-   - State that the project is now ready for parallel multi-agent work and hybrid auto-resolution.
+   - State that the project is now ready for v2.1.0 workflows (/decision, /audit, UX reviews).
 ```
 
 ---
@@ -119,9 +120,15 @@ Help me write a task spec using the PXOS standard structure:
    - If on a dedicated branch/worktree (e.g. `feat/auth-oauth`), create/update `.ai/specs/SPEC-<branch-suffix>.md` based on `.ai/specs/TEMPLATE_SPEC.md`.
    - If on `main` or in a single-spec setup, update `.ai/CURRENT_SPEC.md`.
 
-2. Fill the following structure:
+2. Autonomous Grounding (Macro Context):
+   - Autonomously inspect `.ai/audits/` (or `docs/audits/`) for open findings touching the affected files.
+   - Autonomously check `.ai/research/INDEX.md` (or `docs/research/`) for active benchmarks or architectural invariants.
+   - Auto-populate the Strategic & Audit Alignment block with explicit IDs or "Clean — No active audit blockers touching this scope".
+
+3. Fill the following structure:
    - Goal
    - User value
+   - Strategic & Audit Alignment (auto-filled by agent)
    - Scope (in / out)
    - Constraints
    - Existing patterns relevant to the task
@@ -156,6 +163,7 @@ Before writing any code, produce a plan based on the active spec that includes:
    - What you understood from the task
    - Which files will be affected (ensuring no unauthorized shared file mutations)
    - What will change and why
+   - Audit & Invariant Cross-Check: Verify that proposed file edits directly account for known audit risks, cite audit IDs being resolved (e.g. SEC-01, MEM-03), and prevent reintroducing previously audited defects.
    - Main risks and cross-task dependencies
    - How success will be validated
 
@@ -178,10 +186,15 @@ Review what was just implemented by checking the branch diff (e.g. against main/
 - Overengineering or unnecessary complexity
 - Duplicate logic or conflicts with existing patterns
 - Accidental scope growth (modifying files outside the task scope)
-- Unauthorized edits to shared files (e.g. PROJECT_CONTEXT.md or DECISION_LOG.md)
-- Weak naming
-- Hidden side effects
+- Unauthorized edits to shared files (e.g. PROJECT_CONTEXT.md)
+- Weak naming or missing error boundaries
+- Hidden side effects or security risks
 - Inconsistencies with existing patterns
+
+UX & Interaction Heuristics (If the diff modifies UI, styles, or frontend interactions):
+- Status visibility: Are loading states, transitions, and system feedback clear and responsive?
+- Error prevention: Are destructive actions guarded with confirmation? Are validation errors clear?
+- Cognitive friction: Is the user flow direct and intuitive, minimizing unnecessary clicks or confusion?
 
 If a simpler valid solution exists, point it out.
 Do not refactor without my approval.
@@ -198,7 +211,7 @@ Then state the recommended next step.
 
 ## `/compact` — Close a session and compact context
 
-**When to use:** At the end of a long session, before switching tasks, or before submitting a PR. Produces a structured session summary and atomically updates task tracking.
+**When to use:** At the end of a long session, before switching tasks, or before submitting a PR. Produces a structured session summary, automatically records architectural decisions (ADRs), and atomically updates task tracking.
 
 ```
 Summarize this session in a compact format:
@@ -216,20 +229,68 @@ In the "Next steps" section, distinguish between:
 - Pending human decision (what I need to decide before work resumes)
 - Future follow-up (non-urgent items that can wait)
 
-Update workflow state:
+Update workflow state & durable memory:
 1. Update the "Workflow state" section inside the active task spec (`.ai/specs/SPEC-*.md` or `CURRENT_SPEC.md`).
 2. If SPRINT.md exists at the project root:
    - Locate the row or item corresponding to this task/branch in the Task Matrix.
    - Update its Status column (e.g., "In Plan", "Executing", "Ready for PR", "Done").
    - Leave other tasks and agents untouched.
+3. Architectural & Product Decision Check (Autonomous ADR):
+   - Did this session make or cement any durable architectural, structural, or product decisions (e.g. library choices, API/IPC protocols, rejected alternatives)?
+   - If yes: Autonomously format an ADR entry and append it directly to the end of `.ai/DECISION_LOG.md`. Note the added ADR in the summary.
 
 If SPRINT.md does not exist but this project has a sprint in progress, ask me if I want to create it.
 ```
 
 ---
 
+## `/decision` — Record an architectural or product decision (ADR)
+
+**When to use:** When you or the agent make a lasting decision during conversation that should be durably recorded immediately without waiting for `/compact`.
+
+```
+Record an architectural or product decision into .ai/DECISION_LOG.md:
+
+1. Capture context:
+   - What was decided?
+   - What alternatives were considered and why were they rejected?
+   - What are the key tradeoffs and impacts?
+
+2. Format as a standard ADR (following the schema in .ai/DECISION_LOG.md).
+3. Append directly to the end of .ai/DECISION_LOG.md.
+4. Confirm to me that the decision has been logged and summarize the core invariant.
+```
+
+---
+
+## `/audit` — Autonomous codebase or subsystem audit
+
+**When to use:** Before major releases, after refactors, or to diagnose technical debt, memory leaks, and security posture across subsystems.
+
+```
+Act as a Principal Auditor to inspect codebase subsystems against quality, security, and memory standards:
+
+1. Scope & Context Window Protection:
+   - Audit modularly by subsystem (e.g. /audit auth, /audit audio, /audit ipc) to prevent context exhaustion.
+   - For a full audit, inspect subsystems sequentially and synthesize a consolidated report.
+
+2. Inspect across core dimensions:
+   - Security & Auth (secrets, injection, sanitization, exposed APIs)
+   - Performance & Memory (leaks, unclosed handles, event listeners, main-thread blocking)
+   - Architecture & Invariants (layering, circular imports, adherence to PROJECT_CONTEXT.md)
+   - Reliability & Errors (swallowed exceptions, unhandled promises, missing error boundaries)
+   - UX & Interaction (if UI: status visibility, destructive actions guarded)
+
+3. Format structured findings with IDs, severity (P0 Blocker, P1 Critical, P2 Major, P3 Minor), location, evidence, and remediation.
+4. Output report into .ai/audits/PARTIAL_<subsystem>.md or .ai/audits/AUDIT_YYYY-MM-DD.md.
+5. Provide an executive summary with count by severity and immediate blockers.
+```
+
+---
+
 ## Usage notes
 
-- These workflows cover the full PXOS operating cycle: `/install` → `/start` → `/spec` (when needed) → `/plan` → execute → `/review` → `/compact`.
+- These workflows cover the complete PXOS operating cycle: `/install` → `/start` → `/spec` → `/plan` → execute → `/review` → `/compact`, plus on-demand macro tools (`/decision`, `/audit`).
 - In multi-agent parallel environments, each agent runs `/start` in its own worktree and automatically targets its own isolated spec.
+- `DECISION_LOG.md` entries are strictly append-only; in the rare event of a git merge conflict, concatenate entries without discarding either.
 - Do not create workflows for individual feature types or component patterns — that becomes a prompt library, which contradicts the PXOS principle of keeping the system minimal.

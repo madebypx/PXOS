@@ -1,8 +1,11 @@
 # Decision Log
 
-This file records durable architectural and product decisions.
+This file records durable architectural and product decisions (ADRs).
 Append only — never delete past entries. If a decision is superseded, mark it as such.
-Only decisions with lasting impact belong here: architectural choices, dependency changes, structural shifts, product direction changes.
+Entries are maintained automatically by AI agents during `/compact` and via `/decision`, or manually by developers.
+Only decisions with lasting impact belong here: architectural choices, rejected alternatives, structural shifts, and product invariants.
+
+Multi-Agent Note: Entries are strictly additive and chronological. If a Git merge conflict occurs at the bottom of this file, the resolution rule is always to concatenate both entries without discarding either.
 
 ---
 

@@ -83,3 +83,11 @@ In order:
 
 - [Constraint or technical debt the AI should be aware of]
 - [Constraint or technical debt the AI should be aware of]
+
+---
+
+## Macro Context & Paths (Optional)
+
+**Research directory:** `.ai/research/` (or `docs/research/`)
+**Audits directory:** `.ai/audits/` (or `docs/audits/`)
+**Design / Tokens:** [e.g. `docs/DESIGN.md` or `.ai/research/DESIGN.md`]

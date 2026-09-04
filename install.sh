@@ -20,7 +20,7 @@
 
 set -e
 
-PXOS_VERSION="2.0.0"
+PXOS_VERSION="2.1.0"
 PXOS_REPO="https://raw.githubusercontent.com/madebypx/PXOS/main"
 TARGET_DIR=".ai"
 FULL=false
@@ -75,7 +75,12 @@ download_file() {
   fi
 
   mkdir -p "$(dirname "$dest")"
-  curl -sSL "${PXOS_REPO}/${src}" -o "$dest"
+  if [[ -f "$src" ]]; then
+    cp "$src" "$dest"
+  else
+    curl -sSL "${PXOS_REPO}/${src}" -o "$dest"
+  fi
+
   if [[ "$overwrite" == true && -f "$dest" ]]; then
     ok "Updated $dest"
   else
@@ -135,6 +140,10 @@ if [[ "$GLOBAL" == false ]]; then
     # In update mode, safely update universal rules and modular spec templates
     download_file "templates/.ai/AI_BASE.md"               "${TARGET_DIR}/AI_BASE.md" true
     download_file "templates/.ai/specs/TEMPLATE_SPEC.md"   "${TARGET_DIR}/specs/TEMPLATE_SPEC.md" true
+    # Scaffolding research and audits directories and guide/index without overwriting existing
+    mkdir -p "${TARGET_DIR}/research" "${TARGET_DIR}/audits"
+    download_file "templates/.ai/research/INDEX.md"         "${TARGET_DIR}/research/INDEX.md" false
+    download_file "templates/.ai/audits/README.md"          "${TARGET_DIR}/audits/README.md" false
     log "Preserved PROJECT_CONTEXT.md, DECISION_LOG.md, and all active specs."
   else
     download_file "templates/.ai/AI_BASE.md"               "${TARGET_DIR}/AI_BASE.md"
@@ -142,6 +151,8 @@ if [[ "$GLOBAL" == false ]]; then
     download_file "templates/.ai/CURRENT_SPEC.md"          "${TARGET_DIR}/CURRENT_SPEC.md"
     download_file "templates/.ai/DECISION_LOG.md"          "${TARGET_DIR}/DECISION_LOG.md"
     download_file "templates/.ai/specs/TEMPLATE_SPEC.md"   "${TARGET_DIR}/specs/TEMPLATE_SPEC.md"
+    download_file "templates/.ai/research/INDEX.md"         "${TARGET_DIR}/research/INDEX.md"
+    download_file "templates/.ai/audits/README.md"          "${TARGET_DIR}/audits/README.md"
   fi
 fi
 
@@ -216,6 +227,7 @@ if [[ "$GLOBAL" == false ]]; then
   echo "  Next steps:"
   echo "  1. Check ${BOLD}.ai/AI_BASE.md${RESET} for updated operating rules."
   echo "  2. Run ${BOLD}/start${RESET} in any branch or worktree to auto-resolve specs."
+  echo "  3. Use ${BOLD}/audit${RESET} for codebase health and ${BOLD}/decision${RESET} for ADRs."
 else
   echo "  Global IDE rules configured for v${PXOS_VERSION}."
 fi

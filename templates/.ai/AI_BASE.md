@@ -1,5 +1,5 @@
 # AI Base — Operating Rules
-<!-- pxos:version 2.0.0 -->
+<!-- pxos:version 2.1.0 -->
 
 This file defines universal operating rules for every AI agent working in this project. Do not modify this file unless a fundamental behavioral rule needs to change. Propagation: if you update this file, update it intentionally across all projects that use PXOS.
 
@@ -26,12 +26,12 @@ Every task follows this cycle:
 Discover → Plan → Execute → Validate → Review → Compact Context
 ```
 
-- **Discover** — read relevant files, understand existing patterns, identify dependencies and risks. Do not implement yet.
-- **Plan** — define which files will change, in what order, and why. Surface risks. Confirm the plan before proceeding.
+- **Discover** — read relevant files, understand existing patterns, identify dependencies and risks. Autonomously inspect active audit reports (`.ai/audits/` or `docs/audits/`) and strategic blueprints/research (`.ai/research/` or `docs/research/`, prioritizing `INDEX.md`) affecting the touched subsystem before declaring understanding. Do not implement yet.
+- **Plan** — define which files will change, in what order, and why. Explicitly cite and resolve any active audit blockers (P0/P1) or architectural constraints touching the affected files. Surface risks. Confirm the plan before proceeding.
 - **Execute** — implement incrementally. Keep diffs small. Follow existing conventions.
 - **Validate** — verify the output works. Check edge cases, regressions, and acceptance criteria.
-- **Review** — check for overengineering, duplication, scope creep, and inconsistencies.
-- **Compact Context** — summarize the session. Update SPRINT.md if it exists.
+- **Review** — check for overengineering, duplication, scope creep, and inconsistencies. If the task modifies user interfaces or interaction flows, evaluate Nielsen's UX heuristics (status visibility, error prevention, cognitive load).
+- **Compact Context** — summarize the session. If durable architectural, structural, or product decisions were made or cemented, append an ADR entry directly to `.ai/DECISION_LOG.md`. Update SPRINT.md if it exists.
 
 Do not skip phases. Do not implement before the plan is confirmed.
 
@@ -69,6 +69,9 @@ Do not skip phases. Do not implement before the plan is confirmed.
 - Break large tasks into smaller tasks if context grows noisy.
 - At the end of long sessions, run `/compact` to reduce future context load.
 
+### Audit & Strategic Grounding Protocol
+When drafting a task spec (`/spec`) or formulating an implementation plan (`/plan`), the agent MUST cross-reference active audits and strategic blueprints. The agent must never propose code changes that contradict an active audit finding (specifically P0 blockers or P1 critical items) or strategic benchmark invariant without explicit justification.
+
 ---
 
 ## Multi-Agent & Concurrency Rules
@@ -88,7 +91,7 @@ When multiple agents operate concurrently on the same repository:
 
 3. **Shared File Mutation Etiquette:**
    - **`PROJECT_CONTEXT.md`**: Strictly read-only during parallel execution. Must not be modified on feature branches.
-   - **`DECISION_LOG.md`**: Do not commit durable architectural decisions directly on feature branches. Record proposals inside your local `SPEC-*.md`. Durable promotion to `DECISION_LOG.md` occurs upon merging to the main branch.
+   - **`DECISION_LOG.md`**: Append-only. When a durable architectural, technical, or product decision is finalized, agents append an ADR entry directly at the end of `.ai/DECISION_LOG.md` during `/compact` or via `/decision`. Entries are strictly additive and chronological. In the rare event of a git merge conflict at the end of `DECISION_LOG.md`, the resolution rule is always to concatenate both entries without discarding either.
    - **`SPRINT.md`**: When running `/compact`, only update the row or checklist item corresponding to your specific task ID. Leave other tasks untouched.
 
 4. **Autonomous Task Decomposition & Provisioning:**
@@ -98,7 +101,7 @@ When multiple agents operate concurrently on the same repository:
 5. **Agent Roles & Token Efficiency:**
    - **Architect Role (Reasoning):** Focused on `/spec` and `/plan`. Prefers high-reasoning models (e.g. Gemini Pro / Claude Sonnet).
    - **Executor Role (Coding):** Focused on implementation inside the worktree. Prefers fast, high-throughput, low-cost models (e.g. Gemini Flash).
-   - **Auditor Role (QA):** Focused on `/review` and diff validation against the base branch.
+   - **Auditor Role (QA & Systems):** Focused on `/review` (diff validation, quality, security, UX heuristics) and autonomous subsystem audits (`/audit`) against quality, security, and memory leak standards.
 
 ---
 
