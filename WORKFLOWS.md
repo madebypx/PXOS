@@ -313,6 +313,24 @@ Audit development performance on recent tasks:
    - Report the resulting submission ID back to the user.
 ```
 
+### Monitoring Telemetry Health & Public Submissions
+
+To verify server stability and monitor community benchmark submissions in real time:
+
+```bash
+# Live terminal dashboard (snapshot):
+python scripts/pxos-telemetry-monitor.py
+
+# Continuous watch mode (auto-refreshing every 15s):
+python scripts/pxos-telemetry-monitor.py --watch
+
+# Machine-readable JSON output for CI / dashboards:
+python scripts/pxos-telemetry-monitor.py --json
+
+# Latency threshold check (fails with exit code 1 if ping > 300ms):
+python scripts/pxos-telemetry-monitor.py --max-latency-ms 300
+```
+
 ---
 
 ## Usage notes

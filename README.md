@@ -93,6 +93,8 @@ PXOS does not rely on hand-waved claims or marketing hyperbole. Every efficiency
 - **[Benchmark Methodology](./benchmarks/METHODOLOGY.md):** Formal research questions (RQs), control vs. treatment experimental design, mathematical cost functions, and bias mitigation protocols.
 - **[Agent Interview & Elicitation Protocol](./benchmarks/AGENT_INTERVIEW_PROTOCOL.md):** Adversarial, anti-sycophantic elicitation prompts and strict JSON schemas to extract unvarnished telemetry from working AI agents.
 - **[Automated Analysis Engine (`analyze.py`)](./benchmarks/analyze.py):** Zero-dependency Python 3 engine that parses agent telemetry, computes statistical distributions, and generates audited markdown reports.
+- **[Telemetry Server (`server.py`)](./benchmarks/server.py):** Lightweight, zero-dependency ingestion server running at `https://telemetry.madebypx.com` to aggregate anonymous community benchmarks.
+- **[Live Telemetry Monitor (`pxos-telemetry-monitor.py`)](./scripts/pxos-telemetry-monitor.py):** Terminal dashboard and CI utility for real-time daemon stability checks and public submission monitoring.
 - **[Latest Benchmark Report](./benchmarks/REPORT.md):** Real-world audited telemetry across Tier 1 (micro), Tier 2 (medium), and Tier 3 (complex) engineering tasks.
 
 ---
