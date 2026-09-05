@@ -81,3 +81,25 @@ Following the deployment of the PXOS empirical research daemon, maintainers and 
 Adds `scripts/pxos-telemetry-monitor.py` and documents the monitoring recipes in `WORKFLOWS.md` and `README.md`.
 
 **Status:** Active
+
+---
+
+**Decision:**
+Transition repository licensing from permissive MIT to Business Source License 1.1 (BSL-1.1) governed by PROJECT/X, protecting against unauthorized commercial exploitation while keeping the framework completely free for development, internal operations, and commercial software projects.
+
+**Context:**
+As PXOS prepares for public distribution (GitHub Release v2.3.0, PyPI packaging, Hacker News and Reddit syndication), permissive MIT licensing introduced a critical vulnerability: third parties or competitors could re-package the governance layer, strip PROJECT/X attribution, or sell a competing hosted/managed platform without legal recourse. The author and PROJECT/X required a licensing model that shields commercial intellectual property while preserving zero-friction adoption for individual developers, teams, and enterprises.
+
+**Options considered:**
+- Option A — Closed Source / Proprietary (All Rights Reserved): Rejected because it destroys developer trust and virality in open AI developer communities (Hacker News, Reddit).
+- Option B — Retain MIT License: Rejected because it grants third parties complete permission to commercialize, close-source, or fork PXOS as a competing paid service without compensation or attribution.
+- Chosen: Option C — Business Source License 1.1 (BSL-1.1) by PROJECT/X. Developers and companies enjoy unrestricted free use to build, test, and govern their own software. Competing managed services or standalone resale require a commercial license from PROJECT/X.
+
+**Tradeoffs:**
+- Gains: Total protection of PROJECT/X intellectual property, preventing unauthorized competing commercial SaaS products while granting full freedom for developer and enterprise adoption.
+- Cost: Not classified as OSI-approved open source (categorized as Source-Available / Fair-Code), consistent with industry standards adopted by Sentry, CockroachDB, and Redis.
+
+**Impact:**
+Updated `LICENSE`, `pyproject.toml`, `pxos/__init__.py`, `README.md`, `llms.txt`, `llms-full.txt`, `templates/site/`, `docs/LAUNCH_KIT.md`, and `docs/LAUNCH_WHITEPAPER.md`.
+
+**Status:** Active
