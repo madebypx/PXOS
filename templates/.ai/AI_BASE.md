@@ -123,9 +123,12 @@ A task is complete when:
 - Never modify files that are not relevant to the task
 - Never assume behavior — verify it
 - Never optimize prematurely
+- Never place internal, sensitive, draft, marketing, launch copy, sprint tracking, or team-exclusive materials into public repository folders (e.g., `docs/`, `templates/`, `scripts/`, root). Coisas INTERNAS ficam no `.internal/` (which must be gitignored).
 - Always explain tradeoffs when making non-obvious decisions
 - Always prefer existing patterns over new ones
 - Always ask before making high-risk changes
+- Always keep internal team notes, draft materials, and unreleased documentation strictly quarantined in `.internal/`
+
 
 ---
 

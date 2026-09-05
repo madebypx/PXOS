@@ -153,3 +153,26 @@ A full codebase audit on 2026-09-04 identified 9 security, reliability, packagin
 Modified `benchmarks/server.py`, `benchmarks/analyze.py`, `benchmarks/aggregate_daily.py`, `pxos/cli.py`, `pyproject.toml`, `scripts/pxos-benchmark.py`, `scripts/pxos-task.sh`, `scripts/pxos-task.ps1`, `.github/workflows/release.yml`, and created `tests/test_audit_remediation.py`.
 
 **Status:** Active
+
+---
+
+**Decision:**
+Enforce mandatory quarantine of all internal, sensitive, draft, marketing, launch copy, sprint tracking, and team-exclusive materials inside `.internal/` (strictly `.gitignore`d). Never place internal or unreleased assets in public repository directories (`docs/`, `templates/`, `scripts/`, or repository root).
+
+**Context:**
+Draft launch articles, social media submission copy, internal sprint notes, and team-exclusive strategy documents were inadvertently placed in public documentation paths (`docs/`). This created risk of leaking unreleased materials, exposing team strategy, and cluttering public-facing documentation. The team and author require a strict, non-negotiable boundary: "Coisas INTERNAS ficam no `.internal/`".
+
+**Options considered:**
+- Option A — Rely on ad-hoc developer discretion: Rejected because automated agents or contributors may casually place draft or sensitive files into public documentation folders.
+- Option B — Encrypted git submodules: Rejected due to unnecessary complexity and toolchain friction for internal notes.
+- Chosen: Option C — Mandatory `.internal/` quarantine enforced across global operating rules (`GEMINI.md`), project context (`PROJECT_CONTEXT.md`), operational base rules (`AI_BASE.md`), and repository templates. All internal drafts, marketing copy, launch kits, and team coordination files live exclusively in `.internal/`, which is permanently excluded by `.gitignore`.
+
+**Tradeoffs:**
+- Gains: Total protection against accidental leaks of internal strategy, clean public documentation for end users, and clear psychological and technical boundaries for both humans and AI agents.
+- Cost: Team members must explicitly use `.internal/` for work-in-progress drafts and internal notes.
+
+**Impact:**
+Removed `docs/DEVTO_POST.md` from git tracking, confirmed `.internal/` in `.gitignore`, and codified the invariant in `~/.gemini/GEMINI.md`, `.ai/PROJECT_CONTEXT.md`, `.ai/AI_BASE.md`, and all `templates/.ai/AI_BASE.md`.
+
+**Status:** Active
+

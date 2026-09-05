@@ -34,6 +34,7 @@ In order:
 - Heavy runtime dependencies (avoid Node/pip packages for lightweight core tools)
 - Premature abstraction or overly complex telemetry architectures
 - Unconsented or opaque data collection (strict privacy and opt-in standards)
+- Exposing internal assets: never place internal, draft, marketing, launch copy, sprint tracking, or team-exclusive materials in public directories. Coisas INTERNAS ficam estritamente no `.internal/`.
 
 ---
 
@@ -63,3 +64,5 @@ In order:
 - Git commits: Conventional Commits in English (`feat: ...`, `fix: ...`, `chore: ...`).
 - Scripts: Python 3 with type hints, POSIX compliance for bash scripts.
 - Telemetry: strictly anonymous, numeric metrics and categorical enums only.
+- **Internal vs Public Isolation:** `.internal/` is `.gitignore`d and serves as the mandatory quarantine for all internal, team-exclusive, draft, marketing, launch copy, and sprint tracking files. NEVER place unreleased, sensitive, or team-only documents into public directories (`docs/`, `templates/`, `scripts/`, root). Coisas INTERNAS ficam no `.internal/`.
+
