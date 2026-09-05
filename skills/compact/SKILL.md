@@ -24,7 +24,7 @@ If the workflow state is incomplete, state which PXOS phase should resume first 
 
 Update workflow state & durable memory:
 1. Update the "Workflow state" section inside the active task spec (`.ai/specs/SPEC-*.md` or `CURRENT_SPEC.md`).
-2. If `SPRINT.md` exists at the project root:
+2. If `SPRINT.md` exists at the project root (or inside `.internal/SPRINT.md` / `.ai/SPRINT.md`):
    - Locate the row or item corresponding to this task/branch in the Task Matrix.
    - Update its Status column (e.g., "In Plan", "Executing", "Ready for PR", "Done").
    - Leave other tasks and agents untouched.

@@ -12,3 +12,6 @@ build/
 dist/
 *.egg-info/
 
+# Internal developer, launch & marketing assets (never pushed to public repository)
+.internal/
+

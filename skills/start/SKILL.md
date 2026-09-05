@@ -14,7 +14,7 @@ Auto-resolve active task spec:
 2. Check if a modular spec exists matching this branch in `.ai/specs/` (e.g. `.ai/specs/SPEC-<branch-suffix>.md` or `.ai/specs/SPEC-<branch-name>.md`).
 3. If found, load it as the active task spec.
 4. If not found, check `.ai/CURRENT_SPEC.md`.
-5. If `SPRINT.md` exists at the project root, read it to verify assigned goals and dependencies.
+5. If `SPRINT.md` exists at the project root (or inside `.internal/SPRINT.md` / `.ai/SPRINT.md`), read it to verify assigned goals and dependencies.
 
 Report your findings:
 - Active branch: `[branch-name]`

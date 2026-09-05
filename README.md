@@ -27,6 +27,7 @@
 - [Standard LLM Ingestion (llms.txt)](#standard-llm-ingestion-llmstxt)
 - [The PXOS Engineering Manifesto](#the-pxos-engineering-manifesto)
 - [Author & Portfolio Attribution](#author--portfolio-attribution)
+- [Architectural Whitepaper](./docs/WHITEPAPER.md)
 - [Changelog](./CHANGELOG.md)
 - [License](#license)
 

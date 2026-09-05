@@ -1,4 +1,4 @@
-# Why We Built a Document-Driven Operating System for AI Coding Agents (and Cut Token Waste by 80%)
+# Architectural Whitepaper — Why We Built a Document-Driven Operating System for AI Coding Agents (and Cut Token Waste by 80%)
 
 **Author:** [madebypx](https://github.com/madebypx)  
 **Project:** [PXOS (GitHub)](https://github.com/madebypx/PXOS)  

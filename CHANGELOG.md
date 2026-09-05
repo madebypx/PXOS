@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Official copy-paste badges for downstream repositories (`Governed by PXOS`, `PXOS Multi-Agent`, `Context Cost -80%`).
   - GitHub community templates (`.github/CONTRIBUTING.md`, YAML issue templates, and PR template).
 - **Technical Authority Whitepaper & Web Metadata:**
-  - Ready-to-publish technical essay (`docs/LAUNCH_WHITEPAPER.md`) highlighting empirical benchmark results (-80% token waste).
+  - Ready-to-publish technical essay (`docs/WHITEPAPER.md`) highlighting empirical benchmark results (-80% token waste).
   - Schema.org `SoftwareApplication` JSON-LD and OpenGraph specification (`templates/site/metadata.json`) for `pxos.madebypx.com`.
 
 ### Changed

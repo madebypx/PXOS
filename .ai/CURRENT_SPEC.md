@@ -3,7 +3,7 @@
 - **Branch:** `main`
 - **Status:** `🎉 Done`
 - **Assignee / Agent:** `Agent / Rodrigo`
-- **Related Issues / Tasks:** `.ai/audits/AUDIT_2026-09-04.md`, `T-06`, `.github/workflows/release.yml`
+- **Related Issues / Tasks:** `.internal/audits/AUDIT_2026-09-04.md`, `T-06`, `.github/workflows/release.yml`
 
 ---
 
@@ -23,7 +23,7 @@ Publish the official `v2.3.1` patch release across GitHub and PyPI, ensuring tha
 
 ## Strategic & Audit Alignment
 
-- **Audit Findings Distributed:** Directly packages and publishes the remediations for all 9 findings documented in [.ai/audits/AUDIT_2026-09-04.md](.ai/audits/AUDIT_2026-09-04.md):
+- **Audit Findings Distributed:** Directly packages and publishes the remediations for all 9 findings documented in [AUDIT_2026-09-04.md](.internal/audits/AUDIT_2026-09-04.md):
   - `[PKG-01]` (P1): Packages `pxos/templates/` and `pxos/scripts/` into the PyPI wheel so CLI commands work out of the box.
   - `[REL-01]` (P1): Eliminates SQLite connection leaks and unhandled exceptions in `benchmarks/server.py`.
   - `[SEC-01]` (P1): Prevents unscrubbed PII/payload storage in SQLite submissions table.
