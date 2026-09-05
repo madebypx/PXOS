@@ -100,7 +100,7 @@ We ran rigorous empirical benchmarks comparing unconstrained agents vs. PXOS age
 - Rework Ratio: 44.1% vs. **0.0%**
 - Out-of-bounds file mutations: 7 vs. **0**
 
-The project is published under the Business Source License 1.1 (BSL-1.1 by PROJECT/X) and is completely free for personal, internal, and commercial development use. Check out the repository, benchmarks, and installers:
+The project is published under the Apache License, Version 2.0 (Apache-2.0 by PROJECT/X) and is completely free and open source for personal, internal, and commercial development use. Check out the repository, benchmarks, and installers:
 GitHub: https://github.com/madebypx/PXOS
 Laboratory Report: https://github.com/madebypx/PXOS/blob/main/benchmarks/REPORT.md
 

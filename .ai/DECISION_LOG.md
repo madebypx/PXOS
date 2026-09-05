@@ -38,6 +38,30 @@ Multi-Agent Note: Entries are strictly additive and chronological. If a Git merg
 
 <!-- Add decisions below this line, most recent first -->
 
+## 2026-09-04 — Transition Repository Licensing to Apache License 2.0 (Apache-2.0)
+
+**Decision:**
+Standardize PXOS repository licensing on the official, OSI-approved Apache License, Version 2.0 (Apache-2.0) governed by PROJECT/X, replacing the interim Business Source License 1.1 (BSL-1.1).
+
+**Context:**
+Prior to syndicating public launch announcements (Hacker News, Reddit, Twitter, Dev.to), analysis revealed that BSL-1.1 (Source-Available) creates severe adoption friction for framework and governance layers. Unlike server-side databases (CockroachDB) or cloud infrastructure (Terraform), PXOS `.ai/` specifications, prompts, and CLI scripts live directly inside user and enterprise repositories. Enterprise compliance scanners (FOSSA, Snyk, Black Duck) automatically flag non-OSI licenses as high-risk, while developer communities view BSL-licensed frameworks with skepticism. Apache 2.0 provides 100% unrestricted open-source adoption while preserving vital intellectual property safeguards: explicit reservation of trademark rights (prohibiting unauthorized use of "PXOS" or "PROJECT/X" names) and an express reciprocal patent retaliation shield.
+
+**Options considered:**
+- Option A — Retain BSL-1.1: Rejected because non-OSI status stifles viral framework adoption, triggers enterprise procurement roadblocks, and damages community trust.
+- Option B — MIT License: Rejected because MIT lacks explicit trademark reservations and explicit patent cross-licensing protections.
+- Chosen: Option C — Apache License, Version 2.0 (Apache-2.0). Provides complete open-source credibility (OSI-approved), zero enterprise compliance friction, and robust trademark/patent protections under PROJECT/X stewardship.
+
+**Tradeoffs:**
+- Gains: Immediate zero-friction adoption for individual developers, startups, and Fortune 500 enterprises; 100% positive alignment with open-source communities (Hacker News, Reddit r/LocalLLaMA); explicit trademark shield for PROJECT/X; clean integration with PyPI and open package managers.
+- Cost: Permits third-party commercial derivatives as long as Apache 2.0 attribution, notice conditions, and trademark restrictions are respected.
+
+**Impact:**
+Updated `LICENSE`, `pyproject.toml`, `pxos/__init__.py`, `README.md`, `llms.txt`, `llms-full.txt`, `scripts/generate-llms-txt.py`, `docs/LAUNCH_WHITEPAPER.md`, `docs/LAUNCH_KIT.md`, and synchronized `pxos-site` components.
+
+**Status:** Active
+
+---
+
 ## 2026-09-04 — AI Indexability Standard (llms.txt) & Zero-Friction Multi-Channel Packaging (v2.3.0)
 
 **Decision:**
@@ -102,4 +126,4 @@ As PXOS prepares for public distribution (GitHub Release v2.3.0, PyPI packaging,
 **Impact:**
 Updated `LICENSE`, `pyproject.toml`, `pxos/__init__.py`, `README.md`, `llms.txt`, `llms-full.txt`, `templates/site/`, `docs/LAUNCH_KIT.md`, and `docs/LAUNCH_WHITEPAPER.md`.
 
-**Status:** Active
+**Status:** Superseded by 2026-09-04 Apache-2.0 transition

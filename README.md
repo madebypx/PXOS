@@ -1,7 +1,7 @@
 # PXOS — The AI Operating System for Product & Software Engineering
 
 [![Version](https://img.shields.io/badge/version-2.3.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
-[![License: BSL 1.1](https://img.shields.io/badge/License-BSL%201.1-10b981.svg?style=flat-square)](./LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](./LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Document--Driven-8b5cf6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![UX-First](https://img.shields.io/badge/Design-UX%20Heuristics%20Inside-ec4899.svg?style=flat-square)](https://github.com/madebypx/PXOS)
@@ -406,10 +406,10 @@ PXOS strictly adheres to the [`llmstxt.org`](https://llmstxt.org) standard, ensu
 - **Company / Studio:** [PROJECT/X](https://madebypx.com)
 - **Author & Architect:** Rodrigo ([@rodrigospena](https://github.com/rodrigospena))
 - **Repository:** [https://github.com/madebypx/PXOS](https://github.com/madebypx/PXOS)
-- **Role in Portfolio:** Proprietary AI Operating Framework utilized across enterprise, mobile, web, and distributed systems to orchestrate autonomous multi-agent teams with zero regression and maximum token economy.
+- **Role in Portfolio:** Flagship Open-Source AI Operating Framework utilized across enterprise, mobile, web, and distributed systems to orchestrate autonomous multi-agent teams with zero regression and maximum token economy.
 
 ---
 
 ## License
 
-PXOS is published under the [Business Source License 1.1 (BSL-1.1)](./LICENSE) by **PROJECT/X**. Free to use, inspect, adapt, and scale across personal, internal, and commercial software development projects. Commercial resale, hosted/managed platform competition, or proprietary re-licensing requires a commercial license from PROJECT/X.
+PXOS is published under the [Apache License, Version 2.0 (Apache-2.0)](./LICENSE) by **PROJECT/X**. Free to use, inspect, adapt, modify, and distribute across personal, commercial, and enterprise software development projects with zero licensing fees. PROJECT/X retains all trademark and brand rights.

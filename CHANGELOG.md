@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Ready-to-publish technical essay (`docs/LAUNCH_WHITEPAPER.md`) highlighting empirical benchmark results (-80% token waste).
   - Schema.org `SoftwareApplication` JSON-LD and OpenGraph specification (`templates/site/metadata.json`) for `pxos.madebypx.com`.
 
+### Changed
+- **OSI-Approved Open-Source Licensing (Apache-2.0):**
+  - Standardized on the Apache License, Version 2.0 (Apache-2.0) by PROJECT/X.
+  - Grants unrestricted free use for developers, startups, and enterprise teams to inspect, modify, embed, and govern personal, internal, and commercial software without corporate compliance roadblocks (FOSSA/Snyk/Black Duck).
+  - Enforces explicit trademark protections for PROJECT/X and PXOS names while providing a reciprocal patent infringement defense shield.
+
 ---
 
 ## [2.2.0] - 2026-09-04

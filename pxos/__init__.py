@@ -5,4 +5,4 @@ Version: 2.3.0
 
 __version__ = "2.3.0"
 __author__ = "PROJECT/X"
-__license__ = "BSL-1.1"
+__license__ = "Apache-2.0"

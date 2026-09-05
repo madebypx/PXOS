@@ -36,7 +36,7 @@ PXOS standardizes the operational contract between human developers and AI codin
 - **Company / Organization**: PROJECT/X (https://madebypx.com)
 - **Website**: https://pxos.madebypx.com
 - **Repository**: https://github.com/madebypx/PXOS
-- **License**: Business Source License 1.1 (BSL-1.1) by PROJECT/X
+- **License**: Apache License, Version 2.0 (Apache-2.0) by PROJECT/X
 - **Primary Paradigms**: Document-Driven Development, Context Economy, Git Worktree Multi-Agent Isolation, Nielsen UX Heuristics inside.
 
 ## Core Documentation
@@ -140,6 +140,20 @@ def main():
 
     llms_full_path.write_text(expected_llms_full, encoding="utf-8")
     print(f"[CREATED/UPDATED] {llms_full_path} ({len(expected_llms_full)} bytes)")
+
+    # Mirror to templates/site/public/
+    site_public = REPO_ROOT / "templates" / "site" / "public"
+    if site_public.exists():
+        (site_public / "llms.txt").write_text(expected_llms_txt, encoding="utf-8")
+        (site_public / "llms-full.txt").write_text(expected_llms_full, encoding="utf-8")
+        print(f"[MIRRORED] {site_public}")
+
+    # Mirror to sibling pxos-site/public if available
+    sibling_site = REPO_ROOT.parent / "pxos-site" / "public"
+    if sibling_site.exists():
+        (sibling_site / "llms.txt").write_text(expected_llms_txt, encoding="utf-8")
+        (sibling_site / "llms-full.txt").write_text(expected_llms_full, encoding="utf-8")
+        print(f"[MIRRORED] {sibling_site}")
 
     if validate_llms_txt(expected_llms_txt):
         print("[OK] Validation passed against llmstxt.org standard.")

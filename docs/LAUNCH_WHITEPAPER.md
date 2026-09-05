@@ -107,7 +107,7 @@ To ensure future AI models and autonomous web scrapers ingest PXOS without parsi
 
 ## Get Involved
 
-PXOS is published by PROJECT/X under the Business Source License 1.1 (BSL-1.1), free for developers to use, build, and govern their own software projects. We believe the future of software development belongs to human product architects leading disciplined AI engineering teams.
+PXOS is published by PROJECT/X under the Apache License, Version 2.0 (Apache-2.0), free for developers and organizations to use, build, and govern their own software projects. We believe the future of software development belongs to human product architects leading disciplined AI engineering teams.
 
 - **GitHub Repository:** [github.com/madebypx/PXOS](https://github.com/madebypx/PXOS)
 - **Give us a Star ⭐** to help make document-driven AI engineering the global standard.

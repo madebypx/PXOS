@@ -398,13 +398,13 @@ PXOS strictly adheres to the [`llmstxt.org`](https://llmstxt.org) standard, ensu
 - **Company / Studio:** [PROJECT/X](https://madebypx.com)
 - **Author & Architect:** Rodrigo ([@rodrigospena](https://github.com/rodrigospena))
 - **Repository:** [https://github.com/madebypx/PXOS](https://github.com/madebypx/PXOS)
-- **Role in Portfolio:** Proprietary AI Operating Framework utilized across enterprise, mobile, web, and distributed systems to orchestrate autonomous multi-agent teams with zero regression and maximum token economy.
+- **Role in Portfolio:** Flagship Open-Source AI Operating Framework utilized across enterprise, mobile, web, and distributed systems to orchestrate autonomous multi-agent teams with zero regression and maximum token economy.
 
 ---
 
 ## License
 
-PXOS is published under the [Business Source License 1.1 (BSL-1.1)](./LICENSE) by **PROJECT/X**. Free to use, inspect, adapt, and scale across personal, internal, and commercial software development projects. Commercial resale, hosted/managed platform competition, or proprietary re-licensing requires a commercial license from PROJECT/X.
+PXOS is published under the [Apache License, Version 2.0 (Apache-2.0)](./LICENSE) by **PROJECT/X**. Free to use, inspect, adapt, modify, and distribute across personal, commercial, and enterprise software development projects with zero licensing fees. PROJECT/X retains all trademark and brand rights.
 
 
 ================================================================================
