@@ -40,3 +40,11 @@ Maximize global AI crawlability and developer adoption of PXOS through standardi
 - [x] **T-04** — Assembled static SEO, Schema.org JSON-LD, OpenGraph, and crawler bundle in `templates/site/public/` for `pxos.madebypx.com`.
 - [x] **T-05** — Published comprehensive `docs/LAUNCH_KIT.md` with tailored submission copy for Hacker News (Show HN), Dev.to, and Reddit.
 
+---
+
+## Next Session Priorities
+
+1. **Immediate Next Action:** Execute public community launch on Hacker News (*Show HN*), Dev.to, and Reddit using [`docs/LAUNCH_KIT.md`](docs/LAUNCH_KIT.md).
+2. **Web Deployment:** Upload static assets from [`templates/site/public/`](templates/site/public/) to the hosting/CDN provider for `pxos.madebypx.com`.
+3. **Future Follow-up:** Monitor community feedback and telemetry ingestion on `telemetry.madebypx.com`, triaging roadmap ideas for v2.4.0.
+
