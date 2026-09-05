@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PXOS Web Metadata & Structured Data Specification",
+  "siteUrl": "https://pxos.madebypx.com",
+  "llmsTxtUrl": "https://pxos.madebypx.com/llms.txt",
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "PXOS",
+    "alternateName": "PX Operating System for AI Development",
+    "description": "The minimal, document-driven operating system and governance layer for AI-assisted software engineering. Eliminates token waste, cognitive drift, and multi-agent collisions.",
+    "applicationCategory": "DeveloperApplication",
+    "operatingSystem": "Cross-platform (POSIX, Windows, macOS, Linux)",
+    "license": "https://github.com/madebypx/PXOS/blob/main/LICENSE",
+    "softwareVersion": "2.3.0",
+    "url": "https://pxos.madebypx.com",
+    "downloadUrl": "https://github.com/madebypx/PXOS",
+    "author": {
+      "@type": "Organization",
+      "name": "PROJECT/X",
+      "url": "https://github.com/madebypx"
+    },
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "keywords": [
+      "AI agent framework",
+      "LLM operating system",
+      "AI code governance",
+      "multi-agent git worktrees",
+      "Cursor rules",
+      "Claude Code workflows",
+      "token efficiency",
+      "document-driven development"
+    ]
+  },
+  "openGraph": {
+    "og:title": "PXOS — The AI Operating System for Product & Software Engineering",
+    "og:description": "Transforming AI agents from erratic chatty coders into disciplined, product-aware senior engineering partners. Empirical benchmarks prove -80% token waste.",
+    "og:type": "website",
+    "og:url": "https://pxos.madebypx.com",
+    "og:site_name": "PXOS",
+    "og:image": "https://pxos.madebypx.com/assets/og-pxos.png",
+    "twitter:card": "summary_large_image",
+    "twitter:creator": "@madebypx"
+  },
+  "robotsTxt": {
+    "directives": [
+      "User-agent: *",
+      "Allow: /",
+      "Allow: /llms.txt",
+      "Allow: /llms-full.txt",
+      "Sitemap: https://pxos.madebypx.com/sitemap.xml"
+    ]
+  }
+}

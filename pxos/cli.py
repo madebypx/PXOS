@@ -40,16 +40,27 @@ def err(msg: str):
     print(f"{RED}[PXOS]{RESET} {msg}", file=sys.stderr)
 
 
+def get_resource_path(relative_path: str) -> Path:
+    """Finds a template or script from package data, falling back to repository root."""
+    pkg_res = Path(__file__).resolve().parent / relative_path
+    if pkg_res.exists():
+        return pkg_res
+    repo_res = Path(__file__).resolve().parent.parent / relative_path
+    if repo_res.exists():
+        return repo_res
+    return pkg_res
+
+
 def download_or_copy(src_rel: str, dest_path: Path, overwrite: bool = False):
-    """Download a file from GitHub raw or copy from local repo if available."""
+    """Download a file from GitHub raw or copy from local package/repo if available."""
     if dest_path.exists() and not overwrite:
         warn(f"Skipping {dest_path.name} — already exists.")
         return
 
     dest_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # If running from a local PXOS repository clone
-    local_src = Path(__file__).resolve().parent.parent / src_rel
+    # If running from installed package or local PXOS repository clone
+    local_src = get_resource_path(src_rel)
     if local_src.exists() and local_src.is_file():
         dest_path.write_bytes(local_src.read_bytes())
     else:
@@ -94,7 +105,7 @@ def append_pxos_block(dest_path: Path, content: str):
 
 def configure_ide_rules(ide: str, global_mode: bool = False):
     """Setup editor rules for Cursor, Windsurf, Claude, Gemini, or Copilot."""
-    rules_src = Path(__file__).resolve().parent.parent / "templates/rules/pxos.md"
+    rules_src = get_resource_path("templates/rules/pxos.md")
     content = ""
     if rules_src.exists():
         content = rules_src.read_text(encoding="utf-8")
@@ -208,23 +219,23 @@ def cmd_update(args):
 
 def cmd_benchmark(args):
     """Run the empirical benchmark telemetry dispatcher."""
-    script = Path(__file__).resolve().parent.parent / "scripts/pxos-benchmark.py"
+    script = get_resource_path("scripts/pxos-benchmark.py")
     if script.exists():
         cmd = [sys.executable, str(script)] + sys.argv[2:]
         sys.exit(subprocess.call(cmd))
     else:
-        err("scripts/pxos-benchmark.py not found in local installation.")
+        err(f"scripts/pxos-benchmark.py not found at {script}.")
         sys.exit(1)
 
 
 def cmd_monitor(args):
     """Run the telemetry daemon monitor utility."""
-    script = Path(__file__).resolve().parent.parent / "scripts/pxos-telemetry-monitor.py"
+    script = get_resource_path("scripts/pxos-telemetry-monitor.py")
     if script.exists():
         cmd = [sys.executable, str(script)] + sys.argv[2:]
         sys.exit(subprocess.call(cmd))
     else:
-        err("scripts/pxos-telemetry-monitor.py not found in local installation.")
+        err(f"scripts/pxos-telemetry-monitor.py not found at {script}.")
         sys.exit(1)
 
 

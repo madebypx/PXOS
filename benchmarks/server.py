@@ -27,57 +27,80 @@ DB_PATH = Path(os.environ.get("DB_PATH", "/opt/pxos-telemetry/data/telemetry.db"
 MAX_PAYLOAD_BYTES = 65536  # 64 KB
 
 DB_LOCK = threading.Lock()
+RATE_LIMIT_LOCK = threading.Lock()
+RATE_LIMIT_WINDOW_SECS = 60.0
+MAX_REQUESTS_PER_WINDOW = 20
+IP_REQUEST_HISTORY: Dict[str, list] = {}
+TRUSTED_PROXIES = {"127.0.0.1", "::1"}
 
 VALID_COMPLEXITY_TIERS = {"tier_1_micro", "tier_2_medium", "tier_3_complex"}
 VALID_MODES = {"retrospective", "controlled_ab", "unknown"}
 
 
+def is_rate_limited(ip: str) -> bool:
+    """Simple sliding-window in-memory rate limiter per client IP."""
+    now = time.time()
+    with RATE_LIMIT_LOCK:
+        history = IP_REQUEST_HISTORY.get(ip, [])
+        valid_history = [t for t in history if now - t < RATE_LIMIT_WINDOW_SECS]
+        if len(valid_history) >= MAX_REQUESTS_PER_WINDOW:
+            IP_REQUEST_HISTORY[ip] = valid_history
+            return True
+        valid_history.append(now)
+        IP_REQUEST_HISTORY[ip] = valid_history
+        return False
+
+
 def init_database():
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    conn = None
     with DB_LOCK:
-        conn = sqlite3.connect(DB_PATH)
-        cur = conn.cursor()
-        cur.execute("PRAGMA journal_mode=WAL;")
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS submissions (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                client_ip TEXT,
-                evaluation_mode TEXT,
-                project_name TEXT,
-                model TEXT,
-                task_id TEXT,
-                task_description TEXT,
-                complexity_tier TEXT,
-                primary_subsystem TEXT,
-                total_turns INTEGER,
-                input_tokens INTEGER,
-                output_tokens INTEGER,
-                framework_overhead_tokens INTEGER,
-                initial_loc INTEGER,
-                rework_loc INTEGER,
-                rework_turns INTEGER,
-                compiler_failures INTEGER,
-                merge_conflicts INTEGER,
-                ui_touched INTEGER,
-                ux_completeness REAL,
-                design_tokens_adhered INTEGER,
-                session_amnesia INTEGER,
-                invariants_violated INTEGER,
-                duplicate_utils INTEGER,
-                adrs_consulted INTEGER,
-                new_adrs INTEGER,
-                net_utility_score INTEGER,
-                overhead_justified INTEGER,
-                verified_status TEXT DEFAULT 'community',
-                raw_payload JSON
-            );
-        """)
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_tier ON submissions(complexity_tier);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_mode ON submissions(evaluation_mode);")
-        cur.execute("CREATE INDEX IF NOT EXISTS idx_status ON submissions(verified_status);")
-        conn.commit()
-        conn.close()
+        try:
+            conn = sqlite3.connect(DB_PATH)
+            cur = conn.cursor()
+            cur.execute("PRAGMA journal_mode=WAL;")
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS submissions (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    client_ip TEXT,
+                    evaluation_mode TEXT,
+                    project_name TEXT,
+                    model TEXT,
+                    task_id TEXT,
+                    task_description TEXT,
+                    complexity_tier TEXT,
+                    primary_subsystem TEXT,
+                    total_turns INTEGER,
+                    input_tokens INTEGER,
+                    output_tokens INTEGER,
+                    framework_overhead_tokens INTEGER,
+                    initial_loc INTEGER,
+                    rework_loc INTEGER,
+                    rework_turns INTEGER,
+                    compiler_failures INTEGER,
+                    merge_conflicts INTEGER,
+                    ui_touched INTEGER,
+                    ux_completeness REAL,
+                    design_tokens_adhered INTEGER,
+                    session_amnesia INTEGER,
+                    invariants_violated INTEGER,
+                    duplicate_utils INTEGER,
+                    adrs_consulted INTEGER,
+                    new_adrs INTEGER,
+                    net_utility_score INTEGER,
+                    overhead_justified INTEGER,
+                    verified_status TEXT DEFAULT 'community',
+                    raw_payload JSON
+                );
+            """)
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_tier ON submissions(complexity_tier);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_mode ON submissions(evaluation_mode);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_status ON submissions(verified_status);")
+            conn.commit()
+        finally:
+            if conn:
+                conn.close()
 
 
 def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[str], Optional[Dict[str, Any]]]:
@@ -111,6 +134,10 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
         merge_conflicts = int(telemetry.get("merge_conflicts_encountered", 0))
         ux_completeness = float(ux.get("ux_state_completeness_score", 0.0))
         net_utility_score = int(crit.get("net_utility_score", 0))
+        invariants_violated = int(arch.get("invariants_violated_count", 0))
+        duplicate_utils = int(arch.get("duplicate_utilities_introduced", 0))
+        adrs_consulted = int(arch.get("adrs_consulted_count", 0))
+        new_adrs = int(arch.get("new_adrs_registered", 0))
 
         # Sanity range constraints
         if not (0 <= total_turns <= 1000):
@@ -126,6 +153,49 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
 
     except (ValueError, TypeError) as e:
         return False, f"Type validation error in numeric telemetry: {e}", None
+
+    # Scrub and construct schema-only payload representation to guarantee no PII or extra keys leak into DB
+    sanitized_raw_dict = {
+        "audit_metadata": {
+            "evaluation_mode": mode,
+            "project_name": str(meta.get("project_name", "anonymous"))[:64],
+            "evaluator_agent_model": str(meta.get("evaluator_agent_model", "unknown"))[:64],
+            "timestamp_iso": str(meta.get("timestamp_iso", ""))[:32]
+        },
+        "task_profile": {
+            "task_id": str(task.get("task_id", "unknown"))[:32],
+            "task_description": str(task.get("task_description", ""))[:256],
+            "complexity_tier": tier,
+            "primary_subsystem": str(task.get("primary_subsystem", "general"))[:64]
+        },
+        "quantitative_telemetry": {
+            "total_turns": total_turns,
+            "input_tokens_total": input_tokens,
+            "output_tokens_total": output_tokens,
+            "framework_overhead_tokens": overhead_tokens,
+            "initial_implementation_loc": initial_loc,
+            "rework_lines_modified_or_deleted": rework_loc,
+            "rework_turn_count": rework_turns,
+            "unresolved_compiler_or_test_failures": compiler_failures,
+            "merge_conflicts_encountered": merge_conflicts
+        },
+        "product_design_and_ux": {
+            "ui_components_touched": 1 if ux.get("ui_components_touched") else 0,
+            "ux_state_completeness_score": round(ux_completeness, 3),
+            "design_tokens_adhered": 1 if ux.get("design_tokens_adhered", True) else 0
+        },
+        "architectural_fidelity": {
+            "session_amnesia_occurred": 1 if arch.get("session_amnesia_occurred") else 0,
+            "invariants_violated_count": invariants_violated,
+            "duplicate_utilities_introduced": duplicate_utils,
+            "adrs_consulted_count": adrs_consulted,
+            "new_adrs_registered": new_adrs
+        },
+        "critical_assessment": {
+            "net_utility_score": net_utility_score,
+            "overhead_justified": 1 if crit.get("overhead_justified", True) else 0
+        }
+    }
 
     sanitized = {
         "evaluation_mode": mode,
@@ -148,13 +218,13 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
         "ux_completeness": round(ux_completeness, 3),
         "design_tokens_adhered": 1 if ux.get("design_tokens_adhered", True) else 0,
         "session_amnesia": 1 if arch.get("session_amnesia_occurred") else 0,
-        "invariants_violated": int(arch.get("invariants_violated_count", 0)),
-        "duplicate_utils": int(arch.get("duplicate_utilities_introduced", 0)),
-        "adrs_consulted": int(arch.get("adrs_consulted_count", 0)),
-        "new_adrs": int(arch.get("new_adrs_registered", 0)),
+        "invariants_violated": invariants_violated,
+        "duplicate_utils": duplicate_utils,
+        "adrs_consulted": adrs_consulted,
+        "new_adrs": new_adrs,
         "net_utility_score": net_utility_score,
         "overhead_justified": 1 if crit.get("overhead_justified", True) else 0,
-        "raw_payload": json.dumps(data)
+        "raw_payload": json.dumps(sanitized_raw_dict)
     }
 
     return True, None, sanitized
@@ -193,43 +263,49 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
             return
 
         if path == "/api/v1/stats":
-            with DB_LOCK:
-                conn = sqlite3.connect(DB_PATH)
-                cur = conn.cursor()
-                cur.execute("""
-                    SELECT 
-                        COUNT(*),
-                        AVG(total_turns),
-                        AVG(input_tokens + output_tokens),
-                        AVG(framework_overhead_tokens),
-                        AVG(rework_loc),
-                        AVG(initial_loc),
-                        AVG(ux_completeness),
-                        AVG(overhead_justified)
-                    FROM submissions
-                """)
-                row = cur.fetchone()
-                total_submissions = row[0] or 0
-                if total_submissions == 0:
+            conn = None
+            try:
+                with DB_LOCK:
+                    conn = sqlite3.connect(DB_PATH)
+                    cur = conn.cursor()
+                    cur.execute("""
+                        SELECT 
+                            COUNT(*),
+                            AVG(total_turns),
+                            AVG(input_tokens + output_tokens),
+                            AVG(framework_overhead_tokens),
+                            AVG(rework_loc),
+                            AVG(initial_loc),
+                            AVG(ux_completeness),
+                            AVG(overhead_justified)
+                        FROM submissions
+                    """)
+                    row = cur.fetchone()
+                    total_submissions = row[0] or 0
+                    if total_submissions == 0:
+                        self.send_json(200, {
+                            "total_submissions": 0,
+                            "message": "No submissions recorded yet."
+                        })
+                        return
+
+                    avg_turns = round(row[1] or 0.0, 1)
+                    avg_total_tokens = round(row[2] or 0.0, 1)
+                    avg_overhead = round(row[3] or 0.0, 1)
+                    avg_rework = round(row[4] or 0.0, 1)
+                    avg_initial_loc = round(row[5] or 1.0, 1)
+                    avg_ux = round((row[6] or 0.0) * 100, 1)
+                    overhead_justified_pct = round((row[7] or 0.0) * 100, 1)
+                    rework_ratio_pct = round((avg_rework / max(1.0, avg_initial_loc)) * 100, 1)
+
+                    cur.execute("SELECT complexity_tier, COUNT(*) FROM submissions GROUP BY complexity_tier")
+                    tier_counts = dict(cur.fetchall())
+            except sqlite3.Error as e:
+                self.send_json(500, {"error": f"Database query failed: {e}"})
+                return
+            finally:
+                if conn:
                     conn.close()
-                    self.send_json(200, {
-                        "total_submissions": 0,
-                        "message": "No submissions recorded yet."
-                    })
-                    return
-
-                avg_turns = round(row[1] or 0.0, 1)
-                avg_total_tokens = round(row[2] or 0.0, 1)
-                avg_overhead = round(row[3] or 0.0, 1)
-                avg_rework = round(row[4] or 0.0, 1)
-                avg_initial_loc = round(row[5] or 1.0, 1)
-                avg_ux = round((row[6] or 0.0) * 100, 1)
-                overhead_justified_pct = round((row[7] or 0.0) * 100, 1)
-                rework_ratio_pct = round((avg_rework / max(1.0, avg_initial_loc)) * 100, 1)
-
-                cur.execute("SELECT complexity_tier, COUNT(*) FROM submissions GROUP BY complexity_tier")
-                tier_counts = dict(cur.fetchall())
-                conn.close()
 
             self.send_json(200, {
                 "total_submissions": total_submissions,
@@ -283,37 +359,52 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(422, {"error": f"Validation failed: {err_msg}"})
             return
 
-        client_ip = self.headers.get("X-Forwarded-For", self.client_address[0]).split(",")[0].strip()
+        direct_peer = self.client_address[0]
+        if direct_peer in TRUSTED_PROXIES:
+            client_ip = self.headers.get("X-Forwarded-For", direct_peer).split(",")[0].strip()
+        else:
+            client_ip = direct_peer
 
-        with DB_LOCK:
-            conn = sqlite3.connect(DB_PATH)
-            cur = conn.cursor()
-            cur.execute("""
-                INSERT INTO submissions (
-                    client_ip, evaluation_mode, project_name, model, task_id, task_description,
-                    complexity_tier, primary_subsystem, total_turns, input_tokens, output_tokens,
-                    framework_overhead_tokens, initial_loc, rework_loc, rework_turns,
-                    compiler_failures, merge_conflicts, ui_touched, ux_completeness,
-                    design_tokens_adhered, session_amnesia, invariants_violated, duplicate_utils,
-                    adrs_consulted, new_adrs, net_utility_score, overhead_justified, raw_payload
-                ) VALUES (
-                    ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                )
-            """, (
-                client_ip, sanitized["evaluation_mode"], sanitized["project_name"], sanitized["model"],
-                sanitized["task_id"], sanitized["task_description"], sanitized["complexity_tier"],
-                sanitized["primary_subsystem"], sanitized["total_turns"], sanitized["input_tokens"],
-                sanitized["output_tokens"], sanitized["framework_overhead_tokens"], sanitized["initial_loc"],
-                sanitized["rework_loc"], sanitized["rework_turns"], sanitized["compiler_failures"],
-                sanitized["merge_conflicts"], sanitized["ui_touched"], sanitized["ux_completeness"],
-                sanitized["design_tokens_adhered"], sanitized["session_amnesia"],
-                sanitized["invariants_violated"], sanitized["duplicate_utils"], sanitized["adrs_consulted"],
-                sanitized["new_adrs"], sanitized["net_utility_score"], sanitized["overhead_justified"],
-                sanitized["raw_payload"]
-            ))
-            row_id = cur.lastrowid
-            conn.commit()
-            conn.close()
+        if is_rate_limited(client_ip):
+            self.send_json(429, {"error": "Too Many Requests. Submission rate limit exceeded."})
+            return
+
+        conn = None
+        try:
+            with DB_LOCK:
+                conn = sqlite3.connect(DB_PATH)
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO submissions (
+                        client_ip, evaluation_mode, project_name, model, task_id, task_description,
+                        complexity_tier, primary_subsystem, total_turns, input_tokens, output_tokens,
+                        framework_overhead_tokens, initial_loc, rework_loc, rework_turns,
+                        compiler_failures, merge_conflicts, ui_touched, ux_completeness,
+                        design_tokens_adhered, session_amnesia, invariants_violated, duplicate_utils,
+                        adrs_consulted, new_adrs, net_utility_score, overhead_justified, raw_payload
+                    ) VALUES (
+                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                    )
+                """, (
+                    client_ip, sanitized["evaluation_mode"], sanitized["project_name"], sanitized["model"],
+                    sanitized["task_id"], sanitized["task_description"], sanitized["complexity_tier"],
+                    sanitized["primary_subsystem"], sanitized["total_turns"], sanitized["input_tokens"],
+                    sanitized["output_tokens"], sanitized["framework_overhead_tokens"], sanitized["initial_loc"],
+                    sanitized["rework_loc"], sanitized["rework_turns"], sanitized["compiler_failures"],
+                    sanitized["merge_conflicts"], sanitized["ui_touched"], sanitized["ux_completeness"],
+                    sanitized["design_tokens_adhered"], sanitized["session_amnesia"],
+                    sanitized["invariants_violated"], sanitized["duplicate_utils"], sanitized["adrs_consulted"],
+                    sanitized["new_adrs"], sanitized["net_utility_score"], sanitized["overhead_justified"],
+                    sanitized["raw_payload"]
+                ))
+                row_id = cur.lastrowid
+                conn.commit()
+        except sqlite3.Error as e:
+            self.send_json(500, {"error": f"Database error: {e}"})
+            return
+        finally:
+            if conn:
+                conn.close()
 
         print(f"[{datetime.now(timezone.utc).isoformat()}] Ingested benchmark #{row_id} from {client_ip} (Tier: {sanitized['complexity_tier']}, Model: {sanitized['model']})")
 

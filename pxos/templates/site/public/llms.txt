@@ -1,0 +1,26 @@
+# PXOS
+> The minimal, document-driven operating system and governance layer for AI-assisted software engineering.
+
+PXOS standardizes the operational contract between human developers and AI coding agents. It replaces chaotic conversational chat loops with a disciplined 6-phase lifecycle (Discover -> Plan -> Execute -> Validate -> Review -> Compact), multi-agent isolation via Git worktrees, zero-spoiler specifications, and empirical telemetry benchmarking.
+
+- **Version**: 2.3.0
+- **Company / Organization**: PROJECT/X (https://madebypx.com)
+- **Website**: https://pxos.madebypx.com
+- **Repository**: https://github.com/madebypx/PXOS
+- **License**: Apache License, Version 2.0 (Apache-2.0) by PROJECT/X
+- **Primary Paradigms**: Document-Driven Development, Context Economy, Git Worktree Multi-Agent Isolation, Nielsen UX Heuristics inside.
+
+## Core Documentation
+
+- [README.md](README.md): Complete framework overview, empirical benchmarks, and 6-phase lifecycle.
+- [.ai/AI_BASE.md](.ai/AI_BASE.md): Universal operational rules, autonomy boundaries, and multi-agent etiquette.
+- [WORKFLOWS.md](WORKFLOWS.md): Full directory of 12 slash commands (/start, /spec, /plan, /review, /compact, /benchmark, /audit, etc.).
+- [benchmarks/REPORT.md](benchmarks/REPORT.md): Empirical laboratory findings demonstrating 80% token waste reduction and 1.4% rework ratio.
+- [benchmarks/METHODOLOGY.md](benchmarks/METHODOLOGY.md): Statistical research methodology, complexity tiers, and cost formulas.
+
+## Optional & Developer Resources
+
+- [install.sh](install.sh): Zero-dependency POSIX installation script for macOS/Linux.
+- [install.ps1](install.ps1): Zero-dependency native PowerShell installer for Windows.
+- [CHANGELOG.md](CHANGELOG.md): Historical releases and semantic version history.
+- [llms-full.txt](llms-full.txt): Dense, aggregated single-file complete reference for LLM context windows.

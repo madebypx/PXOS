@@ -82,11 +82,8 @@ class AuditRecord:
         return cost_in + cost_out
 
 
-def load_record_from_json(file_path: Path) -> Optional[AuditRecord]:
+def load_record_from_dict(data: Dict[str, Any], source_label: str = "memory") -> Optional[AuditRecord]:
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-
         meta = data.get("audit_metadata", {})
         task = data.get("task_profile", {})
         telemetry = data.get("quantitative_telemetry", {})
@@ -95,7 +92,7 @@ def load_record_from_json(file_path: Path) -> Optional[AuditRecord]:
         crit = data.get("critical_assessment", {})
 
         return AuditRecord(
-            file_path=str(file_path),
+            file_path=source_label,
             evaluation_mode=meta.get("evaluation_mode", "unknown"),
             project_name=meta.get("project_name", "unknown"),
             model=meta.get("evaluator_agent_model", "unknown"),
@@ -128,7 +125,17 @@ def load_record_from_json(file_path: Path) -> Optional[AuditRecord]:
             evidence_citations=crit.get("evidence_citations", []),
         )
     except Exception as e:
-        print(f"[WARN] Failed to parse {file_path}: {e}", file=sys.stderr)
+        print(f"[WARN] Failed to parse record from {source_label}: {e}", file=sys.stderr)
+        return None
+
+
+def load_record_from_json(file_path: Path) -> Optional[AuditRecord]:
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return load_record_from_dict(data, str(file_path))
+    except Exception as e:
+        print(f"[WARN] Failed to read {file_path}: {e}", file=sys.stderr)
         return None
 
 

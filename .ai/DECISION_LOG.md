@@ -127,3 +127,29 @@ As PXOS prepares for public distribution (GitHub Release v2.3.0, PyPI packaging,
 Updated `LICENSE`, `pyproject.toml`, `pxos/__init__.py`, `README.md`, `llms.txt`, `llms-full.txt`, `templates/site/`, `docs/LAUNCH_KIT.md`, and `docs/LAUNCH_WHITEPAPER.md`.
 
 **Status:** Superseded by 2026-09-04 Apache-2.0 transition
+
+---
+
+**Decision:**
+Enforce strict sanitized-only payload persistence in SQLite, in-memory aggregation parsing, and self-contained PyPI package data distribution (`templates/` and `scripts/` inside `pxos/`).
+
+**Context:**
+A full codebase audit on 2026-09-04 identified 9 security, reliability, packaging, and performance defects across PXOS subsystems:
+1. `raw_payload` in `server.py` stored unscrubbed input JSON, risking PII and code leakage.
+2. PyPI wheels omitted `templates/` and `scripts/`, causing `pxos benchmark` and offline `pxos init` to fail in production.
+3. `aggregate_daily.py` wrote and unlinked temporary JSON files inside the publicly served web directory `PUBLIC_DIR`.
+4. Multi-level branch names crashed `pxos-task.sh` / `pxos-task.ps1` during spec creation.
+
+**Options considered:**
+- Option A — Rely on client-side sanitization only: Rejected because untrusted clients or third-party agents could still send unvalidated payloads or malicious PII directly to the public API.
+- Option B — Keep templates hosted exclusively on GitHub raw: Rejected because offline, enterprise, and air-gapped developer environments fail during `pxos init`.
+- Chosen: Option C — Dual-layer enforcement: server-side schema reconstruction for `raw_payload`, in-memory record loading via `load_record_from_dict()`, package data bundling inside `pxos/` via `get_resource_path()`, and multi-slash branch sanitization.
+
+**Tradeoffs:**
+- Gains: Guaranteed adherence to privacy invariants (zero PII storage), complete offline portability for `pip install pxos`, leak-free database connection lifecycles, and zero temporary disk thrashing during aggregation.
+- Cost: Minor (~50 KB) package size increase for the distribution wheel, which remains lightweight and has zero external dependencies.
+
+**Impact:**
+Modified `benchmarks/server.py`, `benchmarks/analyze.py`, `benchmarks/aggregate_daily.py`, `pxos/cli.py`, `pyproject.toml`, `scripts/pxos-benchmark.py`, `scripts/pxos-task.sh`, `scripts/pxos-task.ps1`, `.github/workflows/release.yml`, and created `tests/test_audit_remediation.py`.
+
+**Status:** Active

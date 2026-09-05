@@ -40,6 +40,7 @@ jobs:
           twine check dist/*
 
       - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -48,6 +49,7 @@ jobs:
             --generate-notes
 
       - name: Publish to PyPI via Trusted Publishing
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: pypa/gh-action-pypi-publish@release/v1
         continue-on-error: true
         with:

@@ -49,3 +49,6 @@ pxos = "pxos.cli:main"
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["pxos*"]
+
+[tool.setuptools.package-data]
+pxos = ["templates/**/*", "scripts/**/*"]
