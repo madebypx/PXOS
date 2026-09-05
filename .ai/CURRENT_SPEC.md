@@ -123,35 +123,36 @@ Execute the release engineering cycle for PXOS v2.3.0 across all distribution ch
 
 ## Acceptance criteria
 
-- [ ] `.github/workflows/release.yml` created and validated for GitHub Actions syntax.
-- [ ] Local build generates valid `sdist` (`.tar.gz`) and `wheel` (`.whl`) without warnings.
-- [ ] CLI runs correctly from built package (`pxos --version` / `pxos --help`).
-- [ ] Git tag `v2.3.0` created and pushed to `origin`.
-- [ ] GitHub Release v2.3.0 published via `gh release create` with attached release notes and package assets.
-- [ ] Web asset bundle in `templates/site/public/` ready for immediate upload to `pxos.madebypx.com`.
-- [ ] `docs/LAUNCH_KIT.md` published with tailored copy for Hacker News, Dev.to, and Reddit.
-- [ ] `SPRINT.md` updated with completed statuses.
+- [x] `.github/workflows/release.yml` created and validated for GitHub Actions syntax.
+- [x] Local build generates valid `sdist` (`.tar.gz`) and `wheel` (`.whl`) without warnings (twine passed).
+- [x] CLI runs correctly from built package (`pxos --version` / `pxos --help`).
+- [x] Git tag `v2.3.0` created and pushed to `origin`.
+- [x] GitHub Release v2.3.0 published via `gh release create` with attached release notes and package assets.
+- [x] Web asset bundle in `templates/site/public/` ready for immediate upload to `pxos.madebypx.com`.
+- [x] `docs/LAUNCH_KIT.md` published with tailored copy for Hacker News, Dev.to, and Reddit.
+- [x] `SPRINT.md` updated with completed statuses.
 
 ---
 
 ## Validation plan
 
-1. **Package integrity:** `python -m pip install dist/*.whl` into a temporary environment and test `pxos --version` and `pxos init --help`.
-2. **Workflow validation:** Validate `.github/workflows/release.yml` with YAML linter.
-3. **GitHub release verification:** Run `gh release view v2.3.0` to confirm live publication on GitHub.
-4. **Site asset validation:** Verify `robots.txt` and `templates/site/public/` files against `templates/site/metadata.json`.
+1. **Package integrity:** `python -m pip install dist/*.whl` into a temporary environment and test `pxos --version` and `pxos init --help`. (Passed)
+2. **Workflow validation:** Validate `.github/workflows/release.yml` with YAML linter. (Passed)
+3. **GitHub release verification:** Run `gh release view v2.3.0` to confirm live publication on GitHub. (Passed)
+4. **Site asset validation:** Verify `robots.txt` and `templates/site/public/` files against `templates/site/metadata.json`. (Passed)
 
 ---
 
 ## Risks & Cross-Task Dependencies
 
-- **PyPI Namespace Reservation:** If `pxos` name is contested or requires 2FA API token, the GitHub Actions workflow provides manual dispatch and local twine fallback.
-- **Host Deployment for Site:** T-04 produces static files; deployment to CDN/Vercel/Cloudflare is ready to trigger.
+- **PyPI Namespace Reservation:** Handled via GitHub Actions workflow and manual fallback.
+- **Host Deployment for Site:** Static bundle in `templates/site/public/` ready for CDN push.
 
 ---
 
 ## Workflow state
 
-- **Current phase:** Plan
-- **Pending decision:** Review and confirmation of this spec before proceeding to `/plan`.
-- **Execution blocked until:** Human confirmation.
+- **Current phase:** Done
+- **Pending decision:** None
+- **Execution blocked until:** None
+
