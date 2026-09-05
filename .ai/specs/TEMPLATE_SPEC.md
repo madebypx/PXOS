@@ -1,6 +1,9 @@
-# Current Spec
+# Spec — [Task ID]: [Task Title]
 
-This file defines the active task or feature. Replace it entirely when starting a new task. The AI reads this file at the start of every session to understand what is being built.
+- **Branch:** `[e.g. feat/auth-oauth]`
+- **Status:** `[ In Spec / In Plan / Executing / In Review / Ready for PR / Done ]`
+- **Assignee / Agent:** `[e.g. Agent Flash-1 / Human Dev]`
+- **Related Issues / Tasks:** `[e.g. T-01, #42]`
 
 ---
 
@@ -12,7 +15,7 @@ This file defines the active task or feature. Replace it entirely when starting 
 
 ## User value
 
-[What improves for the user when this is done?]
+[What improves for the user or system when this is done?]
 
 ---
 
@@ -51,20 +54,20 @@ This file defines the active task or feature. Replace it entirely when starting 
 
 ---
 
-## User flow
+## User flow / Technical flow
 
-[Step-by-step description of the interaction from the user's perspective.]
+[Step-by-step description of the flow or interaction.]
 
-1. User does X
-2. System responds with Y
-3. User sees Z
+1. Step 1
+2. Step 2
+3. Step 3
 
 ---
 
 ## Edge cases
 
 - [What could go wrong or behave unexpectedly?]
-- [What should happen when the user does something unexpected?]
+- [How should unexpected inputs/states be handled?]
 
 ---
 
@@ -77,19 +80,19 @@ This file defines the active task or feature. Replace it entirely when starting 
 
 ## Validation plan
 
-[How will we verify this works? Manual steps, test cases, or scenarios to check.]
+[How will we verify this works? Unit tests, manual verification, lint checks.]
 
 ---
 
-## Risks
+## Risks & Cross-Task Impact
 
-- [Anything that could go wrong during implementation or affect other parts of the system]
+- [Any risks or potential conflicts with parallel branches/modules]
 
 ---
 
 ## Workflow state
-<!-- Updated by the agent during the session -->
+<!-- Updated by the agent during the session via /compact -->
 
 - **Current phase:** [ Discover / Plan / Execute / Validate / Review / Done ]
-- **Pending decision:** [What the human needs to decide before the next phase — leave blank if none]
-- **Execution blocked until:** [Condition or approval required — leave blank if none]
+- **Pending decision:** [What the human needs to decide before next phase — leave blank if none]
+- **Execution blocked until:** [Condition or dependency required — leave blank if none]
