@@ -21,6 +21,7 @@ Maximize global AI crawlability and developer adoption of PXOS through standardi
 | T-04 | Deploy `llms.txt` & metadata bundle (`templates/site/public/`) | `main` | [.ai/CURRENT_SPEC.md](.ai/CURRENT_SPEC.md) | 🎉 Done | Agent / Rodrigo |
 | T-05 | Public Launch Kit: Formatted posts for HN, Dev.to, Reddit | `main` | [.ai/CURRENT_SPEC.md](.ai/CURRENT_SPEC.md) | 🎉 Done | Rodrigo |
 | T-06 | Audit Hardening, Packaging Integrity & Telemetry Reliability | `main` | [.ai/CURRENT_SPEC.md](.ai/CURRENT_SPEC.md) | 🎉 Done | Agent / Rodrigo |
+| T-07 | v2.3.1 Patch Release & Package Distribution | `main` | [.ai/CURRENT_SPEC.md](.ai/CURRENT_SPEC.md) | 🎉 Done | Agent / Rodrigo |
 
 *Statuses: 📝 In Spec | 📋 In Plan / Pending | 🔄 Executing | 🔍 In Review | ✅ Ready for PR | 🎉 Done | ⏸ Blocked*
 
@@ -41,6 +42,7 @@ Maximize global AI crawlability and developer adoption of PXOS through standardi
 - [x] **T-04** — Assembled static SEO, Schema.org JSON-LD, OpenGraph, and crawler bundle in `templates/site/public/` for `pxos.madebypx.com`.
 - [x] **T-05** — Published comprehensive `docs/LAUNCH_KIT.md` with tailored submission copy for Hacker News (Show HN), Dev.to, and Reddit.
 - [x] **T-06** — Remediated all 9 audit findings from `AUDIT_2026-09-04`: scrubbed `raw_payload` PII storage (`SEC-01`), enclosed SQLite in `try...finally` with connection leak prevention (`REL-01`), added sliding-window rate limiting & proxy checks (`SEC-02`), protected against malformed type conversions (`REL-02`), extracted in-memory record parsing eliminating temp files in `PUBLIC_DIR` (`PERF-01`), bundled templates and scripts in `pxos` package data (`PKG-01`), normalized multi-slash branch specs in `pxos-task` (`REL-03`), gated CI release workflows on tag pushes (`REL-04`), added null safety in benchmark client (`REL-05`), and verified via automated test suite (`tests/test_audit_remediation.py`).
+- [x] **T-07** — Released `v2.3.1` patch release across GitHub and PyPI: bumped version across `pyproject.toml`, CLI, installers, crawler indices, and metadata; recorded release notes in `CHANGELOG.md`; built and validated wheel package containing bundled templates/scripts (`PKG-01`); pushed commits to `origin/main` and published release tag `v2.3.1`.
 
 ---
 

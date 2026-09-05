@@ -1,4 +1,4 @@
-# PXOS Complete LLM Reference (v2.3.0)
+# PXOS Complete LLM Reference (v2.3.1)
 > Aggregated documentation for direct AI context injection, indexing, and RAG pipelines.
 Generated automatically from repository sources (https://github.com/madebypx/PXOS).
 

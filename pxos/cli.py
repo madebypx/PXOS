@@ -12,7 +12,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-VERSION = "2.3.0"
+VERSION = "2.3.1"
 REPO_RAW_BASE = "https://raw.githubusercontent.com/madebypx/PXOS/main"
 
 # ANSI Color Codes

@@ -1,196 +1,177 @@
-# Spec — T-06: Codebase Hardening, Audit Remediation & Packaging Integrity
+# Spec — T-07: v2.3.1 Patch Release & Distribution Validation
 
 - **Branch:** `main`
-- **Status:** `Done`
+- **Status:** `🎉 Done`
 - **Assignee / Agent:** `Agent / Rodrigo`
-- **Related Issues / Tasks:** `.ai/audits/AUDIT_2026-09-04.md` (`SEC-01`, `PKG-01`, `REL-01`, `SEC-02`, `REL-02`, `PERF-01`, `REL-03`, `REL-04`, `REL-05`)
+- **Related Issues / Tasks:** `.ai/audits/AUDIT_2026-09-04.md`, `T-06`, `.github/workflows/release.yml`
 
 ---
 
 ## Goal
 
-Remediate all 9 critical, major, and minor defects identified in the full codebase audit of 2026-09-04 across telemetry ingestion (`benchmarks/server.py`), aggregation performance (`benchmarks/aggregate_daily.py`), Python package data bundling (`pyproject.toml`, `pxos/cli.py`), multi-agent worktree script resilience (`scripts/pxos-task.sh`, `scripts/pxos-task.ps1`), and CI workflow release safety (`.github/workflows/release.yml`).
+Publish the official `v2.3.1` patch release across GitHub and PyPI, ensuring that all 9 critical and major audit remediations from `T-06` (including package data bundling, telemetry connection leak prevention, PII scrubbing, rate limiting, and worktree branch normalization) are propagated to global package distributions, installer scripts, and public AI crawler indices.
 
 ---
 
 ## User value
 
-- **Privacy & PII Protection:** Ensures the telemetry server strictly stores scrubbed, anonymous numeric data and enums in SQLite, discarding arbitrary client fields or proprietary source code snippets.
-- **PyPI Package Out-of-the-Box Functionality:** Users installing PXOS via `pip install pxos` gain fully operational `pxos benchmark` and `pxos monitor` subcommands and offline template scaffolding without runtime missing-file exceptions.
-- **Server Stability & Leak Prevention:** Guaranteed closure of database connections across all HTTP threads prevents SQLite file descriptor leaks and provides clean JSON error payloads upon failure.
-- **Robust Multi-Agent Scripting:** Worktree provisioning scripts handle arbitrarily nested git branch names (e.g. `feat/telemetry/fix-wal`) without failing on missing subdirectories.
-- **Safe CI/CD Automation:** Prevents accidental or invalid release tags when triggering manual GitHub Action workflow dispatches on non-tag branches.
+- **Immediate PyPI Integrity:** Developers installing via `pip install --upgrade pxos` receive the bundled helper scripts and offline templates (`PKG-01`), preventing runtime crashes when executing `pxos benchmark` or `pxos init`.
+- **Audited Production Stability:** Downstream adopters and server operators run fully hardened telemetry ingestion (`SEC-01`, `REL-01`, `SEC-02`, `REL-02`) with zero database descriptor leaks and active rate limiting.
+- **Accurate Tooling & Metadata:** All installer scripts (`install.sh`, `install.ps1`), AI index files (`llms.txt`, `llms-full.txt`), and documentation badges accurately reflect version `2.3.1`.
 
 ---
 
 ## Strategic & Audit Alignment
 
-- **Audit Findings Cross-Check:** Resolves all 9 findings documented in [.ai/audits/AUDIT_2026-09-04.md](file:///c:/Users/digo_/Documents/Programação/GitHub/PXOS/.ai/audits/AUDIT_2026-09-04.md):
-  - `[SEC-01]` (P1): Storage of unsanitized raw payload violating privacy invariants.
-  - `[PKG-01]` (P1): PyPI package missing CLI helper scripts and offline templates.
-  - `[REL-01]` (P1): Unhandled SQLite exceptions & leaked connections in request handlers.
-  - `[SEC-02]` (P2): Unvalidated `X-Forwarded-For` header and lack of IP rate limiting.
-  - `[REL-02]` (P2): Unhandled type conversions outside exception block in telemetry sanitizer.
-  - `[PERF-01]` (P2): Temporary file disk thrashing in public directory during telemetry aggregation.
-  - `[REL-03]` (P2): Script crash on nested branch slashes in worktree spec provisioning.
-  - `[REL-04]` (P3): GitHub release step tag collision on manual `workflow_dispatch`.
-  - `[REL-05]` (P3): Potential NoneType iteration crash in benchmark client on null JSON attributes.
-- **Strategic / Research Reference:** Enforces core architectural invariants defined in [.ai/PROJECT_CONTEXT.md](file:///c:/Users/digo_/Documents/Programação/GitHub/PXOS/.ai/PROJECT_CONTEXT.md) (Zero Runtime Dependencies, Token Economy, Strict Privacy & Anonymity, Deterministic Workflows).
+- **Audit Findings Distributed:** Directly packages and publishes the remediations for all 9 findings documented in [.ai/audits/AUDIT_2026-09-04.md](.ai/audits/AUDIT_2026-09-04.md):
+  - `[PKG-01]` (P1): Packages `pxos/templates/` and `pxos/scripts/` into the PyPI wheel so CLI commands work out of the box.
+  - `[REL-01]` (P1): Eliminates SQLite connection leaks and unhandled exceptions in `benchmarks/server.py`.
+  - `[SEC-01]` (P1): Prevents unscrubbed PII/payload storage in SQLite submissions table.
+  - `[SEC-02]` (P2): Activates in-memory sliding-window IP rate limiting and proxy IP verification.
+  - `[REL-02]` (P2): Protects telemetry metric sanitization against malformed input types.
+  - `[PERF-01]` (P2): Removes temporary file disk thrashing during daily telemetry aggregation.
+  - `[REL-03]` (P2): Normalizes multi-slash branch names in worktree spec generation.
+  - `[REL-04]` (P3): Enforces release workflow trigger safety (`refs/tags/v*` gating).
+  - `[REL-05]` (P3): Handles null JSON values safely in benchmark CLI client.
+- **Architectural Invariants:** Preserves pure standard library design, zero external runtime dependencies, and English Conventional Commits standard.
 
 ---
 
 ## Scope
 
 **In:**
-1. **Telemetry Server & Ingestion (`benchmarks/server.py`):**
-   - Sanitize `raw_payload` storage: serialize only schema-validated fields into SQLite, never raw input.
-   - Guard database transactions with `try...finally: conn.close()` and catch `sqlite3.Error` with 500 JSON responses.
-   - Enclose `invariants_violated_count` and related `arch` fields within the numerical `try...except` block.
-   - Trust `X-Forwarded-For` only when direct peer IP is localhost (`127.0.0.1`) or configured proxy; add in-memory sliding-window IP rate limiter.
-2. **Aggregation & In-Memory Analysis (`benchmarks/analyze.py`, `benchmarks/aggregate_daily.py`):**
-   - Add `load_record_from_dict(data: dict, source_label: str)` in `analyze.py`.
-   - Update `aggregate_daily.py` to parse records directly in memory, eliminating temporary file creation in `PUBLIC_DIR`.
-3. **Packaging & Resource Resolution (`pyproject.toml`, `pxos/cli.py`):**
-   - Move or bundle `templates/` and `scripts/` into `pxos` package data, or configure `[tool.setuptools.package-data]`.
-   - Update `pxos/cli.py` to resolve templates and helper scripts relative to package root with fallback to repo root.
-4. **Worktree Automation (`scripts/pxos-task.sh`, `scripts/pxos-task.ps1`):**
-   - Normalize all forward slashes in `$SPEC_SUFFIX` to hyphens, preventing invalid nested paths in `.ai/specs/`.
-5. **CI/CD Pipeline (`.github/workflows/release.yml`):**
-   - Condition GitHub Release and PyPI publishing steps to execute only when `startsWith(github.ref, 'refs/tags/v')`.
-6. **Benchmark Dispatcher (`scripts/pxos-benchmark.py`):**
-   - Use safe list fallback `(crit.get("...") or [])` to avoid `NoneType` iteration.
+1. **Version Synchronization:**
+   - Update `pyproject.toml` version: `2.3.0` → `2.3.1`.
+   - Update `pxos/__init__.py`: `__version__ = "2.3.1"`.
+   - Update `pxos/cli.py`: `VERSION = "2.3.1"`.
+   - Update `install.sh` and `install.ps1`: `2.3.0` → `2.3.1`.
+   - Update `README.md` version badge.
+   - Run `python scripts/generate-llms-txt.py` to synchronize `llms.txt`, `llms-full.txt`, and templates.
+   - Update `templates/site/metadata.json`, `templates/site/public/head-tags.html`, and `pxos/templates/site/...`.
+2. **Changelog & Documentation:**
+   - Document `## [2.3.1] - 2026-09-04` in `CHANGELOG.md` detailing audit hardening, security fixes, and packaging updates.
+3. **Sprint Tracking:**
+   - Register task `T-07` in `SPRINT.md`.
+4. **Git Operations & Release Triggering:**
+   - Push commit `ed973c1` and release bump commit to `origin/main`.
+   - Create annotated tag `v2.3.1` (`git tag -a v2.3.1 -m "release: v2.3.1 - audit hardening and packaging integrity"`).
+   - Push tag `git push origin v2.3.1`, triggering GitHub Actions workflow `.github/workflows/release.yml` (PyPI Trusted Publishing + GitHub Release).
+5. **Distribution Validation:**
+   - Build local wheel and sdist with `python -m build`.
+   - Verify package contents (`tar -tf` / `unzip -l`) to confirm `scripts/` and `templates/` inclusion in the `v2.3.1` distribution archive.
 
 **Out:**
-- Adding third-party package dependencies (must stay pure Python stdlib).
-- Altering the SQLite schema or existing table columns.
-- Modifying core operating rules in `AI_BASE.md`.
+- Functional code rewrites outside version strings and release metadata.
+- Launching public community posts on HN/Dev.to/Reddit (reserved for follow-up syndication session).
 
 ---
 
 ## Constraints
 
-- Pure Python 3 standard library (`urllib`, `sqlite3`, `json`, `argparse`, `dataclasses`).
-- POSIX-compliant syntax for `install.sh` and `scripts/pxos-task.sh`.
-- Windows PowerShell 5.1 & PowerShell 7+ compatibility for `.ps1` scripts.
-- Backward compatibility for existing `.ai/` directory layouts and commands.
+- Strictly follow Semantic Versioning (`PATCH` release for backwards-compatible bug and audit fixes).
+- Maintain Conventional Commits in English (`chore(release): bump version to 2.3.1`).
+- Ensure `release.yml` runs smoothly against the tagged commit.
 
 ---
 
 ## Existing patterns
 
-- `benchmarks/server.py`: `ThreadingHTTPServer` with `PRAGMA journal_mode=WAL;`.
-- `pxos/cli.py`: ANSI color helpers, `download_or_copy` idempotent file copier, `argparse` subparsers.
-- `scripts/pxos-task.sh` & `pxos-task.ps1`: Git worktree manager for parallel agent branches.
+- Version declarations in `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`.
+- Automated AI index generation via `scripts/generate-llms-txt.py`.
+- Keep a Changelog standard in `CHANGELOG.md`.
 
 ---
 
 ## Proposed change
 
-1. **`benchmarks/server.py`:**
-   - In `validate_and_sanitize_payload`, move lines 151-154 inside `try...except (ValueError, TypeError)`.
-   - Create a sanitized representation for `raw_payload` that omits unvalidated keys.
-   - Refactor database access in `do_GET` and `do_POST` to:
-     ```python
-     conn = None
-     try:
-         with DB_LOCK:
-             conn = sqlite3.connect(DB_PATH)
-             ...
-     except sqlite3.Error as e:
-         self.send_json(500, {"error": f"Database error: {e}"})
-     finally:
-         if conn:
-             conn.close()
-     ```
-   - Implement simple IP rate limiting dictionary with timestamp expiration.
-2. **`benchmarks/analyze.py` & `benchmarks/aggregate_daily.py`:**
-   - Extract `load_record_from_dict(data: dict, file_path: str = "") -> Optional[AuditRecord]` in `analyze.py`.
-   - Have `load_record_from_json` delegate to `load_record_from_dict`.
-   - In `aggregate_daily.py`, directly invoke `analyze.load_record_from_dict(tmp_data, f"db_record_{idx}")`.
-3. **`pyproject.toml` & `pxos/cli.py`:**
-   - Add `[tool.setuptools.package-data] pxos = ["templates/**", "scripts/**"]` or vendor resources into `pxos/`.
-   - Update `download_or_copy`, `cmd_benchmark`, and `cmd_monitor` to probe package resources first before checking `parent.parent`.
-4. **`scripts/pxos-task.sh` & `scripts/pxos-task.ps1`:**
-   - Pipe `$SPEC_SUFFIX` through `tr '/' '-'` (bash) and `-replace '/', '-'` (pwsh).
-5. **`.github/workflows/release.yml`:**
-   - Add `if: startsWith(github.ref, 'refs/tags/v')` to `Publish GitHub Release` and `Publish to PyPI`.
-6. **`scripts/pxos-benchmark.py`:**
-   - Guard friction and benefit list comprehensions against `None` values.
+1. **Modify `pyproject.toml`:**
+   ```toml
+   version = "2.3.1"
+   ```
+2. **Modify `pxos/__init__.py` & `pxos/cli.py`:**
+   Set `__version__ = "2.3.1"` and `VERSION = "2.3.1"`.
+3. **Modify `install.sh` & `install.ps1`:**
+   Set default version variable to `"2.3.1"`.
+4. **Modify `CHANGELOG.md`:**
+   Insert `## [2.3.1] - 2026-09-04` section detailing Fixed and Changed items from audit remediation.
+5. **Execute `python scripts/generate-llms-txt.py`:**
+   Refreshes machine-readable files with new version stamp.
+6. **Update `SPRINT.md`:**
+   Add task `T-07` row and description.
+7. **Commit, Tag & Push:**
+   Push to GitHub and publish tag `v2.3.1`.
 
 ---
 
 ## Technical flow
 
 ```
-[Agent runs /spec] ──► [Spec T-06 Approved] ──► [Agent runs /plan]
-                                                        │
-                                                        ▼
-                                          [Execute Modular Fixes]
-                                          ├─ Telemetry Server & Ingestion
-                                          ├─ In-Memory Aggregation
-                                          ├─ Package Data & CLI Resolvers
-                                          ├─ Worktree Normalization
-                                          └─ CI Gating
-                                                        │
-                                                        ▼
-                                          [Validate via Test Suite]
-                                          ├─ Unit test server endpoints
-                                          ├─ Test pip wheel contents
-                                          ├─ Verify worktree script slashes
-                                          └─ Validate dry-run benchmark
-                                                        │
-                                                        ▼
-                                            [/review & /compact]
+[Spec T-07 Approved] ──► [Run /plan] ──► [Implementation Plan Confirmed]
+                                                   │
+                                                   ▼
+                                    [Execute Version Bump & Sync]
+                                    ├─ Bump pyproject.toml, pxos/, installers
+                                    ├─ Update CHANGELOG.md & SPRINT.md
+                                    └─ Regenerate llms.txt via script
+                                                   │
+                                                   ▼
+                                        [Validate Package Build]
+                                        ├─ Build wheel & inspect archive
+                                        └─ Run audit tests on new build
+                                                   │
+                                                   ▼
+                                          [Push & Tag v2.3.1]
+                                        ├─ git push origin main
+                                        ├─ git tag -a v2.3.1 -m "..."
+                                        └─ git push origin v2.3.1
+                                                   │
+                                                   ▼
+                                       [CI/CD Release Triggered]
+                                       ├─ PyPI Trusted Publishing
+                                       └─ GitHub Release with assets
 ```
 
 ---
 
 ## Edge cases
 
-- **Database Locks / Busy:** Handled cleanly with `sqlite3.BusyError` or general `sqlite3.Error` without file descriptor leak.
-- **Corrupted Submission JSON:** Returns 400 Bad Request with descriptive message.
-- **Offline CLI Execution:** `pxos init` falls back to package-bundled templates without making network calls.
-- **Worktree branch with multiple levels:** `feat/auth/oauth/google` converts cleanly to `SPEC-auth-oauth-google.md`.
+- **Git Remote Authentication / Permissions:** Handled by standard SSH/HTTPS git credentials configured in the environment.
+- **PyPI Release Overwrite:** PyPI rejects re-uploading existing versions; bumping to `2.3.1` ensures a clean, rejected-free deployment.
+- **Tag Collision:** Verifying `git tag -l v2.3.1` confirms the tag does not already exist.
 
 ---
 
 ## Acceptance criteria
 
-- [x] Telemetry server never persists un-scrubbed `raw_payload` attributes in SQLite (`SEC-01`).
-- [x] Database connections in `server.py` are enclosed in `try...finally: conn.close()` (`REL-01`).
-- [x] `validate_and_sanitize_payload` catches malformed types on architectural metrics (`REL-02`).
-- [x] `X-Forwarded-For` is verified against trusted peers, and basic IP rate limiting is enforced (`SEC-02`).
-- [x] `aggregate_daily.py` processes SQLite payloads in memory without writing temporary files to `PUBLIC_DIR` (`PERF-01`).
-- [x] Python package includes necessary templates/scripts or bundles resources so `pxos benchmark` and offline `pxos init` succeed from PyPI (`PKG-01`).
-- [x] Worktree creation in `pxos-task.sh` and `pxos-task.ps1` correctly creates modular specs for multi-slash branch names (`REL-03`).
-- [x] GitHub release step in `.github/workflows/release.yml` is guarded against branch runs on `workflow_dispatch` (`REL-04`).
-- [x] `pxos-benchmark.py` handles `null` attribute values in JSON payloads without raising `TypeError` (`REL-05`).
+- [x] `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `install.sh`, and `install.ps1` reflect version `2.3.1`.
+- [x] `CHANGELOG.md` includes comprehensive release notes under `## [2.3.1] - 2026-09-04`.
+- [x] `llms.txt` and `llms-full.txt` reflect version `2.3.1`.
+- [x] `SPRINT.md` records task `T-07` with current tracking.
+- [x] Built wheel archive contains `pxos/scripts/` and `pxos/templates/`.
+- [x] All commits are pushed to `origin/main` and tag `v2.3.1` is published to `origin`.
 
 ---
 
 ## Validation plan
 
-1. **Server Unit & Ingestion Test:** Write and run a test script (`tests/test_audit_remediation.py`) asserting:
-   - Malformed types in `invariants_violated_count` return 422, not 500. (Passed)
-   - Extra fields in payload are excluded from database `raw_payload`. (Passed)
-   - Repeated requests trigger rate limiting (429 Too Many Requests). (Passed)
-   - Simulating database exceptions returns 500 and closes connections cleanly. (Passed)
-2. **In-Memory Aggregation Test:** Test `load_record_from_dict` and ensure `aggregate_daily.py` generates daily reports without creating `_tmp_*.json` files. (Passed)
-3. **Packaging Build Test:** Build wheel via `python -m build`, inspect wheel archive, verify template and script presence. (Passed)
-4. **Worktree Script Test:** Verify branch normalization logic for multi-slash branch names. (Passed)
-5. **Benchmark Dispatcher Test:** Pass JSON with `"identified_frictions": null` to `scripts/pxos-benchmark.py --dry-run` and verify successful sanitization. (Passed)
+1. **Local Build & Archive Inspection:**
+   Run `python -m build` and inspect wheel contents to verify `2.3.1` version and bundled assets.
+2. **Automated Test Suite:**
+   Run `pytest tests/test_audit_remediation.py` to confirm all remediations pass under the updated version.
+3. **Git Tag Verification:**
+   Verify `git describe --tags` and `git status` clean before push.
 
 ---
 
-## Risks & Cross-Task Impact
+## Risks & Cross-Task Dependencies
 
-- **Package Size:** Bundling templates into `pxos/` adds ~50 KB to the package wheel, which is negligible and compliant with zero-dependency requirements.
-- **Breaking Changes:** Zero breaking changes to API endpoints or user-facing CLI syntax.
+- **Low Risk:** Patch release consists strictly of audit fixes and version metadata without breaking API changes.
+- **Dependency:** Must push commits to `origin/main` before pushing tag `v2.3.1` so the tag points to the final release commit.
 
 ---
 
 ## Workflow state
 
-- **Current phase:** Validate / Done
+- **Current phase:** Done
 - **Pending decision:** None
 - **Execution blocked until:** None

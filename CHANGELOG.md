@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.3.1] - 2026-09-04
+
+### Fixed
+- **PyPI Package Resource Bundling (`[PKG-01]`):**
+  - Bundled `scripts/` and `templates/` directly within the `pxos` package data (`[tool.setuptools.package-data]`), resolving missing file errors when running `pxos benchmark`, `pxos monitor`, and offline `pxos init` from PyPI installations.
+- **SQLite Connection Lifecycle & Error Handling (`[REL-01]`):**
+  - Enclosed all database transactions in `benchmarks/server.py` within `try...finally: conn.close()` and added `sqlite3.Error` exception handling returning JSON 500 status codes, eliminating file descriptor leaks across multi-threaded HTTP requests.
+- **PII Scrubbing & Telemetry Governance (`[SEC-01]`):**
+  - Enforced strict serialization of only schema-validated fields into the database `raw_payload` column, discarding arbitrary unvalidated client parameters, proprietary code fragments, or user identifiers.
+- **Client IP Rate Limiting & Proxy Safety (`[SEC-02]`):**
+  - Implemented an in-memory sliding-window IP rate limiter (60 requests/minute) in `benchmarks/server.py` returning HTTP 429 upon bursts.
+  - Restricted `X-Forwarded-For` header evaluation exclusively to requests originating from loopback/trusted proxy addresses.
+- **Telemetry Payload Sanitization Hardening (`[REL-02]`):**
+  - Guarded architectural and invariant integer metrics within `try...except (ValueError, TypeError)` blocks, responding with HTTP 422 Unprocessable Entity on malformed types instead of unhandled HTTP 500 crashes.
+- **In-Memory Telemetry Aggregation Performance (`[PERF-01]`):**
+  - Added `load_record_from_dict()` in `benchmarks/analyze.py` and refactored `benchmarks/aggregate_daily.py` to parse database records directly in memory, eliminating disk thrashing and temporary file writes in the public web directory.
+- **Multi-Slash Git Branch Normalization (`[REL-03]`):**
+  - Normalized branch slashes in `scripts/pxos-task.sh` and `scripts/pxos-task.ps1` (e.g. `feat/auth/oauth` -> `SPEC-auth-oauth.md`), preventing filesystem path failures when provisioning worktree task specs.
+- **Continuous Integration Release Trigger Gating (`[REL-04]`):**
+  - Added conditional guards (`startsWith(github.ref, 'refs/tags/v')`) to the GitHub Release and PyPI publishing steps in `.github/workflows/release.yml`, preventing accidental releases on manual workflow dispatches.
+- **Benchmark Client Null Safety (`[REL-05]`):**
+  - Guarded list iterations in `scripts/pxos-benchmark.py` against null values in incoming telemetry JSON files.
+
+### Changed
+- Synchronized release version to `2.3.1` across `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `install.sh`, `install.ps1`, `llms.txt`, and web metadata.
+
+---
+
 ## [2.3.0] - 2026-09-04
 
 ### Added

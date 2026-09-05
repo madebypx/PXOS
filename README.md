@@ -1,6 +1,6 @@
 # PXOS — The AI Operating System for Product & Software Engineering
 
-[![Version](https://img.shields.io/badge/version-2.3.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
+[![Version](https://img.shields.io/badge/version-2.3.1-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](./LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Document--Driven-8b5cf6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)

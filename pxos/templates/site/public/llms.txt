@@ -3,7 +3,7 @@
 
 PXOS standardizes the operational contract between human developers and AI coding agents. It replaces chaotic conversational chat loops with a disciplined 6-phase lifecycle (Discover -> Plan -> Execute -> Validate -> Review -> Compact), multi-agent isolation via Git worktrees, zero-spoiler specifications, and empirical telemetry benchmarking.
 
-- **Version**: 2.3.0
+- **Version**: 2.3.1
 - **Company / Organization**: PROJECT/X (https://madebypx.com)
 - **Website**: https://pxos.madebypx.com
 - **Repository**: https://github.com/madebypx/PXOS
