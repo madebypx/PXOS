@@ -1,4 +1,4 @@
-# Current Spec — PXOS AI Indexability & Zero-Friction Distribution Engine
+# Current Spec — Release Engineering, Automated PyPI Publishing & Public Launch v2.3.0
 <!-- pxos:version 2.2.0 -->
 
 This file defines the active task or feature. Replace it entirely when starting a new task. The AI reads this file at the start of every session to understand what is being built.
@@ -7,102 +7,151 @@ This file defines the active task or feature. Replace it entirely when starting 
 
 ## Goal
 
-Implement the technical foundations for public AI crawlability, standard LLM consumption (`llms.txt`), repository backlink viral loops, and zero-friction cross-platform distribution (PowerShell installer + PyPI `pxos` CLI) to maximize global indexing across AI training corpora and developer tools.
+Execute the release engineering cycle for PXOS v2.3.0 across all distribution channels: tag the repository, generate GitHub release assets, build and validate the PyPI package with an automated CI/CD publishing pipeline (`.github/workflows/release.yml`), assemble static deployment assets for `pxos.madebypx.com`, and package the multi-platform launch kit for technical developer communities (Hacker News, Dev.to, Reddit).
 
 ---
 
 ## User value
 
-- **Native AI Comprehension:** Any AI agent or web crawler (Claude, ChatGPT, Perplexity, Cursor) browsing PXOS immediately digests the architecture via standardized `/llms.txt` and dense semantic text without parsing HTML.
-- **Zero-Friction Adoption:** Developers can initialize PXOS in any project in one single command on Windows, macOS, or Linux (`pip install pxos`, `install.sh`, or `install.ps1`) without manual repository cloning.
-- **Organic Indexing Loop:** Downstream repositories adopting PXOS propagate backlinks via official badges and structured metadata, populating search engines and future LLM training datasets (e.g. The Stack, GitHub public archives).
-- **Public Authority:** Ready-to-publish technical whitepaper highlighting empirical benchmarks (80% token reduction) positions PXOS as a premier document-driven governance layer.
+- **Seamless Installation:** Developers can install PXOS via `pip install pxos` without compiling from source or cloning the repository.
+- **Auditable Versioning:** Releases and git tags follow strict Semantic Versioning (`v2.3.0`) with cryptographically traceable releases and automated changelog generation on GitHub.
+- **Continuous Distribution:** Future releases can publish to PyPI and GitHub Releases automatically upon pushing signed tags via GitHub Actions OIDC / Trusted Publishing.
+- **Web & SEO Indexing:** The public domain `pxos.madebypx.com` receives validated metadata, JSON-LD, `llms.txt`, and robots directives for immediate crawler ingestion.
+- **High-Impact Public Launch:** Ready-to-use launch drafts allow the author to syndicate the technical whitepaper across developer communities with zero friction.
 
 ---
 
 ## Strategic & Audit Alignment
 
 - **Audit Findings Cross-Check:** Clean — No active audit blockers touching this scope.
-- **Strategic / Research Reference:** Aligns with PXOS Core Priorities (Correctness, Clarity, Simplicity, Context Efficiency, Zero External Dependencies) and empirical benchmark distribution (`benchmarks/REPORT.md`).
+- **Strategic / Research Reference:** Fulfills tasks T-02 through T-05 of `SPRINT.md` v2.3.0 and complies with PXOS core priorities (Zero Runtime Dependencies, Correctness, Deterministic Workflows).
 
 ---
 
 ## Scope
 
 **In:**
-1. **AI Indexability Standard (`llms.txt` & `llms-full.txt`):**
-   - Create root `llms.txt` (curated index of core principles, workflows, and CLI specs adhering to `llmstxt.org`).
-   - Create `llms-full.txt` (single-file dense documentation of PXOS ready for direct LLM agent ingestion).
-   - Create `scripts/generate-llms-txt.py` to autonomously compile and validate these files.
-2. **Cross-Platform Zero-Friction Bootstrap:**
-   - Native Windows PowerShell installer `install.ps1` matching `install.sh` functionality.
-   - Python package structure (`pyproject.toml`, `pxos/`) providing the global `pxos` CLI (`pxos init`, `pxos update`, `pxos benchmark`, `pxos monitor`) with zero runtime dependencies.
-3. **Viral Adoption Loops & Community Infrastructure:**
-   - Standardized README badges for downstream projects (`Governed by PXOS`, `PXOS Inside`).
-   - GitHub community templates (`.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`, `.github/CONTRIBUTING.md`).
-4. **Technical Authority Whitepaper:**
-   - Publication-ready essay `docs/LAUNCH_WHITEPAPER.md` for Hacker News, Dev.to, and Reddit.
-5. **SEO & Structured Metadata:**
-   - Schema.org JSON-LD and OpenGraph metadata template for `pxos.madebypx.com`.
+1. **Task T-02 — Release Engineering & Git Tagging:**
+   - Create and push annotated tag `v2.3.0`.
+   - Draft comprehensive GitHub Release notes using `gh release create` matching `CHANGELOG.md` v2.3.0.
+2. **Task T-03 — PyPI Package Build & CI/CD Pipeline:**
+   - Validate local distribution artifact generation (`sdist` and `wheel`) in `dist/`.
+   - Validate packaging metadata (`twine check dist/*` or internal integrity check).
+   - Create `.github/workflows/release.yml` with GitHub Actions for automated build, release asset upload, and PyPI publishing via Trusted Publishing.
+3. **Task T-04 — Web Deployment Bundle (`pxos.madebypx.com`):**
+   - Package ready-to-deploy static assets (`llms.txt`, `llms-full.txt`, `robots.txt`, and HTML metadata snippet) matching `templates/site/metadata.json`.
+   - Provide zero-dependency verification and sync instructions.
+4. **Task T-05 — Multi-Platform Public Launch Kit:**
+   - Create `docs/LAUNCH_KIT.md` containing formatted launch posts for:
+     - **Hacker News:** Show HN title, URL, and founder intro comment.
+     - **Dev.to / Hashnode / Medium:** Article markdown with frontmatter and cross-post canonical link.
+     - **Reddit:** Tailored posts for `r/programming`, `r/LocalLLaMA`, and `r/ChatGPTCoding`.
 
 **Out:**
-- External third-party dependencies (strictly pure Python stdlib, POSIX sh, pwsh).
-- Manual off-platform social media account management.
+- Adding third-party runtime dependencies to `pxos` package.
+- Direct DNS record modifications (hosting credentials are kept private to the human).
+- Automated live social media posting (human reviews and posts).
 
 ---
 
 ## Constraints
 
-- Pure standard library Python 3 (zero `pip` dependencies at runtime).
-- Strict adherence to `llmstxt.org` specification.
-- Full parity between `install.sh` and `install.ps1`.
-- Clean backward compatibility for existing PXOS projects.
+- Zero runtime dependencies for the Python package (`dependencies = []` in `pyproject.toml`).
+- Use GitHub CLI (`gh`) for release automation since credentials and scopes are already active.
+- CI/CD workflow must use standard, audited GitHub Actions (`actions/checkout`, `actions/setup-python`, `pypa/gh-action-pypi-publish`).
 
 ---
 
 ## Existing patterns
 
-- `install.sh`: structured CLI flag parsing, markers for `.cursorrules`, `.ai/` bootstrapping.
-- `scripts/pxos-benchmark.py` and `scripts/pxos-telemetry-monitor.py`: ANSI color helpers, zero external deps, argparse architecture.
-- `benchmarks/REPORT.md`: empirical benchmark source for whitepaper and `llms.txt`.
+- `pyproject.toml`: standard PEP 517/621 setuptools configuration with entry point `pxos = pxos.cli:main`.
+- `CHANGELOG.md`: structured Keep a Changelog entries for `[2.3.0]`.
+- `templates/site/metadata.json`: specification for JSON-LD, OpenGraph, and `robots.txt`.
+- `docs/LAUNCH_WHITEPAPER.md`: established technical narrative and benchmark data.
 
 ---
 
 ## Proposed change
 
-1. Author `llms.txt` and `llms-full.txt` with autonomous generation script `scripts/generate-llms-txt.py`.
-2. Author `install.ps1` replicating all `install.sh` features for PowerShell environments.
-3. Author `pyproject.toml` and `pxos/` package CLI module.
-4. Author community health files in `.github/` and `CONTRIBUTING.md`.
-5. Update `README.md` with downstream badges and new installation options.
-6. Author `docs/LAUNCH_WHITEPAPER.md` and `templates/site/metadata.json`.
+1. **GitHub Actions Release Workflow:**
+   - Create `.github/workflows/release.yml` triggering on `push: tags: ['v*']`.
+   - Jobs:
+     - Build `sdist` and `wheel`.
+     - Create GitHub Release with `softprops/action-gh-release` attaching release notes and distribution packages.
+     - Publish to PyPI via `pypa/gh-action-pypi-publish` (optional / gated on environment secrets).
+2. **Local Packaging Validation:**
+   - Build package locally using `pip wheel` / `build` to verify wheel/sdist contents.
+   - Verify `pxos --help` installs cleanly in a clean virtual environment.
+3. **Git Tagging & Release Execution:**
+   - Tag `v2.3.0` and create release via `gh release create v2.3.0 --title "v2.3.0 — AI Indexability & Zero-Friction Distribution Engine" --notes-file ...`.
+4. **Web Bundle Preparation:**
+   - Generate static assets for `pxos.madebypx.com` in `templates/site/public/` (`robots.txt`, `index.html` head snippet, `llms.txt`, `llms-full.txt`).
+5. **Launch Kit Compilation:**
+   - Create `docs/LAUNCH_KIT.md` with copy-paste community submissions.
+6. **Sprint Tracking:**
+   - Update `SPRINT.md` with active status changes.
+
+---
+
+## User flow / Technical flow
+
+```
+[Local Build & Validation]
+        │
+        ▼
+[Commit & Push Tag v2.3.0] ──► [GitHub Actions Release Pipeline]
+        │                                 │
+        ▼                                 ▼
+[GH Release Created]              [PyPI Package Published]
+        │
+        ▼
+[Export Web Assets for Site]
+        │
+        ▼
+[Human Uses Launch Kit for HN/Reddit/Dev.to]
+```
+
+---
+
+## Edge cases
+
+- **Tag collision:** Verify `git tag -l v2.3.0` before tagging (confirmed empty).
+- **PyPI credentials:** GitHub Actions workflow should support both OIDC Trusted Publishing (preferred, tokenless) and API token fallback via GitHub Secrets (`PYPI_API_TOKEN`).
+- **Wheel completeness:** Ensure package data (`pxos/` files) and CLI entry point are properly packaged in the wheel without missing modules.
 
 ---
 
 ## Acceptance criteria
 
-- [x] `llms.txt` and `llms-full.txt` exist and pass specification validation.
-- [x] `scripts/generate-llms-txt.py` runs cleanly and updates files idempotently.
-- [x] `install.ps1` executes successfully in PowerShell, creating `.ai/` and supporting `--ide` and `--update` flags.
-- [x] `pyproject.toml` and `pxos` package CLI provide `pxos init`, `pxos update`, `pxos benchmark`, `pxos monitor`.
-- [x] Community templates (`CONTRIBUTING.md`, issue/PR templates) exist and are properly formatted.
-- [x] Downstream badges documented in `README.md` with rendered markdown snippets.
-- [x] `docs/LAUNCH_WHITEPAPER.md` written with technical depth and benchmark evidence.
-- [x] All automated validations pass with exit code 0.
+- [ ] `.github/workflows/release.yml` created and validated for GitHub Actions syntax.
+- [ ] Local build generates valid `sdist` (`.tar.gz`) and `wheel` (`.whl`) without warnings.
+- [ ] CLI runs correctly from built package (`pxos --version` / `pxos --help`).
+- [ ] Git tag `v2.3.0` created and pushed to `origin`.
+- [ ] GitHub Release v2.3.0 published via `gh release create` with attached release notes and package assets.
+- [ ] Web asset bundle in `templates/site/public/` ready for immediate upload to `pxos.madebypx.com`.
+- [ ] `docs/LAUNCH_KIT.md` published with tailored copy for Hacker News, Dev.to, and Reddit.
+- [ ] `SPRINT.md` updated with completed statuses.
 
 ---
 
 ## Validation plan
 
-1. Run `py scripts/generate-llms-txt.py` and verify file content integrity. (Passed)
-2. Execute `pwsh -File .\install.ps1 -TestPath "$env:TEMP\pxos_test_ps1"` and verify generated structure. (Passed)
-3. Test `python -m pxos.cli --help` and verify subcommands. (Passed)
-4. Verify `install.sh` syntax with `bash -n install.sh`. (Passed)
+1. **Package integrity:** `python -m pip install dist/*.whl` into a temporary environment and test `pxos --version` and `pxos init --help`.
+2. **Workflow validation:** Validate `.github/workflows/release.yml` with YAML linter.
+3. **GitHub release verification:** Run `gh release view v2.3.0` to confirm live publication on GitHub.
+4. **Site asset validation:** Verify `robots.txt` and `templates/site/public/` files against `templates/site/metadata.json`.
+
+---
+
+## Risks & Cross-Task Dependencies
+
+- **PyPI Namespace Reservation:** If `pxos` name is contested or requires 2FA API token, the GitHub Actions workflow provides manual dispatch and local twine fallback.
+- **Host Deployment for Site:** T-04 produces static files; deployment to CDN/Vercel/Cloudflare is ready to trigger.
 
 ---
 
 ## Workflow state
 
-- **Current phase:** Done
-- **Pending decision:** None
-- **Execution blocked until:** None
+- **Current phase:** Plan
+- **Pending decision:** Review and confirmation of this spec before proceeding to `/plan`.
+- **Execution blocked until:** Human confirmation.

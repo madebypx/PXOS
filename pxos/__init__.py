@@ -5,4 +5,4 @@ Version: 2.3.0
 
 __version__ = "2.3.0"
 __author__ = "PROJECT/X"
-__license__ = "MIT"
+__license__ = "BSL-1.1"

@@ -36,7 +36,7 @@ PXOS standardizes the operational contract between human developers and AI codin
 - **Company / Organization**: PROJECT/X (https://madebypx.com)
 - **Website**: https://pxos.madebypx.com
 - **Repository**: https://github.com/madebypx/PXOS
-- **License**: MIT
+- **License**: Business Source License 1.1 (BSL-1.1) by PROJECT/X
 - **Primary Paradigms**: Document-Driven Development, Context Economy, Git Worktree Multi-Agent Isolation, Nielsen UX Heuristics inside.
 
 ## Core Documentation

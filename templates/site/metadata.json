@@ -11,7 +11,7 @@
     "description": "The minimal, document-driven operating system and governance layer for AI-assisted software engineering. Eliminates token waste, cognitive drift, and multi-agent collisions.",
     "applicationCategory": "DeveloperApplication",
     "operatingSystem": "Cross-platform (POSIX, Windows, macOS, Linux)",
-    "license": "https://opensource.org/licenses/MIT",
+    "license": "https://github.com/madebypx/PXOS/blob/main/LICENSE",
     "softwareVersion": "2.3.0",
     "url": "https://pxos.madebypx.com",
     "downloadUrl": "https://github.com/madebypx/PXOS",

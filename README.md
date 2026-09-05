@@ -1,7 +1,7 @@
 # PXOS — The AI Operating System for Product & Software Engineering
 
-[![Version](https://img.shields.io/badge/version-2.2.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
-[![License: MIT](https://img.shields.io/badge/License-MIT-10b981.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/version-2.3.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
+[![License: BSL 1.1](https://img.shields.io/badge/License-BSL%201.1-10b981.svg?style=flat-square)](./LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Document--Driven-8b5cf6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![UX-First](https://img.shields.io/badge/Design-UX%20Heuristics%20Inside-ec4899.svg?style=flat-square)](https://github.com/madebypx/PXOS)
@@ -412,4 +412,4 @@ PXOS strictly adheres to the [`llmstxt.org`](https://llmstxt.org) standard, ensu
 
 ## License
 
-PXOS is open-source software released under the [MIT License](./LICENSE). Free to use, adapt, and scale across personal, commercial, and enterprise software projects.
+PXOS is published under the [Business Source License 1.1 (BSL-1.1)](./LICENSE) by **PROJECT/X**. Free to use, inspect, adapt, and scale across personal, internal, and commercial software development projects. Commercial resale, hosted/managed platform competition, or proprietary re-licensing requires a commercial license from PROJECT/X.

@@ -1,0 +1,7 @@
+# https://pxos.madebypx.com/robots.txt
+User-agent: *
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+
+Sitemap: https://pxos.madebypx.com/sitemap.xml

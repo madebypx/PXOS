@@ -6,3 +6,9 @@ __pycache__/
 # OS artifacts
 .DS_Store
 Thumbs.db
+
+# Python distribution and packaging artifacts
+build/
+dist/
+*.egg-info/
+

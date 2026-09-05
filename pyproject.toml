@@ -8,7 +8,7 @@ version = "2.3.0"
 description = "The minimal, document-driven operating system and governance layer for AI-assisted software engineering."
 readme = "README.md"
 authors = [{ name = "PROJECT/X", email = "hello@madebypx.com" }]
-license = { text = "MIT" }
+license = { text = "BSL-1.1" }
 keywords = [
     "ai",
     "llm",
@@ -24,7 +24,7 @@ keywords = [
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: Other/Proprietary License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
