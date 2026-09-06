@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.4.0] - 2026-09-06
+
+### Added
+- **Completion Honesty Protocol (`AI_BASE.md`):**
+  - Agents must now report structured confidence when declaring task completion: what was verified, what was NOT verified, and residual risks. Prohibits "100% complete" claims based solely on build/compilation success.
+- **No-Assumption Clause (`AI_BASE.md`):**
+  - Explicitly prohibits agents from inventing domain-specific values (thresholds, deadlines, ID formats, business rules) to save tokens. Reading the source of truth is mandatory — guessing is always worse than reading.
+- **Mutation Lifecycle Check (`/plan` workflow):**
+  - Conditional check that activates when a task creates, modifies, or deletes persisted data across multiple sources. Requires agents to trace mutations through every persistence node and confirm no background processes will contradict the change.
+- **Spec Satisfaction Check (`/review` workflow):**
+  - Review phase now requires agents to re-read acceptance criteria from the active spec and classify each as verified, not directly verified, or not met — closing the gap where agents deliver partial implementations silently.
+- **Critical Invariants section (`PROJECT_CONTEXT.md` template):**
+  - Optional section for hard domain constraints (with short IDs like INV-001) that agents must cross-reference during Plan. Lives inside PROJECT_CONTEXT.md (already loaded at every `/start`) rather than a separate file.
+
+### Changed
+- **Behavioral constraints (`AI_BASE.md`):** Added three new "never" rules: never declare completion based solely on build success, never use assumed/invented constants, never treat multi-node systems as single-node.
+- **Rules template (`rules/pxos.md`):** Updated to reference Critical Invariants in PROJECT_CONTEXT.md during Plan phase.
+- Synchronized version to `2.4.0` across `AI_BASE.md`, `rules/pxos.md`, and workflow documentation.
+
+---
+
 ## [2.3.1] - 2026-09-04
 
 ### Fixed

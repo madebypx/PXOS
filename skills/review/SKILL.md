@@ -19,6 +19,12 @@ Review what was just implemented by checking the branch diff (e.g. against main/
 - *Error prevention:* Are destructive actions guarded with confirmation? Are validation errors clear?
 - *Cognitive friction:* Is the user flow direct and intuitive, minimizing unnecessary clicks or confusion?
 
+
+**Spec Satisfaction Check:**
+- Re-read the active spec's acceptance criteria.
+- For each criterion, classify: ✅ Verified (state how) | ⚠️ Not directly verified (state why) | ❌ Not met (state what's missing).
+- Flag any implementation that relies on assumed values not sourced from the codebase or domain rules.
+
 If a simpler valid solution exists, point it out.
 Do not refactor without my approval.
 

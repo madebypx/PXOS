@@ -1,11 +1,12 @@
 # PXOS — Operating Rules
-<!-- pxos:version 2.2.0 -->
+<!-- pxos:version 2.4.0 -->
 
-This project adheres to the PXOS framework (v2.2).
+This project adheres to the PXOS framework (v2.4).
 
 1. **Read Core Files & Grounding**:
    - Always check `.ai/AI_BASE.md` and `.ai/PROJECT_CONTEXT.md` before executing tasks.
    - In Discover, inspect `.ai/audits/` and `.ai/research/INDEX.md` if present for active constraints and invariants.
+   - If `PROJECT_CONTEXT.md` contains a `Critical invariants` section, cross-reference it during Plan for any task that modifies listed entities.
    - Identify active branch (`git branch --show-current`). If `.ai/specs/SPEC-<branch>.md` exists, load it as the active spec; otherwise fall back to `.ai/CURRENT_SPEC.md`.
 
 2. **Follow Default Workflow**:

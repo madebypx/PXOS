@@ -167,6 +167,12 @@ Before writing any code, produce a plan based on the active spec that includes:
    - Main risks and cross-task dependencies
    - How success will be validated
 
+3. Mutation Lifecycle Check (conditional — only if this task creates, modifies, or deletes persisted data across multiple sources):
+   - List every persistence node affected (e.g., database, local storage, file system, external API, cache layer).
+   - For each relevant mutation (Create / Update / Delete), state how it propagates to each node.
+   - If a node is intentionally NOT updated, state why and confirm no background process (watcher, sync, cron) will contradict that decision.
+   - Cross-reference critical invariants from `PROJECT_CONTEXT.md` if present.
+
 After presenting the plan, explicitly state:
 - What decision or confirmation you need from me before executing
 - What will NOT happen until I approve
@@ -195,6 +201,11 @@ UX & Interaction Heuristics (If the diff modifies UI, styles, or frontend intera
 - Status visibility: Are loading states, transitions, and system feedback clear and responsive?
 - Error prevention: Are destructive actions guarded with confirmation? Are validation errors clear?
 - Cognitive friction: Is the user flow direct and intuitive, minimizing unnecessary clicks or confusion?
+
+Spec Satisfaction Check:
+- Re-read the active spec's acceptance criteria.
+- For each criterion, classify: ✅ Verified (state how) | ⚠️ Not directly verified (state why) | ❌ Not met (state what's missing).
+- Flag any implementation that relies on assumed values not sourced from the codebase or domain rules.
 
 If a simpler valid solution exists, point it out.
 Do not refactor without my approval.

@@ -1,5 +1,5 @@
 # AI Base — Operating Rules
-<!-- pxos:version 2.2.0 -->
+<!-- pxos:version 2.4.0 -->
 
 This file defines universal operating rules for every AI agent working in this project. Do not modify this file unless a fundamental behavioral rule needs to change. Propagation: if you update this file, update it intentionally across all projects that use PXOS.
 
@@ -64,6 +64,7 @@ Do not skip phases. Do not implement before the plan is confirmed.
 
 - Load only the files relevant to the current task.
 - Do not scan the entire codebase unless explicitly required.
+- Never substitute file reading with assumptions. If a task involves domain-specific values (thresholds, deadlines, statuses, ID formats, business rules), reading the source of truth for those values is mandatory — not optional. Guessing a constant to save tokens is always worse than reading the file that defines it.
 - Summarize findings before continuing to the next phase.
 - Avoid repeating established context within the same session.
 - Break large tasks into smaller tasks if context grows noisy.
@@ -114,6 +115,16 @@ A task is complete when:
 - Edge cases are handled or explicitly acknowledged
 - The diff is as small as it can be while still solving the problem
 
+### Completion reporting
+
+When reporting task completion, always provide:
+
+1. **Verified** — what was directly checked (build, tests, manual steps, runtime behavior)
+2. **Not verified** — which acceptance criteria or edge cases were not directly tested
+3. **Residual risks** — assumptions made, integration points not exercised, or conditions that could cause failure beyond the immediate scope
+
+A passing build verifies syntax, not business correctness. Never declare "100% complete", "fully functional", or "no issues" based solely on compilation or build success.
+
 ---
 
 ## Behavioral constraints
@@ -123,6 +134,9 @@ A task is complete when:
 - Never modify files that are not relevant to the task
 - Never assume behavior — verify it
 - Never optimize prematurely
+- Never declare completion based solely on build or compilation success
+- Never use assumed or invented constants — always source values from code or domain rules
+- Never treat a multi-node system as single-node — if data persists in multiple locations, trace mutations through all of them
 - Never place internal, sensitive, draft, marketing, launch copy, sprint tracking, or team-exclusive materials into public repository folders (e.g., `docs/`, `templates/`, `scripts/`, root). Coisas INTERNAS ficam no `.internal/` (which must be gitignored).
 - Always explain tradeoffs when making non-obvious decisions
 - Always prefer existing patterns over new ones

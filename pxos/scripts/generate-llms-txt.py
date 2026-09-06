@@ -15,7 +15,7 @@ import re
 import sys
 from pathlib import Path
 
-VERSION = "2.3.1"
+VERSION = "2.4.0"
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
 # Core documentation files included in llms-full.txt in curated reading order

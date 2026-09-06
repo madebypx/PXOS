@@ -19,6 +19,12 @@ Before writing any code, produce a plan based on the active spec that includes:
    - Main risks and cross-task dependencies
    - How success will be validated
 
+3. **Mutation Lifecycle Check (conditional — only if this task creates, modifies, or deletes persisted data across multiple sources):**
+   - List every persistence node affected (e.g., database, local storage, file system, external API, cache layer).
+   - For each relevant mutation (Create / Update / Delete), state how it propagates to each node.
+   - If a node is intentionally NOT updated, state why and confirm no background process (watcher, sync, cron) will contradict that decision.
+   - Cross-reference critical invariants from `PROJECT_CONTEXT.md` if present.
+
 After presenting the plan, explicitly state:
 - What decision or confirmation you need from me before executing
 - What will NOT happen until I approve
