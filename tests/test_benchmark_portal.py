@@ -277,6 +277,196 @@ class TestBenchmarkServerEnrichment(unittest.TestCase):
                 self.assertIn("rework_ratio_pct", recent[0])
                 self.assertIn("project_hash", recent[0])
 
+                # Enriched recent_runs fields
+                self.assertIn("task_description", recent[0])
+                self.assertIn("ux_completeness_pct", recent[0])
+                self.assertIn("ui_touched", recent[0])
+                self.assertEqual(recent[0]["task_description"], "Worktree test")
+                self.assertEqual(recent[1]["task_description"], "Telemetry test")
+
+                # evaluated_ui_tasks_count in summary
+                self.assertIn("evaluated_ui_tasks_count", stats["summary"])
+
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+
+class TestUxCompletenessFiltering(unittest.TestCase):
+    """Test that mean_ux_state_completeness_pct only averages tasks where ui_touched=1."""
+
+    @classmethod
+    def setUpClass(cls):
+        import benchmarks.server as srv
+        cls.srv = srv
+
+    def setUp(self):
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.db_path = Path(self.temp_dir.name) / "test_ux_filter.db"
+        self.prev_db = self.srv.DB_PATH
+        self.srv.DB_PATH = self.db_path
+        self.srv.init_database()
+
+    def tearDown(self):
+        self.srv.DB_PATH = self.prev_db
+        self.temp_dir.cleanup()
+
+    def _make_payload(self, fingerprint, model, ui_touched, ux_score, adherence=80):
+        """Helper to create a minimal valid test payload."""
+        return {
+            "audit_metadata": {
+                "session_fingerprint": fingerprint,
+                "schema_version": "2.0",
+                "evaluator_agent_model": model
+            },
+            "task_profile": {
+                "task_id": f"T-{fingerprint}",
+                "task_description": f"Test task {fingerprint}",
+                "complexity_tier": "tier_2_medium",
+                "primary_subsystem": "test"
+            },
+            "quantitative_telemetry": {
+                "total_turns": 4,
+                "input_tokens_total": 20000,
+                "output_tokens_total": 5000,
+                "framework_overhead_tokens": 500,
+                "initial_implementation_loc": 200,
+                "rework_lines_modified_or_deleted": 10,
+                "rework_turn_count": 1
+            },
+            "product_design_and_ux": {
+                "ui_components_touched": ui_touched,
+                "ux_state_completeness_score": ux_score
+            },
+            "architectural_fidelity": {"adherence_score": adherence},
+            "critical_assessment": {"net_utility_score": 4}
+        }
+
+    def test_ux_metric_filters_non_ui_tasks(self):
+        """Backend-only tasks (ui_touched=0) must not drag down the UX average."""
+        handler = self.srv.TelemetryRequestHandler
+        httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        port = httpd.server_port
+        server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        server_thread.start()
+
+        try:
+            # Submit a UI task with ux_completeness=0.93
+            p1 = self._make_payload("fp_ui_task_1", "gemini-2-flash", True, 0.93)
+            req1 = urllib.request.Request(
+                f"http://127.0.0.1:{port}/api/v1/telemetry",
+                data=json.dumps(p1).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req1, timeout=5) as resp:
+                self.assertEqual(resp.status, 201)
+
+            # Submit a backend task with ux_completeness=0.0 (no UI)
+            p2 = self._make_payload("fp_backend_task_1", "gemini-2-flash", False, 0.0)
+            req2 = urllib.request.Request(
+                f"http://127.0.0.1:{port}/api/v1/telemetry",
+                data=json.dumps(p2).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req2, timeout=5) as resp:
+                self.assertEqual(resp.status, 201)
+
+            # Submit another UI task with ux_completeness=0.97
+            p3 = self._make_payload("fp_ui_task_2", "claude-3-5-sonnet", True, 0.97)
+            req3 = urllib.request.Request(
+                f"http://127.0.0.1:{port}/api/v1/telemetry",
+                data=json.dumps(p3).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req3, timeout=5) as resp:
+                self.assertEqual(resp.status, 201)
+
+            # Query stats — UX should average only the 2 UI tasks: (0.93 + 0.97) / 2 = 0.95 → 95.0%
+            url = f"http://127.0.0.1:{port}/api/v1/stats"
+            with urllib.request.urlopen(url, timeout=5) as resp:
+                stats = json.loads(resp.read().decode("utf-8"))
+
+                summary = stats["summary"]
+                ux_pct = summary["mean_ux_state_completeness_pct"]
+                ui_count = summary["evaluated_ui_tasks_count"]
+
+                # Without filtering, this would be (0.93 + 0.0 + 0.97)/3 = 63.3%
+                # With filtering, it should be (0.93 + 0.97)/2 = 95.0%
+                self.assertEqual(ui_count, 2, "Only UI-touching tasks should be counted")
+                self.assertAlmostEqual(ux_pct, 95.0, places=0,
+                    msg=f"UX avg should be ~95.0% (UI tasks only), got {ux_pct}")
+
+                # Total submissions should still be 3
+                self.assertEqual(stats["total_submissions"], 3)
+
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+    def test_ux_metric_zero_ui_tasks(self):
+        """When no UI tasks exist, UX completeness should be 0.0 with count 0."""
+        handler = self.srv.TelemetryRequestHandler
+        httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        port = httpd.server_port
+        server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        server_thread.start()
+
+        try:
+            # Submit only backend tasks
+            p1 = self._make_payload("fp_no_ui_1", "gemini-2-flash", False, 0.0)
+            req1 = urllib.request.Request(
+                f"http://127.0.0.1:{port}/api/v1/telemetry",
+                data=json.dumps(p1).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req1, timeout=5) as resp:
+                self.assertEqual(resp.status, 201)
+
+            url = f"http://127.0.0.1:{port}/api/v1/stats"
+            with urllib.request.urlopen(url, timeout=5) as resp:
+                stats = json.loads(resp.read().decode("utf-8"))
+                summary = stats["summary"]
+                self.assertEqual(summary["evaluated_ui_tasks_count"], 0)
+                self.assertEqual(summary["mean_ux_state_completeness_pct"], 0.0)
+
+        finally:
+            httpd.shutdown()
+            httpd.server_close()
+
+    def test_recent_runs_enriched_fields(self):
+        """Recent runs must include task_description, ux_completeness_pct, and ui_touched."""
+        handler = self.srv.TelemetryRequestHandler
+        httpd = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        port = httpd.server_port
+        server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
+        server_thread.start()
+
+        try:
+            p1 = self._make_payload("fp_enrich_1", "gemini-2-flash", True, 0.88)
+            req1 = urllib.request.Request(
+                f"http://127.0.0.1:{port}/api/v1/telemetry",
+                data=json.dumps(p1).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            with urllib.request.urlopen(req1, timeout=5) as resp:
+                self.assertEqual(resp.status, 201)
+
+            url = f"http://127.0.0.1:{port}/api/v1/stats"
+            with urllib.request.urlopen(url, timeout=5) as resp:
+                stats = json.loads(resp.read().decode("utf-8"))
+                recent = stats["recent_runs"]
+                self.assertEqual(len(recent), 1)
+
+                run = recent[0]
+                self.assertEqual(run["task_description"], "Test task fp_enrich_1")
+                self.assertAlmostEqual(run["ux_completeness_pct"], 88.0, places=0)
+                self.assertTrue(run["ui_touched"])
+
         finally:
             httpd.shutdown()
             httpd.server_close()
@@ -302,3 +492,4 @@ class TestBenchmarkPortalPackageParity(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+

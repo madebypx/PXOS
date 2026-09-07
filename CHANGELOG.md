@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.1] - 2026-09-07
+
+### Fixed
+- **Telemetry UX Completeness Metric Filtering:** `mean_ux_state_completeness_pct` in `/api/v1/stats` now correctly averages only UI-touching tasks (`ui_touched = 1`), matching the filtering already used in `benchmarks/analyze.py`. Previously, backend-only tasks with `ux_completeness = 0.0` dragged down the aggregate, distorting the reported metric.
+
+### Added
+- **`evaluated_ui_tasks_count` in Stats Summary:** New field in the `/api/v1/stats` summary providing transparency on how many submissions contributed to the UX completeness average.
+- **Enriched `recent_runs` Response:** Each entry in the `recent_runs` array now includes `task_description`, `ux_completeness_pct`, and `ui_touched` fields, enabling downstream consumers (dashboards, site) to display richer run details without a separate endpoint.
+- **Live Telemetry Chart Integration (pxos-site):** `TelemetryCharts.tsx` now consumes `stats.recent_runs` from the live API when available, falling back to the static baseline dataset when offline.
+
+### Changed
+- Synchronized release version to `2.5.1` across `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `generate-llms-txt.py`, and web metadata.
+
+---
+
 ## [2.5.0] - 2026-09-07
 
 ### Added

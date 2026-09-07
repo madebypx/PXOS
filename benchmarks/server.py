@@ -433,6 +433,7 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                                 "mean_framework_overhead_tokens": 0.0,
                                 "mean_rework_ratio_pct": 0.0,
                                 "mean_ux_state_completeness_pct": 0.0,
+                                "evaluated_ui_tasks_count": 0,
                                 "overhead_justified_rate_pct": 0.0,
                                 "mean_turns_per_task": 0.0,
                                 "mean_adherence_score": 0.0,
@@ -465,7 +466,6 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                             AVG(framework_overhead_tokens),
                             AVG(rework_loc),
                             AVG(initial_loc),
-                            AVG(ux_completeness),
                             AVG(overhead_justified),
                             AVG(adherence_score)
                         FROM submissions
@@ -478,10 +478,24 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     avg_overhead = round(row[3] or 0.0, 1)
                     avg_rework = round(row[4] or 0.0, 1)
                     avg_initial_loc = round(row[5] or 1.0, 1)
-                    avg_ux = round((row[6] or 0.0) * 100, 1)
-                    overhead_justified_pct = round((row[7] or 0.0) * 100, 1)
+                    overhead_justified_pct = round((row[6] or 0.0) * 100, 1)
                     rework_ratio_pct = round((avg_rework / max(1.0, avg_initial_loc)) * 100, 1)
-                    avg_adherence = round(row[8] or 0.0, 1)
+                    avg_adherence = round(row[7] or 0.0, 1)
+
+                    # UX Completeness: filter to UI-touching tasks only (matches analyze.py behavior)
+                    ui_filter = "ui_touched = 1"
+                    if filter_clause:
+                        ui_filter_clause = f"{filter_clause} AND {ui_filter}"
+                    else:
+                        ui_filter_clause = f"WHERE {ui_filter}"
+                    cur.execute(f"""
+                        SELECT AVG(ux_completeness), COUNT(*)
+                        FROM submissions
+                        {ui_filter_clause}
+                    """)
+                    ux_row = cur.fetchone()
+                    avg_ux = round((ux_row[0] or 0.0) * 100, 1)
+                    evaluated_ui_tasks_count = ux_row[1] or 0
 
                     # Model comparative aggregates
                     cur.execute(f"""
@@ -537,7 +551,10 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                             adherence_score,
                             qualification_tier,
                             is_qualified,
-                            project_hash
+                            project_hash,
+                            task_description,
+                            ux_completeness,
+                            ui_touched
                         FROM submissions
                         {filter_clause}
                         ORDER BY id DESC
@@ -561,7 +578,10 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                             "adherence_score": r[8] or 0,
                             "qualification_tier": r[9] or "tier_c_noise",
                             "is_qualified": bool(r[10]),
-                            "project_hash": (r[11] or "")[:12]
+                            "project_hash": (r[11] or "")[:12],
+                            "task_description": r[12] or "",
+                            "ux_completeness_pct": round((r[13] or 0.0) * 100, 1),
+                            "ui_touched": bool(r[14])
                         })
 
                     cur.execute("SELECT complexity_tier, COUNT(*) FROM submissions GROUP BY complexity_tier")
@@ -585,6 +605,7 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     "mean_framework_overhead_tokens": avg_overhead,
                     "mean_rework_ratio_pct": rework_ratio_pct,
                     "mean_ux_state_completeness_pct": avg_ux,
+                    "evaluated_ui_tasks_count": evaluated_ui_tasks_count,
                     "overhead_justified_rate_pct": overhead_justified_pct,
                     "mean_turns_per_task": avg_turns,
                     "mean_adherence_score": avg_adherence,
