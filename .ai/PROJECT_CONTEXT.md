@@ -1,5 +1,5 @@
 # Project Context
-<!-- pxos:version 2.2.0 -->
+<!-- pxos:version 2.4.0 -->
 
 This file contains durable, project-specific facts for PXOS development.
 
@@ -65,4 +65,16 @@ In order:
 - Scripts: Python 3 with type hints, POSIX compliance for bash scripts.
 - Telemetry: strictly anonymous, numeric metrics and categorical enums only.
 - **Internal vs Public Isolation:** `.internal/` is `.gitignore`d and serves as the mandatory quarantine for all internal, team-exclusive, draft, marketing, launch copy, and sprint tracking files. NEVER place unreleased, sensitive, or team-only documents into public directories (`docs/`, `templates/`, `scripts/`, root). Coisas INTERNAS ficam no `.internal/`.
+
+---
+
+## Critical invariants
+
+Hard constraints that must never be violated by any agent. Use short IDs for traceability.
+
+- **INV-001 (Telemetry Privacy & Opt-in Anonymization):** The telemetry benchmark system must never capture, store, or transmit unconsented PII, private source code, or unhashed commercial repository names. All remote submissions are strictly opt-in and sanitized.
+- **INV-002 (Internal Quarantine):** All internal notes, launch drafts, sprint tracking, marketing copy, and sensitive team workflows must remain strictly quarantined inside `.internal/` (which is `.gitignore`d). Never place internal assets in public folders (`docs/`, `templates/`, `scripts/`, root).
+- **INV-003 (Zero External Core Dependencies):** Core CLI, installer, and daemon tools must rely exclusively on Python 3 standard library, POSIX `sh`, or PowerShell `pwsh`. No third-party packages required for baseline framework usage.
+- **INV-004 (English Conventional Commits):** All git commit messages must be written in English following Conventional Commits standard (`feat: ...`, `fix: ...`, `docs: ...`, `chore: ...`).
+- **INV-005 (Append-Only Decision Log):** `.ai/DECISION_LOG.md` is strictly append-only and chronological. Entries must never be deleted, rewritten, or discarded.
 

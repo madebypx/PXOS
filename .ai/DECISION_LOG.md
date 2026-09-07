@@ -38,6 +38,30 @@ Multi-Agent Note: Entries are strictly additive and chronological. If a Git merg
 
 <!-- Add decisions below this line, most recent first -->
 
+## 2026-09-06 — Automated Package Parity Verification, AI Crawlability Mirroring, and Multi-OS CI Testing
+
+**Decision:**
+Implement automated continuous package parity checks (`scripts/sync-package-data.py --check`) in CI and release workflows, expand AI crawlability mirroring to package data (`pxos/templates/site/public/`), institute a multi-OS GitHub Actions test pipeline (`.github/workflows/test.yml`), and harden the telemetry server with active memory eviction and SQLite busy timeout resilience.
+
+**Context:**
+The v2.4.0 audit revealed packaging drift between repository root templates/scripts and bundled PyPI data in `pxos/` (`[PKG-02]`), as well as desynchronization in `llms-full.txt` crawlability checks (`[PKG-03]`), absent CI test automation on PRs/pushes (`[REL-06]`), and unbounded memory growth in the telemetry server rate limiter (`[PERF-02]`). An automated, standard-library enforcement mechanism was required to guarantee that no release can be packaged or merged without byte-level parity across source templates, package data, and crawler indices.
+
+**Options considered:**
+- Option A — Manual sync prior to git tagging: Rejected because manual sync is error-prone, developer amnesia creates PyPI drift, and PRs can merge regressions undetected.
+- Option B — Heavy third-party build hooks (e.g. Hatchling/Flit plugins, complex tox setups): Rejected to preserve Core Invariant `INV-003` (zero external core dependencies).
+- Chosen: Option C — Lightweight Python stdlib synchronization and parity check script (`scripts/sync-package-data.py`) hooked into `.github/workflows/test.yml` (multi-OS matrix), `release.yml`, and `tests/test_audit_remediation.py`.
+
+**Tradeoffs:**
+- Gains: Downstream PyPI users guaranteed to receive identical governance rules (Completion Honesty Protocol, No-Assumption Clause); AI agents consume synchronized `llms.txt`; zero runtime dependencies; telemetry server protected against OOM under high IP churn.
+- Cost: Build and CI steps run additional parity verification before publishing.
+
+**Impact:**
+Touched `scripts/sync-package-data.py`, `pxos/scripts/sync-package-data.py`, `pxos/templates/`, `scripts/generate-llms-txt.py`, `.github/workflows/test.yml`, `.github/workflows/release.yml`, `benchmarks/server.py`, `WORKFLOWS.md`, `skills/update/SKILL.md`, `.ai/PROJECT_CONTEXT.md`, and `tests/test_audit_remediation.py`.
+
+**Status:** Active
+
+---
+
 ## 2026-09-04 — Transition Repository Licensing to Apache License 2.0 (Apache-2.0)
 
 **Decision:**

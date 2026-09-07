@@ -43,7 +43,7 @@ Do not run the command until you have confirmed which IDE was detected and which
 
 ## `/update` — Upgrade PXOS to latest version
 
-**When to use:** When upgrading an existing PXOS project to the latest version (v2.2.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
+**When to use:** When upgrading an existing PXOS project to the latest version (v2.4.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
 
 ```
 Upgrade PXOS in this project by following these steps:
@@ -56,11 +56,12 @@ Upgrade PXOS in this project by following these steps:
    curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
 
 3. Summarize what was updated:
-   - Report updated version (v2.2.0).
+   - Report updated version (v2.4.0).
+   - Confirm that .ai/AI_BASE.md includes Completion Honesty Protocol, No-Assumption Clause, and Multi-Agent Etiquette.
    - Confirm that .ai/specs/TEMPLATE_SPEC.md includes Strategic & Audit Alignment.
-   - Confirm that .ai/research/ and .ai/audits/ directories and starter guides are present.
+   - Confirm that .ai/research/ and .ai/audits/ directories and starter indexes are present.
    - Confirm that PROJECT_CONTEXT.md, DECISION_LOG.md, and all active specs remain untouched.
-   - State that the project is now ready for v2.2.0 workflows (/decision, /audit, /benchmark, UX reviews).
+   - State that the project is now ready for v2.4.0 workflows (/decision, /audit, /benchmark, UX reviews).
 ```
 
 ---

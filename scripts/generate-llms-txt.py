@@ -129,31 +129,47 @@ def main():
             print("Check Failed: llms-full.txt is missing or out of sync.", file=sys.stderr)
             errors = True
 
+        # Validate mirror paths
+        mirror_dirs = [
+            REPO_ROOT / "templates" / "site" / "public",
+            REPO_ROOT / "pxos" / "templates" / "site" / "public",
+        ]
+        for mirror_dir in mirror_dirs:
+            if mirror_dir.exists():
+                m_txt = mirror_dir / "llms.txt"
+                m_full = mirror_dir / "llms-full.txt"
+                if not m_txt.exists() or m_txt.read_text(encoding="utf-8") != expected_llms_txt:
+                    print(f"Check Failed: {m_txt.relative_to(REPO_ROOT)} is missing or out of sync.", file=sys.stderr)
+                    errors = True
+                if not m_full.exists() or m_full.read_text(encoding="utf-8") != expected_llms_full:
+                    print(f"Check Failed: {m_full.relative_to(REPO_ROOT)} is missing or out of sync.", file=sys.stderr)
+                    errors = True
+
         if errors:
             sys.exit(1)
         print("[OK] llms.txt and llms-full.txt are valid and up to date.")
         sys.exit(0)
 
-    # Write files
+    # Write root files
     llms_txt_path.write_text(expected_llms_txt, encoding="utf-8")
     print(f"[CREATED/UPDATED] {llms_txt_path}")
 
     llms_full_path.write_text(expected_llms_full, encoding="utf-8")
     print(f"[CREATED/UPDATED] {llms_full_path} ({len(expected_llms_full)} bytes)")
 
-    # Mirror to templates/site/public/
-    site_public = REPO_ROOT / "templates" / "site" / "public"
-    if site_public.exists():
-        (site_public / "llms.txt").write_text(expected_llms_txt, encoding="utf-8")
-        (site_public / "llms-full.txt").write_text(expected_llms_full, encoding="utf-8")
-        print(f"[MIRRORED] {site_public}")
+    # Mirror targets: templates, packaged templates, and sibling site
+    mirror_targets = [
+        REPO_ROOT / "templates" / "site" / "public",
+        REPO_ROOT / "pxos" / "templates" / "site" / "public",
+        REPO_ROOT.parent / "pxos-site" / "public",
+    ]
 
-    # Mirror to sibling pxos-site/public if available
-    sibling_site = REPO_ROOT.parent / "pxos-site" / "public"
-    if sibling_site.exists():
-        (sibling_site / "llms.txt").write_text(expected_llms_txt, encoding="utf-8")
-        (sibling_site / "llms-full.txt").write_text(expected_llms_full, encoding="utf-8")
-        print(f"[MIRRORED] {sibling_site}")
+    for target in mirror_targets:
+        if target.exists():
+            target.mkdir(parents=True, exist_ok=True)
+            (target / "llms.txt").write_text(expected_llms_txt, encoding="utf-8")
+            (target / "llms-full.txt").write_text(expected_llms_full, encoding="utf-8")
+            print(f"[MIRRORED] {target}")
 
     if validate_llms_txt(expected_llms_txt):
         print("[OK] Validation passed against llmstxt.org standard.")

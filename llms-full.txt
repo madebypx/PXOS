@@ -309,7 +309,7 @@ pxos init --ide cursor
 
 ### Safe Upgrade for Existing Projects
 
-To upgrade an existing project to **PXOS v2.2.0** without touching your project context, active specs, or decision logs:
+To upgrade an existing project to **PXOS v2.4.0** without touching your project context, active specs, or decision logs:
 
 ```bash
 # Bash
@@ -479,6 +479,7 @@ Do not skip phases. Do not implement before the plan is confirmed.
 
 - Load only the files relevant to the current task.
 - Do not scan the entire codebase unless explicitly required.
+- Never substitute file reading with assumptions. If a task involves domain-specific values (thresholds, deadlines, statuses, ID formats, business rules), reading the source of truth for those values is mandatory — not optional. Guessing a constant to save tokens is always worse than reading the file that defines it.
 - Summarize findings before continuing to the next phase.
 - Avoid repeating established context within the same session.
 - Break large tasks into smaller tasks if context grows noisy.
@@ -529,6 +530,16 @@ A task is complete when:
 - Edge cases are handled or explicitly acknowledged
 - The diff is as small as it can be while still solving the problem
 
+### Completion reporting
+
+When reporting task completion, always provide:
+
+1. **Verified** — what was directly checked (build, tests, manual steps, runtime behavior)
+2. **Not verified** — which acceptance criteria or edge cases were not directly tested
+3. **Residual risks** — assumptions made, integration points not exercised, or conditions that could cause failure beyond the immediate scope
+
+A passing build verifies syntax, not business correctness. Never declare "100% complete", "fully functional", or "no issues" based solely on compilation or build success.
+
 ---
 
 ## Behavioral constraints
@@ -538,9 +549,14 @@ A task is complete when:
 - Never modify files that are not relevant to the task
 - Never assume behavior — verify it
 - Never optimize prematurely
+- Never declare completion based solely on build or compilation success
+- Never use assumed or invented constants — always source values from code or domain rules
+- Never treat a multi-node system as single-node — if data persists in multiple locations, trace mutations through all of them
+- Never place internal, sensitive, draft, marketing, launch copy, sprint tracking, or team-exclusive materials into public repository folders (e.g., `docs/`, `templates/`, `scripts/`, root). Coisas INTERNAS ficam no `.internal/` (which must be gitignored).
 - Always explain tradeoffs when making non-obvious decisions
 - Always prefer existing patterns over new ones
 - Always ask before making high-risk changes
+- Always keep internal team notes, draft materials, and unreleased documentation strictly quarantined in `.internal/`
 
 ---
 
@@ -607,7 +623,7 @@ Do not run the command until you have confirmed which IDE was detected and which
 
 ## `/update` — Upgrade PXOS to latest version
 
-**When to use:** When upgrading an existing PXOS project to the latest version (v2.2.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
+**When to use:** When upgrading an existing PXOS project to the latest version (v2.4.0). Safely updates universal operating rules (`AI_BASE.md`), modular specs template (`TEMPLATE_SPEC.md`), research/audit scaffolding, and IDE rules while strictly preserving custom project facts (`PROJECT_CONTEXT.md`), active specs, and decision logs.
 
 ```
 Upgrade PXOS in this project by following these steps:
@@ -620,11 +636,12 @@ Upgrade PXOS in this project by following these steps:
    curl -sSL https://raw.githubusercontent.com/madebypx/PXOS/main/install.sh | bash -s -- --update
 
 3. Summarize what was updated:
-   - Report updated version (v2.2.0).
+   - Report updated version (v2.4.0).
+   - Confirm that .ai/AI_BASE.md includes Completion Honesty Protocol, No-Assumption Clause, and Multi-Agent Etiquette.
    - Confirm that .ai/specs/TEMPLATE_SPEC.md includes Strategic & Audit Alignment.
-   - Confirm that .ai/research/ and .ai/audits/ directories and starter guides are present.
+   - Confirm that .ai/research/ and .ai/audits/ directories and starter indexes are present.
    - Confirm that PROJECT_CONTEXT.md, DECISION_LOG.md, and all active specs remain untouched.
-   - State that the project is now ready for v2.2.0 workflows (/decision, /audit, /benchmark, UX reviews).
+   - State that the project is now ready for v2.4.0 workflows (/decision, /audit, /benchmark, UX reviews).
 ```
 
 ---
@@ -731,6 +748,12 @@ Before writing any code, produce a plan based on the active spec that includes:
    - Main risks and cross-task dependencies
    - How success will be validated
 
+3. Mutation Lifecycle Check (conditional — only if this task creates, modifies, or deletes persisted data across multiple sources):
+   - List every persistence node affected (e.g., database, local storage, file system, external API, cache layer).
+   - For each relevant mutation (Create / Update / Delete), state how it propagates to each node.
+   - If a node is intentionally NOT updated, state why and confirm no background process (watcher, sync, cron) will contradict that decision.
+   - Cross-reference critical invariants from `PROJECT_CONTEXT.md` if present.
+
 After presenting the plan, explicitly state:
 - What decision or confirmation you need from me before executing
 - What will NOT happen until I approve
@@ -759,6 +782,11 @@ UX & Interaction Heuristics (If the diff modifies UI, styles, or frontend intera
 - Status visibility: Are loading states, transitions, and system feedback clear and responsive?
 - Error prevention: Are destructive actions guarded with confirmation? Are validation errors clear?
 - Cognitive friction: Is the user flow direct and intuitive, minimizing unnecessary clicks or confusion?
+
+Spec Satisfaction Check:
+- Re-read the active spec's acceptance criteria.
+- For each criterion, classify: ✅ Verified (state how) | ⚠️ Not directly verified (state why) | ❌ Not met (state what's missing).
+- Flag any implementation that relies on assumed values not sourced from the codebase or domain rules.
 
 If a simpler valid solution exists, point it out.
 Do not refactor without my approval.

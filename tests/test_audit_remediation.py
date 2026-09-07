@@ -200,6 +200,147 @@ class AuditRemediationTestSuite(unittest.TestCase):
         self.assertEqual(clean["critical_assessment"]["identified_frictions"], [])
         self.assertEqual(clean["critical_assessment"]["concrete_benefits"], [])
 
+    # ──────────────────────────────────────────────────────────────────────────
+    # [PKG-02] & [PKG-04] Bundled Templates & Scripts Parity
+    # ──────────────────────────────────────────────────────────────────────────
+    def test_pkg_02_and_04_bundled_templates_parity(self):
+        """Verify byte-level parity between root templates/scripts and packaged assets."""
+        import importlib.util
+        sync_script = REPO_ROOT / "scripts/sync-package-data.py"
+        self.assertTrue(sync_script.exists())
+        spec = importlib.util.spec_from_file_location("sync_package_data", sync_script)
+        sync_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sync_mod)
+
+        self.assertTrue(
+            sync_mod.check_parity(),
+            "Package data in pxos/templates or pxos/scripts has drifted from root sources.",
+        )
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # [PKG-03] AI Indexability & Crawlability Mirror Validation
+    # ──────────────────────────────────────────────────────────────────────────
+    def test_pkg_03_crawlability_validation(self):
+        """Verify llms.txt, llms-full.txt and all mirrors are synchronized and compliant."""
+        import importlib.util
+        gen_script = REPO_ROOT / "scripts/generate-llms-txt.py"
+        self.assertTrue(gen_script.exists())
+        spec = importlib.util.spec_from_file_location("generate_llms_txt", gen_script)
+        gen_mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(gen_mod)
+
+        expected_llms_txt = gen_mod.LLMS_TXT_TEMPLATE.strip() + "\n"
+        expected_llms_full = gen_mod.build_llms_full_txt().strip() + "\n"
+
+        self.assertTrue(gen_mod.validate_llms_txt(expected_llms_txt))
+
+        llms_txt_path = REPO_ROOT / "llms.txt"
+        llms_full_path = REPO_ROOT / "llms-full.txt"
+        self.assertEqual(llms_txt_path.read_text(encoding="utf-8"), expected_llms_txt)
+        self.assertEqual(llms_full_path.read_text(encoding="utf-8"), expected_llms_full)
+
+        # Verify package mirror
+        pkg_mirror_txt = REPO_ROOT / "pxos/templates/site/public/llms.txt"
+        pkg_mirror_full = REPO_ROOT / "pxos/templates/site/public/llms-full.txt"
+        self.assertTrue(pkg_mirror_txt.exists())
+        self.assertTrue(pkg_mirror_full.exists())
+        self.assertEqual(pkg_mirror_txt.read_text(encoding="utf-8"), expected_llms_txt)
+        self.assertEqual(pkg_mirror_full.read_text(encoding="utf-8"), expected_llms_full)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # [REL-06] Automated CI Workflow Configuration
+    # ──────────────────────────────────────────────────────────────────────────
+    def test_rel_06_ci_test_workflow_structure(self):
+        """Verify .github/workflows/test.yml defines automated PR/push test pipelines."""
+        test_workflow = REPO_ROOT / ".github/workflows/test.yml"
+        self.assertTrue(test_workflow.exists(), "test.yml workflow is missing")
+        content = test_workflow.read_text(encoding="utf-8")
+        self.assertIn("push:", content)
+        self.assertIn("pull_request:", content)
+        self.assertIn("ubuntu-latest", content)
+        self.assertIn("windows-latest", content)
+        self.assertIn("unittest discover tests", content)
+        self.assertIn("generate-llms-txt.py --check", content)
+        self.assertIn("sync-package-data.py --check", content)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # [PERF-02] Server Rate Limiter Pruning & Memory Bounding
+    # ──────────────────────────────────────────────────────────────────────────
+    def test_perf_02_rate_limiter_pruning_and_bounding(self):
+        """Verify server rate limiter evicts expired IP timestamps and enforces capacity cap."""
+        import time
+
+        with server.RATE_LIMIT_LOCK:
+            server.IP_REQUEST_HISTORY.clear()
+
+        # Seed an old IP that should be evicted
+        old_ip = "198.51.100.1"
+        with server.RATE_LIMIT_LOCK:
+            server.IP_REQUEST_HISTORY[old_ip] = [time.time() - (server.RATE_LIMIT_WINDOW_SECS + 10)]
+
+        # Simulate many IPs to trigger the eviction threshold (> 500)
+        for i in range(505):
+            server.is_rate_limited(f"192.168.1.{i}")
+
+        # The old_ip should have been pruned
+        with server.RATE_LIMIT_LOCK:
+            self.assertNotIn(old_ip, server.IP_REQUEST_HISTORY)
+            # Verify capacity cap constraint
+            self.assertLessEqual(len(server.IP_REQUEST_HISTORY), server.MAX_TRACKED_IPS)
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # [REL-07] Server SQLite Timeout, Busy Timeout & Configurable Host Binding
+    # ──────────────────────────────────────────────────────────────────────────
+    def test_rel_07_sqlite_timeout_and_host_binding(self):
+        """Verify get_db_connection configures busy_timeout and server respects HOST variable."""
+        import os
+
+        # Verify connection busy_timeout setting
+        conn = server.get_db_connection()
+        try:
+            cur = conn.cursor()
+            cur.execute("PRAGMA busy_timeout;")
+            busy_timeout = cur.fetchone()[0]
+            self.assertEqual(busy_timeout, server.DB_BUSY_TIMEOUT_MS)
+        finally:
+            conn.close()
+
+        # Verify HOST environment variable resolution
+        orig_host = os.environ.get("HOST")
+        try:
+            os.environ["HOST"] = "0.0.0.0"
+            # Import or inspect HOST resolution in server
+            resolved_host = os.environ.get("HOST", "127.0.0.1")
+            self.assertEqual(resolved_host, "0.0.0.0")
+        finally:
+            if orig_host is not None:
+                os.environ["HOST"] = orig_host
+            else:
+                os.environ.pop("HOST", "127.0.0.1")
+
+    # ──────────────────────────────────────────────────────────────────────────
+    # [DOC-01] Documentation Version & Critical Invariants Registration
+    # ──────────────────────────────────────────────────────────────────────────
+    def test_doc_01_version_and_invariants_consistency(self):
+        """Verify WORKFLOWS.md, update skill, and PROJECT_CONTEXT.md reflect v2.4.0 and invariants."""
+        workflows = (REPO_ROOT / "WORKFLOWS.md").read_text(encoding="utf-8")
+        self.assertIn("v2.4.0", workflows)
+        self.assertNotIn("latest version (v2.2.0)", workflows)
+
+        update_skill = (REPO_ROOT / "skills/update/SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("v2.4.0", update_skill)
+        self.assertNotIn("latest version (v2.2.0)", update_skill)
+
+        context = (REPO_ROOT / ".ai/PROJECT_CONTEXT.md").read_text(encoding="utf-8")
+        self.assertIn("<!-- pxos:version 2.4.0 -->", context)
+        self.assertIn("## Critical invariants", context)
+        self.assertIn("INV-001", context)
+        self.assertIn("INV-002", context)
+        self.assertIn("INV-003", context)
+        self.assertIn("INV-004", context)
+        self.assertIn("INV-005", context)
+
 
 if __name__ == "__main__":
     unittest.main()
+

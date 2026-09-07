@@ -22,14 +22,18 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Optional, Tuple
 
+HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8090"))
 DB_PATH = Path(os.environ.get("DB_PATH", "/opt/pxos-telemetry/data/telemetry.db"))
 MAX_PAYLOAD_BYTES = 65536  # 64 KB
+DB_TIMEOUT_SECS = 30.0
+DB_BUSY_TIMEOUT_MS = 5000
 
 DB_LOCK = threading.Lock()
 RATE_LIMIT_LOCK = threading.Lock()
 RATE_LIMIT_WINDOW_SECS = 60.0
 MAX_REQUESTS_PER_WINDOW = 20
+MAX_TRACKED_IPS = 10000
 IP_REQUEST_HISTORY: Dict[str, list] = {}
 TRUSTED_PROXIES = {"127.0.0.1", "::1"}
 
@@ -38,17 +42,42 @@ VALID_MODES = {"retrospective", "controlled_ab", "unknown"}
 
 
 def is_rate_limited(ip: str) -> bool:
-    """Simple sliding-window in-memory rate limiter per client IP."""
+    """Sliding-window in-memory rate limiter per client IP with active memory pruning."""
     now = time.time()
     with RATE_LIMIT_LOCK:
+        # Prune stale timestamps for current IP
         history = IP_REQUEST_HISTORY.get(ip, [])
         valid_history = [t for t in history if now - t < RATE_LIMIT_WINDOW_SECS]
+
+        # Periodic eviction of stale IPs if tracked dictionary expands
+        if len(IP_REQUEST_HISTORY) > 500:
+            stale_ips = [
+                k for k, timestamps in IP_REQUEST_HISTORY.items()
+                if not timestamps or (now - timestamps[-1] >= RATE_LIMIT_WINDOW_SECS)
+            ]
+            for stale_ip in stale_ips:
+                del IP_REQUEST_HISTORY[stale_ip]
+
+        # Capacity cap bounding: if still exceeding max capacity, evict oldest entries
+        if len(IP_REQUEST_HISTORY) >= MAX_TRACKED_IPS:
+            overflow = len(IP_REQUEST_HISTORY) - MAX_TRACKED_IPS + 50
+            for k in list(IP_REQUEST_HISTORY.keys())[:overflow]:
+                del IP_REQUEST_HISTORY[k]
+
         if len(valid_history) >= MAX_REQUESTS_PER_WINDOW:
             IP_REQUEST_HISTORY[ip] = valid_history
             return True
+
         valid_history.append(now)
         IP_REQUEST_HISTORY[ip] = valid_history
         return False
+
+
+def get_db_connection() -> sqlite3.Connection:
+    """Create a SQLite connection with busy_timeout pragma and configured timeout."""
+    conn = sqlite3.connect(DB_PATH, timeout=DB_TIMEOUT_SECS)
+    conn.execute(f"PRAGMA busy_timeout = {DB_BUSY_TIMEOUT_MS};")
+    return conn
 
 
 def init_database():
@@ -56,7 +85,7 @@ def init_database():
     conn = None
     with DB_LOCK:
         try:
-            conn = sqlite3.connect(DB_PATH)
+            conn = get_db_connection()
             cur = conn.cursor()
             cur.execute("PRAGMA journal_mode=WAL;")
             cur.execute("""
@@ -266,7 +295,7 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
             conn = None
             try:
                 with DB_LOCK:
-                    conn = sqlite3.connect(DB_PATH)
+                    conn = get_db_connection()
                     cur = conn.cursor()
                     cur.execute("""
                         SELECT 
@@ -372,7 +401,7 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
         conn = None
         try:
             with DB_LOCK:
-                conn = sqlite3.connect(DB_PATH)
+                conn = get_db_connection()
                 cur = conn.cursor()
                 cur.execute("""
                     INSERT INTO submissions (
@@ -417,9 +446,10 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
 
 def run_server():
     init_database()
-    server_address = ("127.0.0.1", PORT)
+    host = os.environ.get("HOST", "127.0.0.1")
+    server_address = (host, PORT)
     httpd = http.server.ThreadingHTTPServer(server_address, TelemetryRequestHandler)
-    print(f"PXOS Telemetry Server listening on http://127.0.0.1:{PORT}")
+    print(f"PXOS Telemetry Server listening on http://{host}:{PORT}")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

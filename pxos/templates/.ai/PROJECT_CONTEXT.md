@@ -91,3 +91,16 @@ In order:
 **Research directory:** `.ai/research/` (or `docs/research/`)
 **Audits directory:** `.ai/audits/` (or `docs/audits/`)
 **Design / Tokens:** [e.g. `docs/DESIGN.md` or `.ai/research/DESIGN.md`]
+
+---
+
+## Critical invariants (optional)
+
+Hard constraints that must never be violated by any agent. Use short IDs for traceability.
+Leave this section empty or remove it if the project has no critical invariants.
+
+<!-- Example:
+- **INV-001:** Quarantine period is always >= 120 days. Never hardcode shorter values.
+- **INV-002:** Assignment IDs must be deterministic: `prefix_${source}_${sourceId}`.
+- **INV-003:** Every data mutation must propagate to all persistence nodes (DB + Bridge + Cache).
+-->
