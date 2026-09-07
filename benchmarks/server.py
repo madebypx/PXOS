@@ -11,6 +11,7 @@ Endpoints:
     GET  /api/v1/health     - Service health check
 """
 
+import hashlib
 import http.server
 import json
 import os
@@ -37,8 +38,48 @@ MAX_TRACKED_IPS = 10000
 IP_REQUEST_HISTORY: Dict[str, list] = {}
 TRUSTED_PROXIES = {"127.0.0.1", "::1"}
 
+PROJECT_RATE_LIMIT_LOCK = threading.Lock()
+PROJECT_RATE_LIMIT_WINDOW_SECS = 86400.0  # 24 hours
+MAX_PROJECT_SUBMISSIONS_PER_DAY = 10
+MAX_TRACKED_PROJECTS = 10000
+PROJECT_REQUEST_HISTORY: Dict[str, list] = {}
+
 VALID_COMPLEXITY_TIERS = {"tier_1_micro", "tier_2_medium", "tier_3_complex"}
 VALID_MODES = {"retrospective", "controlled_ab", "unknown"}
+VALID_QUALIFICATION_TIERS = {"tier_a_rigor", "tier_b_partial", "tier_c_noise"}
+
+
+def is_project_rate_limited(project_hash: str) -> bool:
+    """Sliding-window rate limiter per project hash (max 10 submissions per 24 hours)."""
+    if not project_hash:
+        return False
+    now = time.time()
+    with PROJECT_RATE_LIMIT_LOCK:
+        history = PROJECT_REQUEST_HISTORY.get(project_hash, [])
+        valid_history = [t for t in history if now - t < PROJECT_RATE_LIMIT_WINDOW_SECS]
+
+        # Periodic cleanup of stale projects
+        if len(PROJECT_REQUEST_HISTORY) > 500:
+            stale_keys = [
+                k for k, timestamps in PROJECT_REQUEST_HISTORY.items()
+                if not timestamps or (now - timestamps[-1] >= PROJECT_RATE_LIMIT_WINDOW_SECS)
+            ]
+            for stale_k in stale_keys:
+                del PROJECT_REQUEST_HISTORY[stale_k]
+
+        if len(PROJECT_REQUEST_HISTORY) >= MAX_TRACKED_PROJECTS:
+            overflow = len(PROJECT_REQUEST_HISTORY) - MAX_TRACKED_PROJECTS + 50
+            for k in list(PROJECT_REQUEST_HISTORY.keys())[:overflow]:
+                del PROJECT_REQUEST_HISTORY[k]
+
+        if len(valid_history) >= MAX_PROJECT_SUBMISSIONS_PER_DAY:
+            PROJECT_REQUEST_HISTORY[project_hash] = valid_history
+            return True
+
+        valid_history.append(now)
+        PROJECT_REQUEST_HISTORY[project_hash] = valid_history
+        return False
+
 
 
 def is_rate_limited(ip: str) -> bool:
@@ -92,6 +133,13 @@ def init_database():
                 CREATE TABLE IF NOT EXISTS submissions (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     received_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                    session_fingerprint TEXT UNIQUE,
+                    schema_version TEXT DEFAULT '2.0',
+                    project_hash TEXT,
+                    adherence_score INTEGER DEFAULT 0,
+                    qualification_tier TEXT DEFAULT 'tier_c_noise',
+                    is_qualified INTEGER DEFAULT 0,
+                    git_tree_hash TEXT,
                     client_ip TEXT,
                     evaluation_mode TEXT,
                     project_name TEXT,
@@ -123,9 +171,32 @@ def init_database():
                     raw_payload JSON
                 );
             """)
+
+            # Dynamic column migration for existing tables
+            cur.execute("PRAGMA table_info(submissions);")
+            existing_cols = {row[1] for row in cur.fetchall()}
+            migrations = [
+                ("session_fingerprint", "TEXT"),
+                ("schema_version", "TEXT DEFAULT '2.0'"),
+                ("project_hash", "TEXT"),
+                ("adherence_score", "INTEGER DEFAULT 0"),
+                ("qualification_tier", "TEXT DEFAULT 'tier_c_noise'"),
+                ("is_qualified", "INTEGER DEFAULT 0"),
+                ("git_tree_hash", "TEXT"),
+            ]
+            for col_name, col_def in migrations:
+                if col_name not in existing_cols:
+                    try:
+                        cur.execute(f"ALTER TABLE submissions ADD COLUMN {col_name} {col_def};")
+                    except sqlite3.OperationalError:
+                        pass
+
             cur.execute("CREATE INDEX IF NOT EXISTS idx_tier ON submissions(complexity_tier);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_mode ON submissions(evaluation_mode);")
             cur.execute("CREATE INDEX IF NOT EXISTS idx_status ON submissions(verified_status);")
+            cur.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_fingerprint ON submissions(session_fingerprint);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_qualified ON submissions(is_qualified);")
+            cur.execute("CREATE INDEX IF NOT EXISTS idx_project_hash ON submissions(project_hash);")
             conn.commit()
         finally:
             if conn:
@@ -151,6 +222,15 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
     if tier not in VALID_COMPLEXITY_TIERS:
         tier = "tier_2_medium"
 
+    schema_version = str(meta.get("schema_version", "2.0")).strip()[:16]
+    session_fingerprint = str(meta.get("session_fingerprint", "")).strip()[:64]
+    git_tree_hash = str(meta.get("git_tree_hash", "")).strip()[:64]
+
+    raw_project_name = str(meta.get("project_name", "anonymous"))[:64]
+    project_hash = str(meta.get("project_hash", "")).strip()[:16]
+    if not project_hash:
+        project_hash = hashlib.sha256(raw_project_name.encode("utf-8")).hexdigest()[:16]
+
     try:
         total_turns = int(telemetry.get("total_turns", 0))
         input_tokens = int(telemetry.get("input_tokens_total", 0))
@@ -167,6 +247,7 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
         duplicate_utils = int(arch.get("duplicate_utilities_introduced", 0))
         adrs_consulted = int(arch.get("adrs_consulted_count", 0))
         new_adrs = int(arch.get("new_adrs_registered", 0))
+        adherence_score = int(arch.get("adherence_score", 0))
 
         # Sanity range constraints
         if not (0 <= total_turns <= 1000):
@@ -179,15 +260,42 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
             return False, "ux_state_completeness_score must be between 0.0 and 1.0", None
         if not (-5 <= net_utility_score <= 5):
             return False, "net_utility_score must be between -5 and 5", None
+        if not (0 <= adherence_score <= 100):
+            return False, "adherence_score must be between 0 and 100", None
+
+        # Plausibility constraints & anti-spoofing guards
+        if rework_turns > 0 and rework_loc == 0:
+            return False, "Plausibility violation: rework_turn_count > 0 cannot have 0 rework LOC", None
+        if total_turns > 0 and (input_tokens + output_tokens) == 0:
+            return False, "Plausibility violation: active turns recorded but 0 tokens consumed", None
+        if total_turns >= 5 and (input_tokens + output_tokens) / total_turns < 10:
+            return False, "Plausibility violation: token consumption abnormally low for turn count", None
+        if total_turns > 0 and initial_loc / max(1, total_turns) > 2000:
+            return False, "Plausibility violation: throughput exceeds plausible human/agent threshold (>2000 LOC/turn)", None
 
     except (ValueError, TypeError) as e:
         return False, f"Type validation error in numeric telemetry: {e}", None
 
+    # Derive qualification tier objectively based on adherence score
+    if adherence_score >= 70:
+        qualification_tier = "tier_a_rigor"
+        is_qualified = 1
+    elif adherence_score >= 40:
+        qualification_tier = "tier_b_partial"
+        is_qualified = 0
+    else:
+        qualification_tier = "tier_c_noise"
+        is_qualified = 0
+
     # Scrub and construct schema-only payload representation to guarantee no PII or extra keys leak into DB
     sanitized_raw_dict = {
         "audit_metadata": {
+            "schema_version": schema_version,
+            "session_fingerprint": session_fingerprint,
+            "project_hash": project_hash,
+            "git_tree_hash": git_tree_hash,
             "evaluation_mode": mode,
-            "project_name": str(meta.get("project_name", "anonymous"))[:64],
+            "project_name": raw_project_name,
             "evaluator_agent_model": str(meta.get("evaluator_agent_model", "unknown"))[:64],
             "timestamp_iso": str(meta.get("timestamp_iso", ""))[:32]
         },
@@ -214,6 +322,9 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
             "design_tokens_adhered": 1 if ux.get("design_tokens_adhered", True) else 0
         },
         "architectural_fidelity": {
+            "adherence_score": adherence_score,
+            "qualification_tier": qualification_tier,
+            "is_qualified": is_qualified,
             "session_amnesia_occurred": 1 if arch.get("session_amnesia_occurred") else 0,
             "invariants_violated_count": invariants_violated,
             "duplicate_utilities_introduced": duplicate_utils,
@@ -227,8 +338,15 @@ def validate_and_sanitize_payload(data: Dict[str, Any]) -> Tuple[bool, Optional[
     }
 
     sanitized = {
+        "schema_version": schema_version,
+        "session_fingerprint": session_fingerprint if session_fingerprint else None,
+        "project_hash": project_hash,
+        "adherence_score": adherence_score,
+        "qualification_tier": qualification_tier,
+        "is_qualified": is_qualified,
+        "git_tree_hash": git_tree_hash,
         "evaluation_mode": mode,
-        "project_name": str(meta.get("project_name", "anonymous"))[:64],
+        "project_name": raw_project_name,
         "model": str(meta.get("evaluator_agent_model", "unknown"))[:64],
         "task_id": str(task.get("task_id", "unknown"))[:32],
         "task_description": str(task.get("task_description", ""))[:256],
@@ -297,7 +415,25 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                 with DB_LOCK:
                     conn = get_db_connection()
                     cur = conn.cursor()
-                    cur.execute("""
+
+                    cur.execute("SELECT COUNT(*) FROM submissions")
+                    total_submissions = cur.fetchone()[0] or 0
+
+                    if total_submissions == 0:
+                        self.send_json(200, {
+                            "total_submissions": 0,
+                            "message": "No submissions recorded yet."
+                        })
+                        return
+
+                    # Check Tier A qualified submissions
+                    cur.execute("SELECT COUNT(*) FROM submissions WHERE is_qualified = 1")
+                    qualified_tier_a_count = cur.fetchone()[0] or 0
+
+                    filter_clause = "WHERE is_qualified = 1" if qualified_tier_a_count > 0 else ""
+                    scope = "tier_a_verified" if qualified_tier_a_count > 0 else "all_exploratory"
+
+                    cur.execute(f"""
                         SELECT 
                             COUNT(*),
                             AVG(total_turns),
@@ -306,17 +442,12 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                             AVG(rework_loc),
                             AVG(initial_loc),
                             AVG(ux_completeness),
-                            AVG(overhead_justified)
+                            AVG(overhead_justified),
+                            AVG(adherence_score)
                         FROM submissions
+                        {filter_clause}
                     """)
                     row = cur.fetchone()
-                    total_submissions = row[0] or 0
-                    if total_submissions == 0:
-                        self.send_json(200, {
-                            "total_submissions": 0,
-                            "message": "No submissions recorded yet."
-                        })
-                        return
 
                     avg_turns = round(row[1] or 0.0, 1)
                     avg_total_tokens = round(row[2] or 0.0, 1)
@@ -326,9 +457,13 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     avg_ux = round((row[6] or 0.0) * 100, 1)
                     overhead_justified_pct = round((row[7] or 0.0) * 100, 1)
                     rework_ratio_pct = round((avg_rework / max(1.0, avg_initial_loc)) * 100, 1)
+                    avg_adherence = round(row[8] or 0.0, 1)
 
                     cur.execute("SELECT complexity_tier, COUNT(*) FROM submissions GROUP BY complexity_tier")
                     tier_counts = dict(cur.fetchall())
+
+                    cur.execute("SELECT qualification_tier, COUNT(*) FROM submissions GROUP BY qualification_tier")
+                    qualification_counts = dict(cur.fetchall())
             except sqlite3.Error as e:
                 self.send_json(500, {"error": f"Database query failed: {e}"})
                 return
@@ -338,6 +473,8 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
 
             self.send_json(200, {
                 "total_submissions": total_submissions,
+                "qualified_tier_a_count": qualified_tier_a_count,
+                "qualification_scope": scope,
                 "summary": {
                     "mean_total_tokens": avg_total_tokens,
                     "mean_framework_overhead_tokens": avg_overhead,
@@ -345,8 +482,10 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     "mean_ux_state_completeness_pct": avg_ux,
                     "overhead_justified_rate_pct": overhead_justified_pct,
                     "mean_turns_per_task": avg_turns,
+                    "mean_adherence_score": avg_adherence,
                 },
                 "submissions_by_tier": tier_counts,
+                "submissions_by_qualification_tier": qualification_counts,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             })
             return
@@ -398,35 +537,110 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_json(429, {"error": "Too Many Requests. Submission rate limit exceeded."})
             return
 
+        if is_project_rate_limited(sanitized["project_hash"]):
+            self.send_json(429, {"error": "Too Many Requests. Project submission quota exceeded (max 10/day)."})
+            return
+
         conn = None
         try:
             with DB_LOCK:
                 conn = get_db_connection()
                 cur = conn.cursor()
-                cur.execute("""
-                    INSERT INTO submissions (
-                        client_ip, evaluation_mode, project_name, model, task_id, task_description,
-                        complexity_tier, primary_subsystem, total_turns, input_tokens, output_tokens,
-                        framework_overhead_tokens, initial_loc, rework_loc, rework_turns,
-                        compiler_failures, merge_conflicts, ui_touched, ux_completeness,
-                        design_tokens_adhered, session_amnesia, invariants_violated, duplicate_utils,
-                        adrs_consulted, new_adrs, net_utility_score, overhead_justified, raw_payload
-                    ) VALUES (
-                        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-                    )
-                """, (
-                    client_ip, sanitized["evaluation_mode"], sanitized["project_name"], sanitized["model"],
-                    sanitized["task_id"], sanitized["task_description"], sanitized["complexity_tier"],
-                    sanitized["primary_subsystem"], sanitized["total_turns"], sanitized["input_tokens"],
-                    sanitized["output_tokens"], sanitized["framework_overhead_tokens"], sanitized["initial_loc"],
-                    sanitized["rework_loc"], sanitized["rework_turns"], sanitized["compiler_failures"],
-                    sanitized["merge_conflicts"], sanitized["ui_touched"], sanitized["ux_completeness"],
-                    sanitized["design_tokens_adhered"], sanitized["session_amnesia"],
-                    sanitized["invariants_violated"], sanitized["duplicate_utils"], sanitized["adrs_consulted"],
-                    sanitized["new_adrs"], sanitized["net_utility_score"], sanitized["overhead_justified"],
-                    sanitized["raw_payload"]
-                ))
-                row_id = cur.lastrowid
+
+                if sanitized["session_fingerprint"]:
+                    cur.execute("""
+                        INSERT INTO submissions (
+                            session_fingerprint, schema_version, project_hash, adherence_score,
+                            qualification_tier, is_qualified, git_tree_hash, client_ip, evaluation_mode,
+                            project_name, model, task_id, task_description, complexity_tier, primary_subsystem,
+                            total_turns, input_tokens, output_tokens, framework_overhead_tokens, initial_loc,
+                            rework_loc, rework_turns, compiler_failures, merge_conflicts, ui_touched,
+                            ux_completeness, design_tokens_adhered, session_amnesia, invariants_violated,
+                            duplicate_utils, adrs_consulted, new_adrs, net_utility_score, overhead_justified,
+                            raw_payload
+                        ) VALUES (
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                        )
+                        ON CONFLICT(session_fingerprint) DO UPDATE SET
+                            received_at = CURRENT_TIMESTAMP,
+                            schema_version = excluded.schema_version,
+                            project_hash = excluded.project_hash,
+                            adherence_score = excluded.adherence_score,
+                            qualification_tier = excluded.qualification_tier,
+                            is_qualified = excluded.is_qualified,
+                            git_tree_hash = excluded.git_tree_hash,
+                            client_ip = excluded.client_ip,
+                            evaluation_mode = excluded.evaluation_mode,
+                            model = excluded.model,
+                            task_description = excluded.task_description,
+                            complexity_tier = excluded.complexity_tier,
+                            primary_subsystem = excluded.primary_subsystem,
+                            total_turns = excluded.total_turns,
+                            input_tokens = excluded.input_tokens,
+                            output_tokens = excluded.output_tokens,
+                            framework_overhead_tokens = excluded.framework_overhead_tokens,
+                            initial_loc = excluded.initial_loc,
+                            rework_loc = excluded.rework_loc,
+                            rework_turns = excluded.rework_turns,
+                            compiler_failures = excluded.compiler_failures,
+                            merge_conflicts = excluded.merge_conflicts,
+                            ui_touched = excluded.ui_touched,
+                            ux_completeness = excluded.ux_completeness,
+                            design_tokens_adhered = excluded.design_tokens_adhered,
+                            session_amnesia = excluded.session_amnesia,
+                            invariants_violated = excluded.invariants_violated,
+                            duplicate_utils = excluded.duplicate_utils,
+                            adrs_consulted = excluded.adrs_consulted,
+                            new_adrs = excluded.new_adrs,
+                            net_utility_score = excluded.net_utility_score,
+                            overhead_justified = excluded.overhead_justified,
+                            raw_payload = excluded.raw_payload;
+                    """, (
+                        sanitized["session_fingerprint"], sanitized["schema_version"], sanitized["project_hash"],
+                        sanitized["adherence_score"], sanitized["qualification_tier"], sanitized["is_qualified"],
+                        sanitized["git_tree_hash"], client_ip, sanitized["evaluation_mode"], sanitized["project_name"],
+                        sanitized["model"], sanitized["task_id"], sanitized["task_description"],
+                        sanitized["complexity_tier"], sanitized["primary_subsystem"], sanitized["total_turns"],
+                        sanitized["input_tokens"], sanitized["output_tokens"], sanitized["framework_overhead_tokens"],
+                        sanitized["initial_loc"], sanitized["rework_loc"], sanitized["rework_turns"],
+                        sanitized["compiler_failures"], sanitized["merge_conflicts"], sanitized["ui_touched"],
+                        sanitized["ux_completeness"], sanitized["design_tokens_adhered"], sanitized["session_amnesia"],
+                        sanitized["invariants_violated"], sanitized["duplicate_utils"], sanitized["adrs_consulted"],
+                        sanitized["new_adrs"], sanitized["net_utility_score"], sanitized["overhead_justified"],
+                        sanitized["raw_payload"]
+                    ))
+                    cur.execute("SELECT id FROM submissions WHERE session_fingerprint = ?", (sanitized["session_fingerprint"],))
+                    row_res = cur.fetchone()
+                    row_id = row_res[0] if row_res else cur.lastrowid
+                else:
+                    cur.execute("""
+                        INSERT INTO submissions (
+                            schema_version, project_hash, adherence_score, qualification_tier, is_qualified,
+                            git_tree_hash, client_ip, evaluation_mode, project_name, model, task_id,
+                            task_description, complexity_tier, primary_subsystem, total_turns, input_tokens,
+                            output_tokens, framework_overhead_tokens, initial_loc, rework_loc, rework_turns,
+                            compiler_failures, merge_conflicts, ui_touched, ux_completeness,
+                            design_tokens_adhered, session_amnesia, invariants_violated, duplicate_utils,
+                            adrs_consulted, new_adrs, net_utility_score, overhead_justified, raw_payload
+                        ) VALUES (
+                            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                        )
+                    """, (
+                        sanitized["schema_version"], sanitized["project_hash"], sanitized["adherence_score"],
+                        sanitized["qualification_tier"], sanitized["is_qualified"], sanitized["git_tree_hash"],
+                        client_ip, sanitized["evaluation_mode"], sanitized["project_name"], sanitized["model"],
+                        sanitized["task_id"], sanitized["task_description"], sanitized["complexity_tier"],
+                        sanitized["primary_subsystem"], sanitized["total_turns"], sanitized["input_tokens"],
+                        sanitized["output_tokens"], sanitized["framework_overhead_tokens"], sanitized["initial_loc"],
+                        sanitized["rework_loc"], sanitized["rework_turns"], sanitized["compiler_failures"],
+                        sanitized["merge_conflicts"], sanitized["ui_touched"], sanitized["ux_completeness"],
+                        sanitized["design_tokens_adhered"], sanitized["session_amnesia"],
+                        sanitized["invariants_violated"], sanitized["duplicate_utils"], sanitized["adrs_consulted"],
+                        sanitized["new_adrs"], sanitized["net_utility_score"], sanitized["overhead_justified"],
+                        sanitized["raw_payload"]
+                    ))
+                    row_id = cur.lastrowid
+
                 conn.commit()
         except sqlite3.Error as e:
             self.send_json(500, {"error": f"Database error: {e}"})
@@ -435,11 +649,14 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
             if conn:
                 conn.close()
 
-        print(f"[{datetime.now(timezone.utc).isoformat()}] Ingested benchmark #{row_id} from {client_ip} (Tier: {sanitized['complexity_tier']}, Model: {sanitized['model']})")
+        print(f"[{datetime.now(timezone.utc).isoformat()}] Ingested benchmark #{row_id} from {client_ip} (Tier: {sanitized['complexity_tier']}, Qualified: {sanitized['is_qualified']}, Model: {sanitized['model']})")
 
         self.send_json(201, {
             "status": "accepted",
             "submission_id": row_id,
+            "session_fingerprint": sanitized["session_fingerprint"],
+            "qualification_tier": sanitized["qualification_tier"],
+            "is_qualified": bool(sanitized["is_qualified"]),
             "message": "Anonymous empirical benchmark telemetry stored successfully."
         })
 

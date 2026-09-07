@@ -15,18 +15,25 @@ Audit development performance on recent tasks, measure token efficiency and UX c
 Examine the active workspace, recent git commits, `.ai/specs/`, and conversation turns for the current or most recent completed task.
 Do not flatter or use marketing fluff. Evaluate with objective skepticism.
 
-### 2. Extract Quantitative & Qualitative Telemetry
-Collect:
-- **Task Metadata:** Task ID, description, complexity tier (`tier_1_micro`, `tier_2_medium`, `tier_3_complex`), and primary subsystem.
-- **Token Telemetry:** Total turns, input tokens, output tokens, and framework overhead tokens (`SPEC`, `PLAN`, `COMPACT`).
-- **Code Churn / Rework:** Initial lines implemented vs lines modified/deleted in corrective turns.
-- **Product Design & UX Completeness:** Universal 5-state coverage (`initial_idle`, `loading_pending`, `empty_data`, `error_recovery`, `destructive_action_guard`) and design token adherence.
-- **Architectural Fidelity:** Session amnesia occurrences, ADRs consulted/registered, and audit blockers resolved.
-- **Critical Assessment:** Net utility score (-5 to +5), overhead justification, and at least one concrete friction point and one concrete benefit.
+### 2. Extract Quantitative & Qualitative Telemetry Deterministically
+Do not guess or hallucinate code volume or rework lines. Use the verifiability engine:
+- Run deterministic git extraction to capture exact code metrics and maturity tier:
+  ```bash
+  pxos benchmark --extract --task-id <task_id> --output .ai/audits/BENCHMARK_<task_id>.json
+  ```
+  *(or via Python: `python scripts/pxos-benchmark.py --extract --task-id <task_id> --output .ai/audits/BENCHMARK_<task_id>.json`)*
+- The engine calculates:
+  - **Deterministic Git Churn:** exact lines added, deleted, modified, and commit history via `git diff --numstat` and `git log`.
+  - **Methodological Adherence Score:** objective 0-100 evaluation of repository maturity (Tier A Rigor >=70, Tier B Partial 40-69, Tier C Noise <40).
+  - **Cryptographic Session Fingerprint:** deterministic `session_fingerprint` ensuring 1 session = 1 idempotent record (prevents duplicates/Sybil loops).
+  - **Cryptographic Project Hash:** irreversible `project_hash = sha256(project_name + salt)[:16]` guaranteeing total IP privacy under `INV-001`.
+- Complete the qualitative audit fields:
+  - Universal 5-state UX completeness (`initial_idle`, `loading_pending`, `empty_data`, `error_recovery`, `destructive_action_guard`).
+  - Net utility score (-5 to +5), overhead justification, and at least one concrete friction point and one concrete benefit.
 
 ### 3. Clean Workspace Storage (Zero Project Pollution)
 - **Never pollute the user's project root** with a `benchmarks/` folder or standalone scripts.
-- Save the structured JSON audit record inside the existing `.ai/` governance layer:
+- Save the structured Schema 2.0 JSON audit record inside the existing `.ai/` governance layer:
   ```
   .ai/audits/BENCHMARK_<task_id>.json
   ```

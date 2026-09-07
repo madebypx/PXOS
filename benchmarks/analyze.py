@@ -64,6 +64,11 @@ class AuditRecord:
     frictions: List[str]
     benefits: List[str]
     evidence_citations: List[Dict[str, str]]
+    adherence_score: int = 0
+    qualification_tier: str = "tier_c_noise"
+    is_qualified: bool = False
+    session_fingerprint: str = ""
+    project_hash: str = ""
 
     @property
     def total_tokens(self) -> int:
@@ -90,6 +95,10 @@ def load_record_from_dict(data: Dict[str, Any], source_label: str = "memory") ->
         ux = data.get("product_design_and_ux", {})
         arch = data.get("architectural_fidelity", {})
         crit = data.get("critical_assessment", {})
+
+        adherence_score = int(arch.get("adherence_score", 0))
+        qualification_tier = str(arch.get("qualification_tier", "tier_c_noise")).lower()
+        is_qualified = bool(arch.get("is_qualified", False)) or (adherence_score >= 70 and qualification_tier == "tier_a_rigor")
 
         return AuditRecord(
             file_path=source_label,
@@ -123,6 +132,11 @@ def load_record_from_dict(data: Dict[str, Any], source_label: str = "memory") ->
             frictions=crit.get("identified_frictions", []),
             benefits=crit.get("concrete_benefits", []),
             evidence_citations=crit.get("evidence_citations", []),
+            adherence_score=adherence_score,
+            qualification_tier=qualification_tier,
+            is_qualified=is_qualified,
+            session_fingerprint=str(meta.get("session_fingerprint", "")),
+            project_hash=str(meta.get("project_hash", ""))
         )
     except Exception as e:
         print(f"[WARN] Failed to parse record from {source_label}: {e}", file=sys.stderr)
@@ -139,18 +153,57 @@ def load_record_from_json(file_path: Path) -> Optional[AuditRecord]:
         return None
 
 
-def calculate_descriptive_stats(values: List[float]) -> Dict[str, float]:
+def calculate_trimmed_mean(values: List[float], trim_percent: float = 0.05) -> float:
+    """Calculates trimmed mean discarding top/bottom trim_percent of data."""
     if not values:
-        return {"n": 0, "mean": 0.0, "median": 0.0, "std": 0.0, "min": 0.0, "max": 0.0}
+        return 0.0
+    if len(values) < 4:
+        return round(statistics.mean(values), 2)
+    s = sorted(values)
+    k = int(len(s) * trim_percent)
+    if k > 0 and len(s) - 2 * k > 0:
+        trimmed = s[k : len(s) - k]
+        return round(statistics.mean(trimmed), 2)
+    return round(statistics.mean(values), 2)
+
+
+def calculate_iqr_bounds(values: List[float]) -> Tuple[float, float, float, List[float]]:
+    """Calculates Interquartile Range (IQR) and identifies outlier data points."""
+    if not values:
+        return 0.0, 0.0, 0.0, []
+    if len(values) < 4:
+        return min(values), max(values), 0.0, []
+    try:
+        q1, _, q3 = statistics.quantiles(values, n=4)
+        iqr = q3 - q1
+        lower = q1 - 1.5 * iqr
+        upper = q3 + 1.5 * iqr
+        outliers = [v for v in values if v < lower or v > upper]
+        return round(lower, 2), round(upper, 2), round(iqr, 2), outliers
+    except Exception:
+        return min(values), max(values), 0.0, []
+
+
+def calculate_descriptive_stats(values: List[float]) -> Dict[str, Any]:
+    if not values:
+        return {
+            "n": 0, "mean": 0.0, "median": 0.0, "trimmed_mean_5pct": 0.0,
+            "std": 0.0, "iqr": 0.0, "outliers_count": 0, "min": 0.0, "max": 0.0
+        }
     n = len(values)
     mean_val = statistics.mean(values)
     median_val = statistics.median(values)
+    trimmed_val = calculate_trimmed_mean(values, 0.05)
     std_val = statistics.stdev(values) if n > 1 else 0.0
+    lower, upper, iqr, outliers = calculate_iqr_bounds(values)
     return {
         "n": n,
         "mean": round(mean_val, 2),
         "median": round(median_val, 2),
+        "trimmed_mean_5pct": trimmed_val,
         "std": round(std_val, 2),
+        "iqr": iqr,
+        "outliers_count": len(outliers),
         "min": round(min(values), 2),
         "max": round(max(values), 2),
     }
@@ -213,8 +266,21 @@ def analyze_dataset(records: List[AuditRecord]) -> Dict[str, Any]:
             if b and b not in all_benefits:
                 all_benefits.append(b)
 
+    # Qualification segmentation
+    qualified_records = [r for r in records if r.is_qualified]
+    qualification_counts = {}
+    for r in records:
+        qualification_counts[r.qualification_tier] = qualification_counts.get(r.qualification_tier, 0) + 1
+
+    scope_label = "tier_a_rigor" if qualified_records else "all_submissions"
+
     return {
         "sample_size": total_records,
+        "qualification_analysis": {
+            "primary_scope": scope_label,
+            "qualified_tier_a_count": len(qualified_records),
+            "qualification_tier_counts": qualification_counts,
+        },
         "token_statistics": {
             "total_tokens": calculate_descriptive_stats(total_tokens_list),
             "input_tokens": calculate_descriptive_stats(input_tokens_list),

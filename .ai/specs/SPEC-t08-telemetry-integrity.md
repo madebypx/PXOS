@@ -1,7 +1,9 @@
-# Current Spec — Task T-08: Benchmark Verifiability & Telemetry Anti-Poisoning Engine (v2.5.0)
-<!-- pxos:spec-version 1.0.0 -->
+# Spec — T-08: Benchmark Verifiability & Telemetry Anti-Poisoning Engine (v2.5.0)
 
-This file defines the active task specification for engineering the Benchmark Verifiability and Telemetry Anti-Poisoning Engine for PXOS, establishing cryptographic session idempotency, methodological qualification tiers, deterministic git extraction, server-side anti-spoofing plausibility filters, and robust statistical aggregation.
+- **Branch:** `main` (or `feat/t08-telemetry-integrity`)
+- **Status:** In Spec
+- **Assignee / Agent:** Agent Flash-1 / Rodrigo Pena
+- **Related Issues / Tasks:** T-08, [`.internal/TELEMETRY_INTEGRITY_RFC.md`](../../.internal/TELEMETRY_INTEGRITY_RFC.md), [`.internal/ROADMAP.md`](../../.internal/ROADMAP.md)
 
 ---
 
@@ -22,7 +24,7 @@ Harden the `/benchmark` operational pipeline and public telemetry ingestion infr
 ## Strategic & Audit Alignment
 
 - **Audit Findings Cross-Check:** Clean — No active audit blockers touching this scope. Builds upon `[PERF-02]` (rate limiter eviction/bounding) and `[REL-07]` (SQLite busy_timeout concurrency) resolved in `AUDIT_2026-09-06.md`.
-- **Strategic Blueprint Reference:** Fully implements the architectural requirements defined in [`.internal/TELEMETRY_INTEGRITY_RFC.md`](.internal/TELEMETRY_INTEGRITY_RFC.md) and [`.internal/ROADMAP.md`](.internal/ROADMAP.md).
+- **Strategic Blueprint Reference:** Fully implements the architectural requirements defined in [`.internal/TELEMETRY_INTEGRITY_RFC.md`](../../.internal/TELEMETRY_INTEGRITY_RFC.md) and [`.internal/ROADMAP.md`](../../.internal/ROADMAP.md).
 - **Critical Invariants Adherence:**
   - `INV-001` (Telemetry Privacy & Opt-in Anonymization): Project names irreversibly hashed with SHA-256; zero source code, commit messages, or PII transmitted.
   - `INV-002` (Internal Quarantine): All internal notes and benchmarks remain strictly isolated.
@@ -193,7 +195,7 @@ Harden the `/benchmark` operational pipeline and public telemetry ingestion infr
 
 ---
 
-## Risks & Cross-Task Dependencies
+## Risks & Cross-Task Impact
 
 - **Database Migration for Existing Submissions:** Existing `telemetry.db` databases need backward-compatible schema alterations (`ALTER TABLE ADD COLUMN`).
   - *Mitigation:* `init_database()` inspects column names via `PRAGMA table_info(submissions)` and adds missing columns dynamically if the table already exists.

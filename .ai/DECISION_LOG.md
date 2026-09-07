@@ -200,3 +200,32 @@ Removed `docs/DEVTO_POST.md` from git tracking, confirmed `.internal/` in `.giti
 
 **Status:** Active
 
+---
+
+**Decision:**
+Implement cryptographic session fingerprint idempotency, objective methodological adherence scoring (Tiers A/B/C), deterministic git metric extraction (`pxos benchmark --extract`), server-side anti-spoofing plausibility filters, and robust statistical aggregation (5% trimmed mean & IQR outlier rejection) for the PXOS empirical benchmarking subsystem.
+
+**Context:**
+The `/benchmark` workflow audits empirical developer and AI agent efficiency. However, without server-side verification and client determinism, public telemetry was vulnerable to: (1) Sybil loops and database spam from repeated runs on the same task; (2) exploratory noise from casual repos claiming full framework rigor; (3) LLM estimation hallucinations regarding LOC churn; and (4) malicious or corrupted outlier submissions skewing arithmetic averages.
+
+**Options considered:**
+- Option A — Rely solely on client self-reporting and raw arithmetic averages: Rejected because it leaves telemetry vulnerable to spoofing, client hallucinations, Sybil spam, and outlier poisoning.
+- Option B — Heavy cryptographic attestation with centralized PKI certificates: Rejected because it violates Critical Invariant INV-003 (Zero External Dependencies) and burdens open-source users with complex key management.
+- Chosen: Option C — Zero-dependency multi-layer verifiability engine:
+  1. Cryptographic session fingerprint idempotency (`session_fingerprint` UNIQUE with SQLite UPSERT) and project-level submission throttling (max 10/day).
+  2. Objective repository adherence scoring (0-100 pts based on `.ai/PROJECT_CONTEXT.md`, specs, Conventional Commits, and ADRs) gating public stats strictly to Tier A (`is_qualified = 1`).
+  3. Deterministic git metric extraction via `git diff --numstat` and `git log` (`pxos benchmark --extract`), removing LLM guesswork.
+  4. Server-side plausibility constraints rejecting impossible combinations.
+  5. Robust statistical aggregation computing medians, 5% trimmed means, and IQR outlier boundaries.
+  6. Irreversible project name hashing (`project_hash`) preserving privacy under INV-001.
+
+**Tradeoffs:**
+- Gains: Irrefutable, peer-auditable scientific dataset, total immunity to Sybil duplicate inflation, zero LLM guesswork on LOC metrics, and robust statistical immunity to outliers.
+- Cost: Client execution requires access to local git plumbing (which falls back gracefully if git is unavailable).
+
+**Impact:**
+Modified `benchmarks/server.py`, `benchmarks/analyze.py`, `scripts/pxos-benchmark.py`, `pxos/scripts/pxos-benchmark.py`, `skills/benchmark/SKILL.md`, and created `tests/test_telemetry_integrity.py`.
+
+**Status:** Active
+
+
