@@ -1,15 +1,9 @@
-# Current Spec — Task T-11: Closed-Loop Invariant Evolution & Cognitive Post-Mortem Engine
-<!-- pxos:spec-version 1.0.0 -->
-
-This file defines the active task specification for engineering the Closed-Loop Invariant Evolution and Cognitive Post-Mortem Engine in PXOS (Task T-11 of Sprint Roadmap v2.5.0+). 
-Related upcoming roadmap specs in this batch:
-- [Task T-12: Autonomous Multi-Modal UI Verification](.ai/specs/SPEC-t12-multimodal-ui.md)
-- [Task T-13: Public Benchmark Portal & Research Dashboard](.ai/specs/SPEC-t13-benchmark-portal.md)
+# Spec — T-11: Closed-Loop Invariant Evolution & Cognitive Post-Mortem Engine
 
 - **Branch:** `feat/t11-invariant-evolution` (or `main`)
 - **Status:** In Spec
 - **Assignee / Agent:** Agent Flash-1 / Rodrigo Pena
-- **Related Issues / Tasks:** `.internal/postmortem_ai_cognition_and_pxos.md`, `.internal/ROADMAP.md`, `T-08`, `T-09`, `T-10`
+- **Related Issues / Tasks:** `.internal/postmortem_ai_cognition_and_pxos.md`, `.internal/ROADMAP.md`, `T-08`, `T-09`
 
 ---
 
@@ -30,7 +24,7 @@ Create a self-healing governance mechanism within PXOS that automatically detect
 ## Strategic & Audit Alignment
 
 - **Audit Findings Cross-Check:** Clean — No active audit blockers touching this scope. Builds upon Completion Honesty Protocol and No-Assumption Clause introduced in v2.4.0.
-- **Strategic Blueprint Reference:** Implements Section 5 of [`.internal/postmortem_ai_cognition_and_pxos.md`](.internal/postmortem_ai_cognition_and_pxos.md) and Horizon 1 of [`.internal/ROADMAP.md`](.internal/ROADMAP.md).
+- **Strategic Blueprint Reference:** Implements Section 5 of [`.internal/postmortem_ai_cognition_and_pxos.md`](../../.internal/postmortem_ai_cognition_and_pxos.md) and Horizon 1 of [`.internal/ROADMAP.md`](../../.internal/ROADMAP.md).
 - **Critical Invariants Adherence:**
   - `INV-001` (Telemetry Privacy): Invariant evolution operates strictly on local diffs and metrics; no proprietary code is uploaded.
   - `INV-002` (Internal Quarantine): Preserved.
@@ -136,11 +130,3 @@ Create a self-healing governance mechanism within PXOS that automatically detect
 1. Test CLI parsing on valid and invalid `PROJECT_CONTEXT.md` files.
 2. Test sequential ID generation (`INV-006`, etc.).
 3. Test simulation with simulated rework session.
-
----
-
-## Workflow State
-
-- **Current phase:** Discover
-- **Pending decision:** Plan confirmation for Task T-11
-- **Execution blocked until:** Approval to proceed
