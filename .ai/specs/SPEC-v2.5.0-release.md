@@ -145,15 +145,16 @@ Publish and package the official **PXOS v2.5.0** release across GitHub and PyPI,
 
 ## Acceptance Criteria
 
-- [ ] `pyproject.toml`, `pxos/__init__.py`, and `pxos/cli.py` set to version `2.5.0`.
-- [ ] `install.sh` and `install.ps1` default to `2.5.0`.
-- [ ] `README.md`, `WORKFLOWS.md`, `skills/update/SKILL.md`, and templates updated to `v2.5.0`.
-- [ ] `py scripts/sync-package-data.py --check` passes with zero drift.
-- [ ] `py scripts/generate-llms-txt.py --check` passes with zero drift.
-- [ ] `tests/test_audit_remediation.py` assertions updated and full test suite passes 100%.
-- [ ] `CHANGELOG.md` updated with comprehensive `[2.5.0]` release notes.
-- [ ] `.internal/SPRINT.md` task matrix updated with Task `T-10`.
-- [ ] Git commit and annotated tag `v2.5.0` prepared cleanly.
+- [x] `pyproject.toml`, `pxos/__init__.py`, and `pxos/cli.py` set to version `2.5.0`.
+- [x] `install.sh` and `install.ps1` default to `2.5.0`.
+- [x] `README.md`, `WORKFLOWS.md`, `skills/update/SKILL.md`, and templates updated to `v2.5.0`.
+- [x] `py scripts/sync-package-data.py --check` passes with zero drift.
+- [x] `py scripts/generate-llms-txt.py --check` passes with zero drift.
+- [x] `tests/test_audit_remediation.py` assertions updated and full test suite passes 100%.
+- [x] `CHANGELOG.md` updated with comprehensive `[2.5.0]` release notes.
+- [x] `.internal/SPRINT.md` task matrix updated with Task `T-10`.
+- [x] Git commit and annotated tag `v2.5.0` prepared and pushed to origin.
+- [x] Official GitHub Release created with attached wheel and sdist binaries and `docs/RELEASE_PROCESS.md` codified.
 
 ---
 
@@ -176,6 +177,6 @@ Publish and package the official **PXOS v2.5.0** release across GitHub and PyPI,
 
 ## Workflow State
 
-- **Current phase:** Plan
-- **Pending decision:** Confirmation of spec before running `/plan`
-- **Execution blocked until:** Approval to proceed
+- **Current phase:** Done
+- **Pending decision:** None
+- **Execution blocked until:** None
