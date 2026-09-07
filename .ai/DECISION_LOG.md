@@ -38,6 +38,30 @@ Multi-Agent Note: Entries are strictly additive and chronological. If a Git merg
 
 <!-- Add decisions below this line, most recent first -->
 
+## 2026-09-07 — Standardized GitHub Releases Procedure & Release Governance Lifecycle
+
+**Decision:**
+Formalize official GitHub Releases creation as the mandatory standard release procedure for all current and future versions of PXOS (`docs/RELEASE_PROCESS.md`), automate dynamic tag-based release titles in `.github/workflows/release.yml`, and record the requirement in `.ai/PROJECT_CONTEXT.md` conventions. Every release must attach wheel and source distribution binaries and publish curated release notes from `CHANGELOG.md`.
+
+**Context:**
+Previous patch releases occasionally relied on ad-hoc tagging or hardcoded release titles in CI workflows (e.g. legacy `v2.3.0` strings persisting in workflow configs). To ensure complete distribution integrity, transparency for the open-source community, and immutable distribution assets on GitHub across all releases, a documented and programmatic standard operating procedure was required.
+
+**Options considered:**
+- Option A — Rely purely on manual GitHub web UI releases: Rejected due to human variance, inconsistent title formatting, and risk of forgotten assets or changelog omissions.
+- Option B — Silent git-tag-only releases without GitHub Releases or binary attachments: Rejected because developers and evaluators auditing repository releases expect signed artifacts, attached wheels/sdists, and searchable changelog notes on GitHub.
+- Chosen: Option C — Codify `docs/RELEASE_PROCESS.md` with a 9-step checklist, bind GitHub Releases as a mandatory convention in `PROJECT_CONTEXT.md`, make `.github/workflows/release.yml` title resolution dynamic, and automate release publication with `gh release create` and attached `dist/*` binaries.
+
+**Tradeoffs:**
+- Gains: Immediate availability of immutable wheel/sdist assets directly from GitHub Releases; eliminates title drift in CI; deterministic, audited release steps followed uniformly by both human maintainers and AI agents.
+- Cost: Requires maintaining `docs/RELEASE_PROCESS.md` and verifying GitHub CLI or token permissions during release steps.
+
+**Impact:**
+Added `docs/RELEASE_PROCESS.md`, updated `.ai/PROJECT_CONTEXT.md`, `.github/workflows/release.yml`, `.internal/SPRINT.md`, `CHANGELOG.md`, and published GitHub Release `v2.5.0`.
+
+**Status:** Active
+
+---
+
 ## 2026-09-06 — Automated Package Parity Verification, AI Crawlability Mirroring, and Multi-OS CI Testing
 
 **Decision:**
