@@ -1,0 +1,55 @@
+{
+  "audit_metadata": {
+    "schema_version": "2.0",
+    "session_fingerprint": "99c3652a03ce208229112f2b717eb929d110938e0d808e7b4d7f3e84e71c3075",
+    "project_name": "project-d14a6b81",
+    "project_hash": "d14a6b812ac8b4e6",
+    "git_tree_hash": "b8a964fe959fced6a267e2cc8a575d09b66b73ce",
+    "evaluator_agent_model": "agent-evaluator",
+    "evaluation_mode": "retrospective",
+    "timestamp_iso": "2026-09-07T02:35:25.058560+00:00"
+  },
+  "task_profile": {
+    "task_id": "T-13",
+    "task_description": "Task execution on branch main",
+    "complexity_tier": "tier_2_medium",
+    "primary_subsystem": "core"
+  },
+  "quantitative_telemetry": {
+    "total_turns": 30,
+    "input_tokens_total": 25000,
+    "output_tokens_total": 6500,
+    "framework_overhead_tokens": 1200,
+    "initial_implementation_loc": 109,
+    "rework_lines_modified_or_deleted": 33,
+    "rework_turn_count": 1,
+    "unresolved_compiler_or_test_failures": 0,
+    "merge_conflicts_encountered": 0
+  },
+  "product_design_and_ux": {
+    "ui_components_touched": true,
+    "ux_state_completeness_score": 1.0,
+    "ui_states_verified": 5,
+    "design_tokens_adhered": true
+  },
+  "architectural_fidelity": {
+    "adherence_score": 100,
+    "qualification_tier": "tier_a_rigor",
+    "is_qualified": true,
+    "session_amnesia_occurred": false,
+    "invariants_violated_count": 0,
+    "duplicate_utilities_introduced": 0,
+    "adrs_consulted_count": 1,
+    "new_adrs_registered": 1
+  },
+  "critical_assessment": {
+    "net_utility_score": 4,
+    "overhead_justified": true,
+    "identified_frictions": [
+      "None observed"
+    ],
+    "concrete_benefits": [
+      "Deterministic git extraction and tamper prevention"
+    ]
+  }
+}
