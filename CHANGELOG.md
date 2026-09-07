@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.5.0] - 2026-09-07
+
+### Added
+- **Benchmark Verifiability & Telemetry Anti-Poisoning Engine (Task T-08):**
+  - **Cryptographic Session Fingerprinting (`session_fingerprint`):** Deterministically generated from `sha256(project_salt + git_root_hash + branch + task_id)` and enforced as a `UNIQUE` constraint in SQLite with `UPSERT` semantics (`ON CONFLICT(session_fingerprint) DO UPDATE`), preventing duplicate submissions and Sybil attacks.
+  - **Methodological Qualification Engine & Gating (Tiers A/B/C):** Automated scoring (0-100 pts) evaluating repository discipline (project context invariants, completed specs, Conventional Commits adherence, session depth, and decision tracking). Public stats at `/api/v1/stats` and benchmark summaries now strictly gate calculations to **Tier A (`is_qualified = 1`)**.
+  - **Deterministic Git Metric Extraction (`pxos benchmark --extract`):** Mathematical extraction of lines added/deleted, churn, tree hash, and commit counts directly from git plumbing (`git diff --numstat`, `git log`), replacing LLM guesswork and hallucinations.
+  - **Server-Side Anti-Spoofing & Plausibility Guardrails:** Rejection of impossible telemetry combinations (e.g. 0% rework with multiple fix commits or unrealistic turn-to-token velocity) via HTTP 422.
+  - **Robust Statistical Aggregation:** Implementation of medians, 5% trimmed means, and Interquartile Range (**IQR Outlier Filtering**) ($> 1.5 \times \text{IQR}$) in `benchmarks/analyze.py` and `server.py` to isolate statistical anomalies.
+  - **Client-Side Irreversible Project Hashing:** Cryptographic hashing of project names (`project_hash = sha256(name)[:16]`), preserving total intellectual property confidentiality per `INV-001`.
+  - **Schema Version 2.0:** Standardized payload contract supporting negative utility tracking (`net_utility_score <= -2`) to eliminate survivor bias in AI evaluation.
+- **Codebase Hardening, Packaging Integrity & CI Automation (Task T-09):**
+  - **Automated Multi-Platform CI Matrix:** Added `.github/workflows/test.yml` running unit tests and crawlability validation on push and PR across Ubuntu and Windows from Python 3.8 to 3.12 (`[REL-06]`).
+  - **Package Parity Automation & Validation:** Added `scripts/sync-package-data.py` with `--check` mode to guarantee 100% byte-for-byte parity between root sources and bundled `pxos/templates` and `pxos/scripts` (`[PKG-02]`, `[PKG-04]`).
+  - **Formalized Critical Invariants:** Added `INV-001` through `INV-005` to `.ai/PROJECT_CONTEXT.md` defining strict governance for telemetry privacy, internal file quarantine, zero external core dependencies, Conventional Commits, and append-only decision logging (`[DOC-01]`).
+- **Standard Release Procedure & Governance (Task T-10):**
+  - Published `docs/RELEASE_PROCESS.md` formalizing the mandatory GitHub Releases lifecycle, asset attachments, and automated distribution procedures.
+  - Updated `.ai/PROJECT_CONTEXT.md` conventions establishing GitHub Releases as the standard release procedure for all current and future versions.
+
+### Fixed
+- **Rate Limiter Memory Bounds & Active Eviction (`[PERF-02]`):** Memory-bounded IP rate limiter in `benchmarks/server.py` with active expired entry eviction and 10,000 IP capacity cap.
+- **SQLite Concurrency & Multi-Threaded Resiliência (`[REL-07]`):** Enforced `PRAGMA busy_timeout = 5000` and `timeout=30.0` on SQLite connections in `benchmarks/server.py`, mitigating `database is locked` errors during concurrent bursts. Added `HOST` environment variable binding (default `127.0.0.1`, allowing `0.0.0.0` for Docker).
+- **Project Rate Limiter Anonymous Exemption (`[SEC-03]`):** Removed bypass exemption on literal `'anonymous'` strings, ensuring uniform 10-submissions/day project quotas.
+- **Deterministic Git Extractor Initial Commit Fallback (`[REL-08]`):** Added fallback detection against Git's empty tree hash (`4b825dc...`) when executing on newly initialized repositories with a single commit.
+- **Dynamic GitHub Release Titles:** Updated `.github/workflows/release.yml` to dynamically use the release tag name instead of hardcoded legacy version titles.
+
+### Changed
+- Synchronized release version to `2.5.0` across `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `install.sh`, `install.ps1`, `llms.txt`, `llms-full.txt`, and web metadata.
+
+---
+
 ## [2.4.0] - 2026-09-06
 
 ### Added

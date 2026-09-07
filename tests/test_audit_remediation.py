@@ -322,17 +322,17 @@ class AuditRemediationTestSuite(unittest.TestCase):
     # [DOC-01] Documentation Version & Critical Invariants Registration
     # ──────────────────────────────────────────────────────────────────────────
     def test_doc_01_version_and_invariants_consistency(self):
-        """Verify WORKFLOWS.md, update skill, and PROJECT_CONTEXT.md reflect v2.4.0 and invariants."""
+        """Verify WORKFLOWS.md, update skill, and PROJECT_CONTEXT.md reflect v2.5.0 and invariants."""
         workflows = (REPO_ROOT / "WORKFLOWS.md").read_text(encoding="utf-8")
-        self.assertIn("v2.4.0", workflows)
+        self.assertIn("v2.5.0", workflows)
         self.assertNotIn("latest version (v2.2.0)", workflows)
 
         update_skill = (REPO_ROOT / "skills/update/SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("v2.4.0", update_skill)
+        self.assertIn("v2.5.0", update_skill)
         self.assertNotIn("latest version (v2.2.0)", update_skill)
 
         context = (REPO_ROOT / ".ai/PROJECT_CONTEXT.md").read_text(encoding="utf-8")
-        self.assertIn("<!-- pxos:version 2.4.0 -->", context)
+        self.assertIn("<!-- pxos:version 2.5.0 -->", context)
         self.assertIn("## Critical invariants", context)
         self.assertIn("INV-001", context)
         self.assertIn("INV-002", context)

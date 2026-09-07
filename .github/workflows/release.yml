@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ github.ref_name }}" dist/* \
-            --title "${{ github.ref_name }} — AI Indexability & Zero-Friction Distribution Engine" \
+            --title "${{ github.ref_name }}" \
             --generate-notes
 
       - name: Publish to PyPI via Trusted Publishing

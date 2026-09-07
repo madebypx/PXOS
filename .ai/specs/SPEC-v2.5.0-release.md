@@ -1,7 +1,4 @@
-# Current Spec — Task T-10: v2.5.0 Release Tagging & Packaging
-<!-- pxos:spec-version 1.0.0 -->
-
-This file defines the active task specification for releasing and packaging PXOS v2.5.0, synchronizing version metadata across core Python modules, CLI, installers, AI index references (`llms.txt`, `llms-full.txt`), package data templates, and test suites.
+# Spec — T-10: v2.5.0 Release Tagging & Packaging
 
 - **Branch:** `main`
 - **Status:** In Spec
@@ -27,7 +24,7 @@ Publish and package the official **PXOS v2.5.0** release across GitHub and PyPI,
 ## Strategic & Audit Alignment
 
 - **Audit Findings Cross-Check:** Clean — No active audit blockers touching this scope. All findings through `AUDIT_2026-09-07.md` ([SEC-03], [REL-08]) and `AUDIT_2026-09-06.md` ([PKG-02] through [PKG-04], [REL-06], [PERF-02], [REL-07], [DOC-01]) are fully remediated and verified.
-- **Strategic Blueprint Reference:** Completes the medium-term milestone specified in [`.internal/ROADMAP.md`](.internal/ROADMAP.md) and Priority #3 in [`.internal/SPRINT.md`](.internal/SPRINT.md).
+- **Strategic Blueprint Reference:** Completes the medium-term milestone specified in [`.internal/ROADMAP.md`](../../.internal/ROADMAP.md) and Priority #3 in [`.internal/SPRINT.md`](../../.internal/SPRINT.md).
 - **Critical Invariants Adherence:**
   - `INV-001` (Telemetry Privacy & Opt-in Anonymization): Preserved.
   - `INV-002` (Internal Quarantine): `.internal/` materials remain strictly quarantined and gitignored.

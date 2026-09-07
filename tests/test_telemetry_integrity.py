@@ -75,7 +75,7 @@ class TestTelemetryIntegrityEngine(unittest.TestCase):
 
         # 1. Context
         ctx_file = ai_dir / "PROJECT_CONTEXT.md"
-        ctx_file.write_text("# Project Context\n<!-- pxos:version 2.4.0 -->\nCritical invariants:\n- INV-001: Privacy\n" * 5, encoding="utf-8")
+        ctx_file.write_text("# Project Context\n<!-- pxos:version 2.5.0 -->\nCritical invariants:\n- INV-001: Privacy\n" * 5, encoding="utf-8")
 
         # 2. Spec
         spec_file = specs_dir / "SPEC-auth.md"

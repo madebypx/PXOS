@@ -1,5 +1,5 @@
 # Project Context
-<!-- pxos:version 2.4.0 -->
+<!-- pxos:version 2.5.0 -->
 
 This file contains durable, project-specific facts for PXOS development.
 
@@ -65,6 +65,7 @@ In order:
 - Scripts: Python 3 with type hints, POSIX compliance for bash scripts.
 - Telemetry: strictly anonymous, numeric metrics and categorical enums only.
 - **Internal vs Public Isolation:** `.internal/` is `.gitignore`d and serves as the mandatory quarantine for all internal, team-exclusive, draft, marketing, launch copy, and sprint tracking files. NEVER place unreleased, sensitive, or team-only documents into public directories (`docs/`, `templates/`, `scripts/`, root). Coisas INTERNAS ficam no `.internal/`.
+- **Standard Release Procedure:** Every new version of PXOS must be published as an official GitHub Release (`gh release create` or tag push triggering `.github/workflows/release.yml`) with distribution assets (`dist/*`) and release notes extracted from `CHANGELOG.md` per `docs/RELEASE_PROCESS.md`.
 
 ---
 

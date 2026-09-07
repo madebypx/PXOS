@@ -1,7 +1,7 @@
 # PXOS — Operating Rules
-<!-- pxos:version 2.4.0 -->
+<!-- pxos:version 2.5.0 -->
 
-This project adheres to the PXOS framework (v2.4).
+This project adheres to the PXOS framework (v2.5).
 
 1. **Read Core Files & Grounding**:
    - Always check `.ai/AI_BASE.md` and `.ai/PROJECT_CONTEXT.md` before executing tasks.

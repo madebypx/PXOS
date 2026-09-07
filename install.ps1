@@ -28,7 +28,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-$PXOS_VERSION = "2.4.0"
+$PXOS_VERSION = "2.5.0"
 $PXOS_REPO = "https://raw.githubusercontent.com/madebypx/PXOS/main"
 
 function Write-PxosLog([string]$Message) {
