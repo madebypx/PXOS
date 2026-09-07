@@ -1,5 +1,4 @@
-# Current Spec — Task T-14: v2.5.1 Telemetry API Refinement & UX Metric Filtering
-<!-- pxos:spec-version 1.0.0 -->
+# Spec — T-14: v2.5.1 Telemetry API Refinement & UX Metric Filtering
 
 - **Branch:** `main`
 - **Status:** 🎉 Done

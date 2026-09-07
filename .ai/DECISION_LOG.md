@@ -332,3 +332,27 @@ Created `scripts/pxos-invariant.py`, `pxos/scripts/pxos-invariant.py`, `docs/INV
 
 **Status:** Active
 
+---
+
+## 2026-09-07 — Telemetry UX Completeness Metric UI Filtering & Enriched Run Schema (v2.5.1)
+
+**Decision:**
+Filter `mean_ux_state_completeness_pct` in `/api/v1/stats` strictly to submissions where `ui_touched = 1`, introduce `evaluated_ui_tasks_count` in the summary object, and enrich each item in the `recent_runs` array with `task_description`, `ux_completeness_pct`, and `ui_touched`.
+
+**Context:**
+The public landing page (`pxos.madebypx.com`) displays the UX State Completeness benchmark comparing AI coding agents. Previously, `/api/v1/stats` computed `mean_ux_state_completeness_pct` across all submissions unconditionally. Backend-only tasks (CLI tools, DB migrations, audio processing) with zero UI touchpoints naturally recorded 0% or null UX completeness, dragging down the aggregate metric to 63.3% and contradicting the audited UI benchmark results (88.4%) reported in `benchmarks/analyze.py`. Additionally, the landing page live charts (`TelemetryCharts.tsx`) required task descriptions and run-level UX flags to display live community run details dynamically instead of relying purely on static baseline data.
+
+**Options considered:**
+- Option A — Maintain unconditional average across all tasks: Rejected because it penalizes backend development tasks for not implementing UI states, distorting empirical research data.
+- Option B — Add a separate, heavy `/api/v1/runs` endpoint with full pagination: Rejected because the existing `/api/v1/stats` endpoint already provides recent runs for the dashboard; adding a whole new API surface increases maintenance and attack surface unnecessarily.
+- Chosen: Option C — Filter aggregate calculation by `ui_touched = 1` in `/api/v1/stats`, add `evaluated_ui_tasks_count`, and enrich the existing `recent_runs` array with task description and UI metadata.
+
+**Tradeoffs:**
+- Gains: Immediate data consistency between `benchmarks/analyze.py` and the live telemetry API; eliminates artificial dilution of UX quality metrics; enables live dynamic telemetry rendering on `pxos.madebypx.com`; zero breaking changes to existing API clients.
+- Cost: Minor increase in `/api/v1/stats` payload size (~50-80 bytes per recent run entry).
+
+**Impact:**
+Updated `benchmarks/server.py`, `tests/test_benchmark_portal.py`, `CHANGELOG.md`, bumped version to `2.5.1`, and published official release `v2.5.1`.
+
+**Status:** Active
+
