@@ -1,7 +1,7 @@
 # Spec — T-12: Autonomous Multi-Modal UI Verification & Universal 5-State Inspector
 
 - **Branch:** `feat/t12-multimodal-ui` (or `main`)
-- **Status:** In Spec
+- **Status:** Done
 - **Assignee / Agent:** Agent Flash-1 / Rodrigo Pena
 - **Related Issues / Tasks:** `.internal/ROADMAP.md`, `skills/audit/SKILL.md`, `skills/benchmark/SKILL.md`
 
@@ -101,10 +101,10 @@ Incorporate an autonomous visual verification protocol into PXOS `/audit` and `/
 
 ## Acceptance Criteria
 
-- [ ] `docs/UI_5_STATES.md` created with clear specifications and code patterns for all 5 states.
-- [ ] `skills/audit/SKILL.md` updated with mandatory 5-state verification protocol for frontend scopes.
-- [ ] `scripts/pxos-benchmark.py` supports 5-state scoring in adherence calculation.
-- [ ] Unit tests in `tests/test_multimodal_ui.py` pass 100%.
+- [x] `docs/UI_5_STATES.md` created with clear specifications and code patterns for all 5 states.
+- [x] `skills/audit/SKILL.md` updated with mandatory 5-state verification protocol for frontend scopes.
+- [x] `scripts/pxos-benchmark.py` supports 5-state scoring in adherence calculation.
+- [x] Unit tests in `tests/test_multimodal_ui.py` pass 100%.
 
 ---
 
@@ -112,3 +112,11 @@ Incorporate an autonomous visual verification protocol into PXOS `/audit` and `/
 
 1. Run test suite against mock audit documents containing partial and complete state matrices.
 2. Verify scoring calculation awards appropriate points to Tier A benchmark qualifications.
+
+---
+
+## Workflow State
+
+- **Current phase:** Done
+- **Pending decision:** None
+- **Execution blocked until:** None

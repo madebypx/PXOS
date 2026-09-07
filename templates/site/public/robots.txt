@@ -1,6 +1,7 @@
 # https://pxos.madebypx.com/robots.txt
 User-agent: *
 Allow: /
+Allow: /benchmarks/
 Allow: /llms.txt
 Allow: /llms-full.txt
 

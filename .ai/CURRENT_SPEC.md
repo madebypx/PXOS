@@ -1,146 +1,98 @@
-# Current Spec — Task T-11: Closed-Loop Invariant Evolution & Cognitive Post-Mortem Engine
+# Current Spec — Task T-13: Public Benchmark Portal & Research Dashboard
 <!-- pxos:spec-version 1.0.0 -->
 
-This file defines the active task specification for engineering the Closed-Loop Invariant Evolution and Cognitive Post-Mortem Engine in PXOS (Task T-11 of Sprint Roadmap v2.5.0+). 
-Related upcoming roadmap specs in this batch:
-- [Task T-12: Autonomous Multi-Modal UI Verification](.ai/specs/SPEC-t12-multimodal-ui.md)
-- [Task T-13: Public Benchmark Portal & Research Dashboard](.ai/specs/SPEC-t13-benchmark-portal.md)
-
-- **Branch:** `feat/t11-invariant-evolution` (or `main`)
-- **Status:** In Spec
+- **Branch:** `main` (or `feat/t13-benchmark-portal`)
+- **Status:** 🎉 Done
 - **Assignee / Agent:** Agent Flash-1 / Rodrigo Pena
-- **Related Issues / Tasks:** `.internal/postmortem_ai_cognition_and_pxos.md`, `.internal/ROADMAP.md`, `T-08`, `T-09`, `T-10`
+- **Related Issues / Tasks:** `.internal/ROADMAP.md`, `T-08`, `benchmarks/server.py`, `benchmarks/analyze.py`
 
 ---
 
 ## Goal
 
-Create a self-healing governance mechanism within PXOS that automatically detects cognitive drift and high rework (`rework_ratio > 20%`) during `/review` and `/compact`, diagnoses the root failure cause (CRUD bias, unstated constants, or multi-node blindness), and autonomously synthesizes atomic, human-confirmed `INV-xxx` invariants for insertion into `.ai/PROJECT_CONTEXT.md`.
+Build and deploy an interactive, high-performance public research dashboard at `pxos.madebypx.com/benchmarks` consuming real-time verified Tier A telemetry from `telemetry.madebypx.com/api/v1/stats`, displaying empirical comparisons between LLM coding models (Gemini Flash vs. Claude Sonnet vs. GPT-4o) under the discipline of the PXOS framework.
 
 ---
 
 ## User Value
 
-- **Developers & Teams:** Never suffer from the same agent hallucination or architectural regression twice. Project mistakes convert permanently into durable rules.
-- **AI Coding Agents:** Receive concise, unambiguous negative constraints (`never assume...`) loaded on every session `/start`, preventing token waste and rework loops.
-- **Framework Maintainers:** Transforms empirical telemetry (`rework_turn_count`, `churn`) from passive metrics into proactive self-improving prompt engineering.
+- **Developers & Tech Leads:** Make data-driven decisions on model selection and token budgets based on real-world empirical telemetry rather than synthetic benchmarks.
+- **AI Research Community:** Access transparent, peer-auditable open datasets with outlier-trimmed medians and IQR filtering.
+- **PXOS Framework:** Showcases empirical proof of token cost reduction (-80%) and rework mitigation.
 
 ---
 
 ## Strategic & Audit Alignment
 
-- **Audit Findings Cross-Check:** Clean — No active audit blockers touching this scope. Builds upon Completion Honesty Protocol and No-Assumption Clause introduced in v2.4.0.
-- **Strategic Blueprint Reference:** Implements Section 5 of [`.internal/postmortem_ai_cognition_and_pxos.md`](.internal/postmortem_ai_cognition_and_pxos.md) and Horizon 1 of [`.internal/ROADMAP.md`](.internal/ROADMAP.md).
+- **Audit Findings Cross-Check:** Clean — Built directly upon the verified Tier A qualification gating (`[T-08]`), robust statistical aggregations (`analyze.py`), and rate-limited ingestion endpoints.
+- **Strategic Blueprint Reference:** Horizon 3 of [`.internal/ROADMAP.md`](.internal/ROADMAP.md).
 - **Critical Invariants Adherence:**
-  - `INV-001` (Telemetry Privacy): Invariant evolution operates strictly on local diffs and metrics; no proprietary code is uploaded.
+  - `INV-001` (Telemetry Privacy): Portal displays strictly aggregated and anonymous metrics (`project_hash`, model name, turn counts); zero proprietary code or unhashed project names are exposed.
   - `INV-002` (Internal Quarantine): Preserved.
-  - `INV-003` (Zero External Core Dependencies): Standard Python stdlib (`re`, `json`, `pathlib`, `subprocess`).
+  - `INV-003` (Zero External Core Dependencies): Standalone vanilla HTML/CSS/JS or lightweight Chart.js without runtime dependencies on backend CLI.
   - `INV-004` (Conventional Commits): Standard English commit format.
-  - `INV-005` (Append-Only Decision Log): New durable invariants and ADRs recorded chronologically.
+  - `INV-005` (Append-Only Decision Log): Durable ADR recorded.
 
 ---
 
 ## Scope
 
 ### In:
-1. **Rework Spike Detection Trigger (`skills/review/SKILL.md` & `skills/compact/SKILL.md`):**
-   - Automatically calculate or query local task churn: if `rework_ratio > 0.20` (or `rework_turn_count >= 2`), activate Cognitive Post-Mortem protocol.
-2. **Cognitive Drift Diagnostic Engine (`scripts/pxos-invariant.py`):**
-   - Inspect the git diff and commit history to classify the error pattern:
-     - *Pattern A (Assumed Constant / Value Drift):* Hardcoded threshold or status not present in `PROJECT_CONTEXT.md`.
-     - *Pattern B (Partial CRUD / Multi-Node Blindness):* Mutated one state source while neglecting related storage or background sync processes.
-     - *Pattern C (Premature Completion):* Build passed but spec criteria were missing.
-3. **Atomic Invariant Synthesizer:**
-   - Format proposed invariant adhering to PXOS standard:
-     `- **INV-### (Short Title):** Imperative statement prohibiting the failure mode, citing the exact boundary.`
-4. **Interactive Confirmation & Safe Injection:**
-   - Present candidate `INV-###` to the human developer during `/compact` or `/review`.
-   - Upon confirmation, safely append the invariant into `.ai/PROJECT_CONTEXT.md` under `## Critical invariants` with automatic index incrementation.
-5. **CLI Integration (`pxos invariant` or `pxos doctor`):**
-   - CLI command to audit existing invariants in `.ai/PROJECT_CONTEXT.md`, ensure sequential numbering, and verify that universal rules (`AI_BASE.md`) are satisfied.
+1. **Interactive Dashboard UI (`templates/site/public/benchmarks/index.html`):**
+   - Sleek dark-mode aesthetic adhering to PROJECT/X design language (CSS variables, responsive cards, glassmorphic accents).
+   - Real-time client-side fetch from `https://telemetry.madebypx.com/api/v1/stats`.
+2. **Model Comparison & Efficiency Visualizations:**
+   - Token Economy Comparison: Tokens per LOC delivered by model.
+   - Rework Ratio & Churn: Median and 5% Trimmed Mean churn comparison.
+   - UX Completeness & Utility: Average net utility and state coverage by model.
+3. **Interactive Tier Filter:**
+   - Default view locked strictly to **Tier A (Verified Rigor, `is_qualified = 1`)**.
+   - Option to toggle exploratory data (Tiers B & C) with visual badge demarcation.
+4. **Recent Verified Runs Table:**
+   - Tabular stream of recent anonymized runs displaying timestamp, model, task domain, LOC touched, rework ratio, and adherence badge.
+5. **Open Science Data Export:**
+   - One-click export of current benchmark dataset in sanitized JSON and CSV formats.
+6. **Backend Server Extension (`benchmarks/server.py`):**
+   - Support `?tier=all` vs `?tier=a` filtering.
+   - Return model comparison aggregations (`models`) and recent verified runs stream (`recent_runs`).
 
 ### Out:
-- Autonomous modification of `.ai/PROJECT_CONTEXT.md` without explicit human confirmation (strictly prohibited by governance).
-- Cloud-based LLM fine-tuning or remote rule ingestion.
+- Authenticated login or administrative mutations (dashboard is 100% public read-only).
+- Heavy server-side rendering architectures.
 
 ---
 
 ## Constraints
 
-- Zero external dependencies (`INV-003`).
-- Invariant IDs must be monotonically sequential (`INV-001`, `INV-002`, ... `INV-006`).
-- Max length of synthesized invariant: <= 3 lines to maintain token economy.
+- Pure client-side execution running cleanly on GitHub Pages, Cloudflare Pages, or Vercel static hosting.
+- Fast load time (< 1.0s) and zero tracking/analytics cookies.
+- Zero external core backend dependencies (`INV-003`).
 
 ---
 
 ## Existing Patterns
 
-- Invariant declaration block in `.ai/PROJECT_CONTEXT.md`.
-- Deterministic churn calculation in `scripts/pxos-benchmark.py`.
-- Skill operational workflows in `skills/review/SKILL.md` and `skills/compact/SKILL.md`.
-
----
-
-## Proposed Change
-
-1. **`scripts/pxos-invariant.py`:**
-   - CLI utility to parse, check, and safely insert `INV-xxx` entries into `.ai/PROJECT_CONTEXT.md`.
-2. **`skills/review/SKILL.md` & `WORKFLOWS.md`:**
-   - Add post-mortem trigger check when rework lines exceed 20% of total diff.
-3. **`skills/compact/SKILL.md`:**
-   - Add prompt instruction to synthesize and propose an invariant candidate if rework occurred during the session.
-4. **`pxos/cli.py`:**
-   - Expose `pxos invariant --check` and `pxos invariant --add`.
-5. **`tests/test_invariant_evolution.py`:**
-   - Automated unit tests for ID extraction, formatting validation, and injection idempotency.
-
----
-
-## Technical Flow
-
-```
-1. Developer runs /review or /compact after session with rework
-2. System checks git diff: rework_ratio = lines_deleted_or_modified / lines_total
-3. If rework_ratio > 0.20:
-   ├── Trigger Cognitive Drift Diagnoser
-   ├── Classify root cause (Assumed Constant / Multi-Node / Premature Completion)
-   └── Propose Candidate: "- **INV-006 (Quarantine Period):** Minimum territory quarantine must always..."
-4. Developer approves or edits proposal
-5. Script pxos-invariant.py appends candidate to .ai/PROJECT_CONTEXT.md
-6. Invariant is immediately active for all subsequent /start sessions
-```
-
----
-
-## Edge Cases
-
-- **Legitimate Heavy Refactoring:** User intentionally deletes and rewrites old code.
-  - *Mitigation:* Agent asks developer if rework was due to an agent cognitive error before synthesizing an invariant.
-- **Invariant Duplication:** Candidate rule overlaps with existing `INV-xxx`.
-  - *Mitigation:* Script performs substring and keyword similarity check against existing invariants.
+- `/api/v1/stats` payload contract in `benchmarks/server.py`.
+- Static site assets in `templates/site/public/`.
+- Chart rendering patterns in `skills/slides/` and `skills/design/`.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] `scripts/pxos-invariant.py` implements parsing, sequential ID assignment, and validation for `PROJECT_CONTEXT.md`.
-- [ ] `skills/review/SKILL.md` and `skills/compact/SKILL.md` include the Closed-Loop Invariant check on `rework_ratio > 20%`.
-- [ ] `pxos invariant --check` and `pxos invariant --add` exposed via `pxos/cli.py`.
-- [ ] Proposed invariants strictly adhere to the single-sentence imperative standard.
-- [ ] Full unit test suite in `tests/test_invariant_evolution.py` passes 100%.
-
----
-
-## Validation Plan
-
-1. Test CLI parsing on valid and invalid `PROJECT_CONTEXT.md` files.
-2. Test sequential ID generation (`INV-006`, etc.).
-3. Test simulation with simulated rework session.
+- [x] `templates/site/public/benchmarks/index.html` renders interactive dashboard matching PROJECT/X design language.
+- [x] Connects to `/api/v1/stats` with offline graceful error recovery.
+- [x] Visualizes comparative token economy and rework by model.
+- [x] Strictly isolates and defaults to Tier A verified data.
+- [x] Open data export generates valid JSON and CSV downloads.
+- [x] `benchmarks/server.py` `/api/v1/stats` provides models breakdown and recent runs list while maintaining backward compatibility.
+- [x] Package data parity maintained via `scripts/sync-package-data.py`.
+- [x] Automated tests pass with 100% success rate.
 
 ---
 
 ## Workflow State
 
-- **Current phase:** Discover
-- **Pending decision:** Plan confirmation for Task T-11
-- **Execution blocked until:** Approval to proceed
+- **Current phase:** Done
+- **Pending decision:** None
+- **Execution blocked until:** None

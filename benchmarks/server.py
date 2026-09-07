@@ -21,7 +21,8 @@ import threading
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
+from urllib.parse import parse_qs, urlparse
 
 HOST = os.environ.get("HOST", "127.0.0.1")
 PORT = int(os.environ.get("PORT", "8090"))
@@ -399,7 +400,9 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        path = self.path.split("?")[0].rstrip("/")
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path.rstrip("/")
+        query_params = parse_qs(parsed_url.query)
 
         if path == "/api/v1/health":
             self.send_json(200, {
@@ -422,7 +425,23 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     if total_submissions == 0:
                         self.send_json(200, {
                             "total_submissions": 0,
-                            "message": "No submissions recorded yet."
+                            "qualified_tier_a_count": 0,
+                            "qualification_scope": "tier_a_verified",
+                            "message": "No submissions recorded yet.",
+                            "summary": {
+                                "mean_total_tokens": 0.0,
+                                "mean_framework_overhead_tokens": 0.0,
+                                "mean_rework_ratio_pct": 0.0,
+                                "mean_ux_state_completeness_pct": 0.0,
+                                "overhead_justified_rate_pct": 0.0,
+                                "mean_turns_per_task": 0.0,
+                                "mean_adherence_score": 0.0,
+                            },
+                            "models": [],
+                            "recent_runs": [],
+                            "submissions_by_tier": {},
+                            "submissions_by_qualification_tier": {},
+                            "timestamp": datetime.now(timezone.utc).isoformat()
                         })
                         return
 
@@ -430,8 +449,13 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     cur.execute("SELECT COUNT(*) FROM submissions WHERE is_qualified = 1")
                     qualified_tier_a_count = cur.fetchone()[0] or 0
 
-                    filter_clause = "WHERE is_qualified = 1" if qualified_tier_a_count > 0 else ""
-                    scope = "tier_a_verified" if qualified_tier_a_count > 0 else "all_exploratory"
+                    tier_req = query_params.get("tier", ["a"])[0].lower()
+                    if tier_req == "all":
+                        filter_clause = ""
+                        scope = "all_exploratory"
+                    else:
+                        filter_clause = "WHERE is_qualified = 1" if qualified_tier_a_count > 0 else ""
+                        scope = "tier_a_verified" if qualified_tier_a_count > 0 else "all_exploratory"
 
                     cur.execute(f"""
                         SELECT 
@@ -459,6 +483,87 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     rework_ratio_pct = round((avg_rework / max(1.0, avg_initial_loc)) * 100, 1)
                     avg_adherence = round(row[8] or 0.0, 1)
 
+                    # Model comparative aggregates
+                    cur.execute(f"""
+                        SELECT 
+                            model,
+                            COUNT(*),
+                            AVG(input_tokens + output_tokens),
+                            AVG(initial_loc),
+                            AVG(rework_loc),
+                            AVG(ux_completeness),
+                            AVG(adherence_score),
+                            AVG(net_utility_score)
+                        FROM submissions
+                        {filter_clause}
+                        GROUP BY model
+                        ORDER BY COUNT(*) DESC
+                    """)
+                    models_list = []
+                    for m in cur.fetchall():
+                        m_model = m[0] or "unknown"
+                        m_count = m[1] or 0
+                        m_tokens = round(m[2] or 0.0, 1)
+                        m_init = round(m[3] or 1.0, 1)
+                        m_rework = round(m[4] or 0.0, 1)
+                        m_ratio = round((m_rework / max(1.0, m_init)) * 100, 1)
+                        m_tok_per_loc = round(m_tokens / max(1.0, m_init), 1)
+                        m_ux_pct = round((m[5] or 0.0) * 100, 1)
+                        m_adh = round(m[6] or 0.0, 1)
+                        m_util = round(m[7] or 0.0, 1)
+
+                        models_list.append({
+                            "model": m_model,
+                            "run_count": m_count,
+                            "mean_total_tokens": m_tokens,
+                            "tokens_per_loc": m_tok_per_loc,
+                            "rework_ratio_pct": m_ratio,
+                            "ux_completeness_pct": m_ux_pct,
+                            "adherence_score": m_adh,
+                            "net_utility_score": m_util
+                        })
+
+                    # Recent anonymized verified runs
+                    cur.execute(f"""
+                        SELECT 
+                            received_at,
+                            model,
+                            primary_subsystem,
+                            complexity_tier,
+                            initial_loc,
+                            rework_loc,
+                            total_turns,
+                            input_tokens + output_tokens,
+                            adherence_score,
+                            qualification_tier,
+                            is_qualified,
+                            project_hash
+                        FROM submissions
+                        {filter_clause}
+                        ORDER BY id DESC
+                        LIMIT 25
+                    """)
+                    recent_runs_list = []
+                    for r in cur.fetchall():
+                        r_init = r[4] or 0
+                        r_rework = r[5] or 0
+                        r_ratio = round((r_rework / max(1.0, float(r_init))) * 100, 1)
+                        recent_runs_list.append({
+                            "timestamp": r[0],
+                            "model": r[1] or "unknown",
+                            "primary_subsystem": r[2] or "general",
+                            "complexity_tier": r[3] or "tier_2_medium",
+                            "initial_loc": r_init,
+                            "rework_loc": r_rework,
+                            "rework_ratio_pct": r_ratio,
+                            "total_turns": r[6] or 0,
+                            "total_tokens": r[7] or 0,
+                            "adherence_score": r[8] or 0,
+                            "qualification_tier": r[9] or "tier_c_noise",
+                            "is_qualified": bool(r[10]),
+                            "project_hash": (r[11] or "")[:12]
+                        })
+
                     cur.execute("SELECT complexity_tier, COUNT(*) FROM submissions GROUP BY complexity_tier")
                     tier_counts = dict(cur.fetchall())
 
@@ -484,6 +589,8 @@ class TelemetryRequestHandler(http.server.BaseHTTPRequestHandler):
                     "mean_turns_per_task": avg_turns,
                     "mean_adherence_score": avg_adherence,
                 },
+                "models": models_list,
+                "recent_runs": recent_runs_list,
                 "submissions_by_tier": tier_counts,
                 "submissions_by_qualification_tier": qualification_counts,
                 "timestamp": datetime.now(timezone.utc).isoformat()

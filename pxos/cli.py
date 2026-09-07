@@ -41,11 +41,17 @@ def err(msg: str):
 
 
 def get_resource_path(relative_path: str) -> Path:
-    """Finds a template or script from package data, falling back to repository root."""
+    """Finds a template or script from repository root if in repo, falling back to package data."""
+    repo_root = Path(__file__).resolve().parent.parent
+    if (repo_root / ".git").exists():
+        repo_res = repo_root / relative_path
+        if repo_res.exists():
+            return repo_res
+
     pkg_res = Path(__file__).resolve().parent / relative_path
     if pkg_res.exists():
         return pkg_res
-    repo_res = Path(__file__).resolve().parent.parent / relative_path
+    repo_res = repo_root / relative_path
     if repo_res.exists():
         return repo_res
     return pkg_res
@@ -239,6 +245,52 @@ def cmd_monitor(args):
         sys.exit(1)
 
 
+def cmd_invariant(args):
+    """Run the invariant evolution and audit utility."""
+    script = get_resource_path("scripts/pxos-invariant.py")
+    if script.exists():
+        cmd = [sys.executable, str(script)] + sys.argv[2:]
+        sys.exit(subprocess.call(cmd))
+    else:
+        err(f"scripts/pxos-invariant.py not found at {script}.")
+        sys.exit(1)
+
+
+def cmd_doctor(args):
+    """Run repository health check and diagnostic suite."""
+    log("Running PXOS Diagnostic Suite & Repository Health Audit...")
+    all_ok = True
+
+    # 1. Invariant Integrity
+    inv_script = get_resource_path("scripts/pxos-invariant.py")
+    if inv_script.exists():
+        code = subprocess.call([sys.executable, str(inv_script), "--check"])
+        if code != 0:
+            all_ok = False
+    else:
+        warn("scripts/pxos-invariant.py not found.")
+
+    # 2. Package Parity (if running inside repo)
+    sync_script = get_resource_path("scripts/sync-package-data.py")
+    if sync_script.exists():
+        code = subprocess.call([sys.executable, str(sync_script), "--check"])
+        if code != 0:
+            all_ok = False
+
+    # 3. AI Crawlability (if running inside repo)
+    llms_script = get_resource_path("scripts/generate-llms-txt.py")
+    if llms_script.exists():
+        code = subprocess.call([sys.executable, str(llms_script), "--check"])
+        if code != 0:
+            all_ok = False
+
+    if all_ok:
+        ok("All system integrity and governance checks passed.")
+    else:
+        err("One or more diagnostic checks failed. Review output above.")
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="pxos",
@@ -268,6 +320,14 @@ def main():
     # monitor
     p_mon = subparsers.add_parser("monitor", help="Monitor public telemetry ingestion daemon")
     p_mon.set_defaults(func=cmd_monitor)
+
+    # invariant
+    p_inv = subparsers.add_parser("invariant", help="Audit and evolve project invariants")
+    p_inv.set_defaults(func=cmd_invariant)
+
+    # doctor
+    p_doc = subparsers.add_parser("doctor", help="Run comprehensive repository health check")
+    p_doc.set_defaults(func=cmd_doctor)
 
     args, unknown = parser.parse_known_args()
     if not args.command:

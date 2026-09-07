@@ -25,6 +25,12 @@ Review what was just implemented by checking the branch diff (e.g. against main/
 - For each criterion, classify: ✅ Verified (state how) | ⚠️ Not directly verified (state why) | ❌ Not met (state what's missing).
 - Flag any implementation that relies on assumed values not sourced from the codebase or domain rules.
 
+**Closed-Loop Invariant Evolution Check:**
+- Evaluate task churn and rework: if `rework_ratio > 0.20` or multiple `fix:` iterations occurred:
+  - Run cognitive post-mortem diagnosis (`python scripts/pxos-invariant.py --suggest --reason "<cause>"`).
+  - Classify whether rework stemmed from an unstated domain assumption, multi-node lifecycle omission, or premature completion.
+  - Propose a synthesized atomic `INV-###` candidate to the developer for confirmation.
+
 If a simpler valid solution exists, point it out.
 Do not refactor without my approval.
 

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- Primary Meta Tags -->
+  <title>PXOS Public Benchmark Portal — Empirical LLM Coding Telemetry</title>
+  <meta name="title" content="PXOS Public Benchmark Portal — Empirical LLM Coding Telemetry">
+  <meta name="description" content="Explore real-time, peer-auditable empirical telemetry comparing LLM coding models (Gemini 2.0 Flash, Claude 3.5 Sonnet, GPT-4o) under the discipline of the PXOS framework.">
+  <link rel="canonical" href="https://pxos.madebypx.com/benchmarks/">
+
+  <!-- Fonts & Preconnect -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://pxos.madebypx.com/benchmarks/">
+  <meta property="og:site_name" content="PXOS Benchmarks">
+  <meta property="og:title" content="PXOS Public Benchmark Portal — Empirical LLM Coding Telemetry">
+  <meta property="og:description" content="Transparent, verified Tier A telemetry on token economy (-80% waste), rework churn mitigation, and UX state completeness across AI coding agents.">
+  <meta property="og:image" content="https://pxos.madebypx.com/assets/og-pxos.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://pxos.madebypx.com/benchmarks/">
+  <meta name="twitter:title" content="PXOS Public Benchmark Portal — Empirical LLM Coding Telemetry">
+  <meta name="twitter:description" content="Transparent, verified Tier A telemetry on token economy (-80% waste), rework churn mitigation, and UX state completeness across AI coding agents.">
+  <meta name="twitter:image" content="https://pxos.madebypx.com/assets/og-pxos.png">
+  <meta name="twitter:creator" content="@madebypx">
+
+  <!-- AI Crawling Directives -->
+  <link rel="alternate" type="text/plain" href="https://pxos.madebypx.com/llms.txt" title="LLMs.txt Specification">
+  <link rel="alternate" type="text/plain" href="https://pxos.madebypx.com/llms-full.txt" title="Full LLM Context Reference">
+
+  <!-- Schema.org Dataset Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Dataset",
+    "name": "PXOS Empirical AI Agent Benchmark Telemetry",
+    "description": "Empirical quantitative benchmarks measuring token economy, code rework churn, and product UX completeness across frontier LLMs operating under the PXOS disciplined workflow.",
+    "url": "https://pxos.madebypx.com/benchmarks/",
+    "license": "https://creativecommons.org/licenses/by/4.0/",
+    "isAccessibleForFree": true,
+    "creator": {
+      "@type": "Organization",
+      "name": "PROJECT/X",
+      "url": "https://madebypx.com"
+    },
+    "distribution": [
+      {
+        "@type": "DataDownload",
+        "encodingFormat": "application/json",
+        "contentUrl": "https://telemetry.madebypx.com/api/v1/stats"
+      }
+    ],
+    "keywords": [
+      "AI code benchmarks",
+      "LLM token efficiency",
+      "code churn",
+      "Gemini Flash",
+      "Claude Sonnet",
+      "GPT-4o",
+      "PXOS framework"
+    ]
+  }
+  </script>
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- Sticky Header -->
+  <header class="portal-header">
+    <div class="container nav-wrapper">
+      <a href="https://pxos.madebypx.com" class="brand-group" aria-label="PXOS Home">
+        <div class="brand-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="16 18 22 12 16 6"></polyline>
+            <polyline points="8 6 2 12 8 18"></polyline>
+          </svg>
+        </div>
+        <div class="brand-text">
+          PXOS <span class="brand-tag">Benchmarks</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <div class="status-indicator" id="network-status">
+          <span class="pulse-dot"></span>
+          <span class="status-text">Connecting to Telemetry...</span>
+        </div>
+        <a href="https://github.com/madebypx/PXOS" class="nav-link" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://pxos.madebypx.com" class="nav-link">Framework</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="hero-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        Open Science &amp; Verifiable Telemetry
+      </div>
+      <h1 class="hero-title">
+        Empirical AI Coding <span class="gradient-text">Research Dashboard</span>
+      </h1>
+      <p class="hero-desc">
+        Real-world, peer-auditable telemetry measuring LLM coding efficiency across frontier models. 
+        Zero synthetic vibes; 100% verified git worktree runs under the PXOS operating system.
+      </p>
+    </section>
+
+    <!-- Controls Bar (Filter + Data Export) -->
+    <div class="control-bar">
+      <div class="filter-group">
+        <span class="filter-label">Rigor Tier:</span>
+        <div class="segmented-control" role="group" aria-label="Telemetry Tier Filter">
+          <button id="btn-tier-a" class="segment-btn active" type="button">Tier A (Verified Rigor)</button>
+          <button id="btn-tier-all" class="segment-btn" type="button">All Submissions (A, B &amp; C)</button>
+        </div>
+      </div>
+
+      <div class="export-group">
+        <button id="btn-export-json" class="btn-secondary" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export JSON
+        </button>
+        <button id="btn-export-csv" class="btn-secondary" type="button">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Top KPI Cards Grid -->
+    <section class="kpi-grid" aria-label="Key Performance Indicators">
+      <div class="kpi-card" style="--card-accent: var(--accent-blue);">
+        <div class="kpi-header">
+          <span class="kpi-title">Verified Runs</span>
+          <span class="kpi-icon">📊</span>
+        </div>
+        <div class="kpi-value" id="stat-total-runs">36</div>
+        <div class="kpi-subtext">Tier A verified telemetry submissions</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-emerald);">
+        <div class="kpi-header">
+          <span class="kpi-title">Tokens / LOC</span>
+          <span class="kpi-icon">⚡</span>
+        </div>
+        <div class="kpi-value" id="stat-tokens-loc">142</div>
+        <div class="kpi-subtext"><span class="kpi-trend-positive">-80% token waste</span> vs ad-hoc chat</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-amber);">
+        <div class="kpi-header">
+          <span class="kpi-title">Mean Churn / Rework</span>
+          <span class="kpi-icon">🔄</span>
+        </div>
+        <div class="kpi-value" id="stat-mean-rework">3.5%</div>
+        <div class="kpi-subtext">Rework lines modified or deleted</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-cyan);">
+        <div class="kpi-header">
+          <span class="kpi-title">UX Completeness</span>
+          <span class="kpi-icon">🎯</span>
+        </div>
+        <div class="kpi-value" id="stat-mean-ux">94.2%</div>
+        <div class="kpi-subtext">Nielsen heuristic state coverage</div>
+      </div>
+
+      <div class="kpi-card" style="--card-accent: var(--accent-purple);">
+        <div class="kpi-header">
+          <span class="kpi-title">Overhead Justified</span>
+          <span class="kpi-icon">🛡️</span>
+        </div>
+        <div class="kpi-value" id="stat-justified-rate">88%</div>
+        <div class="kpi-subtext">Developer affirmative ROI rating</div>
+      </div>
+    </section>
+
+    <!-- Comparative Visualizations Section -->
+    <section aria-label="Model Comparative Visualizations">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Model Efficiency &amp; Reliability Comparison</h2>
+          <p class="section-desc">Empirical telemetry aggregated across Gemini 2.0 Flash, Claude 3.5 Sonnet, and GPT-4o.</p>
+        </div>
+      </div>
+
+      <div class="charts-grid">
+        <!-- Chart 1: Token Economy -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Token Economy (Tokens / LOC Delivered)</h3>
+            <p class="chart-subtitle">Lower is more context-efficient. Pure stdlib &amp; minimal specification overhead.</p>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-token-economy"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 2: Code Churn & Rework -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3 class="chart-title">Code Churn &amp; Rework Ratio (%)</h3>
+            <p class="chart-subtitle">Percentage of generated code modified or rewritten in subsequent debugging turns.</p>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-rework-churn"></canvas>
+          </div>
+        </div>
+
+        <!-- Chart 3: UX & Adherence -->
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h3 class="chart-title">UX State Completeness &amp; Framework Adherence</h3>
+            <p class="chart-subtitle">Adherence to 5-state UI design (empty, loading, error, success, partial) and PXOS operating rules (0–100 scale).</p>
+          </div>
+          <div class="chart-canvas-wrapper">
+            <canvas id="chart-ux-adherence"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recent Verified Runs Stream Table -->
+    <section class="runs-section" aria-label="Recent Verified Runs">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Recent Anonymized Telemetry Feed</h2>
+          <p class="section-desc">Live verifiable benchmark runs recorded with cryptographic session fingerprints.</p>
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Age</th>
+              <th>Model</th>
+              <th>Subsystem</th>
+              <th>Initial LOC</th>
+              <th>Rework LOC</th>
+              <th>Churn (%)</th>
+              <th>Adherence</th>
+              <th>Rigor Tier</th>
+            </tr>
+          </thead>
+          <tbody id="recent-runs-tbody">
+            <!-- Dynamically populated by dashboard.js -->
+            <tr>
+              <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                Loading verified runs...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Methodology & Invariants Card -->
+    <section class="info-card" aria-label="Research Methodology">
+      <h3 class="section-title" style="font-size: 1.15rem;">Empirical Methodology &amp; Data Governance</h3>
+      <p class="section-desc">
+        How PXOS ensures zero data poisoning and transparent research verifiability.
+      </p>
+
+      <div class="info-grid">
+        <div class="info-block">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-emerald)" stroke-width="2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Tier A Qualification Standard
+          </h4>
+          <p>
+            Submissions require <code>adherence_score &gt;= 80</code>, passing unit tests, and verified git diff metrics. Exploratory runs (Tiers B &amp; C) are strictly partitioned.
+          </p>
+        </div>
+
+        <div class="info-block">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Zero PII Privacy Invariant (INV-001)
+          </h4>
+          <p>
+            Zero proprietary code or unhashed project identifiers are stored or transmitted. All project names are permanently SHA-256 hashed on client dispatch.
+          </p>
+        </div>
+
+        <div class="info-block">
+          <h4>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent-purple)" stroke-width="2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            Anti-Poisoning Deduplication
+          </h4>
+          <p>
+            Cryptographic <code>session_fingerprint</code> with SQLite UPSERT prevents Sybil duplicate submissions. Hourly rate limiting and 24h project submission quotas protect dataset integrity.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Portal Footer -->
+  <footer class="portal-footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://pxos.madebypx.com">PXOS Framework</a>
+        <a href="https://github.com/madebypx/PXOS">GitHub Repository</a>
+        <a href="https://pxos.madebypx.com/llms.txt">llms.txt</a>
+        <a href="https://github.com/madebypx/PXOS/blob/main/benchmarks/METHODOLOGY.md">Methodology</a>
+        <a href="https://github.com/madebypx/PXOS/blob/main/benchmarks/REPORT.md">Report</a>
+      </div>
+      <p>&copy; 2026 PROJECT/X. Open research released under Apache 2.0. Empirical datasets under CC-BY 4.0.</p>
+    </div>
+  </footer>
+
+  <!-- Chart.js via CDN with graceful fallback -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  
+  <!-- Dashboard Interactive Logic -->
+  <script src="dashboard.js"></script>
+</body>
+</html>

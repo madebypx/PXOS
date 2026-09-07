@@ -1,7 +1,7 @@
 # Spec — T-13: Public Benchmark Portal & Research Dashboard (pxos.madebypx.com/benchmarks)
 
-- **Branch:** `feat/t13-benchmark-portal` (or `main`)
-- **Status:** In Spec
+- **Branch:** `main` (or `feat/t13-benchmark-portal`)
+- **Status:** 🎉 Done
 - **Assignee / Agent:** Agent Flash-1 / Rodrigo Pena
 - **Related Issues / Tasks:** `.internal/ROADMAP.md`, `T-08`, `benchmarks/server.py`, `benchmarks/analyze.py`
 
@@ -28,7 +28,9 @@ Build and deploy an interactive, high-performance public research dashboard at `
 - **Critical Invariants Adherence:**
   - `INV-001` (Telemetry Privacy): Portal displays strictly aggregated and anonymous metrics (`project_hash`, model name, turn counts); zero proprietary code or unhashed project names are exposed.
   - `INV-002` (Internal Quarantine): Preserved.
-  - `INV-003` (Zero External Core Dependencies): Standalone vanilla HTML/CSS/JS or lightweight Chart.js without runtime dependencies on backend CLI.
+  - `INV-003` (Zero External Core Dependencies): Standalone vanilla HTML/CSS/JS without backend server-rendering dependencies.
+  - `INV-004` (Conventional Commits): Standard English commit format.
+  - `INV-005` (Append-Only Decision Log): Durable ADR recorded.
 
 ---
 
@@ -60,6 +62,7 @@ Build and deploy an interactive, high-performance public research dashboard at `
 
 - Pure client-side execution running cleanly on GitHub Pages, Cloudflare Pages, or Vercel static hosting.
 - Fast load time (< 1.0s) and zero tracking/analytics cookies.
+- Zero external core dependencies (`INV-003`).
 
 ---
 
@@ -103,11 +106,11 @@ Build and deploy an interactive, high-performance public research dashboard at `
 
 ## Acceptance Criteria
 
-- [ ] `templates/site/public/benchmarks/index.html` renders interactive dashboard matching PROJECT/X design language.
-- [ ] Connects to `/api/v1/stats` with offline graceful error recovery.
-- [ ] Visualizes comparative token economy and rework by model.
-- [ ] Strictly isolates and defaults to Tier A verified data.
-- [ ] Open data export generates valid JSON and CSV downloads.
+- [x] `templates/site/public/benchmarks/index.html` renders interactive dashboard matching PROJECT/X design language.
+- [x] Connects to `/api/v1/stats` with offline graceful error recovery.
+- [x] Visualizes comparative token economy and rework by model.
+- [x] Strictly isolates and defaults to Tier A verified data.
+- [x] Open data export generates valid JSON and CSV downloads.
 
 ---
 
@@ -116,3 +119,11 @@ Build and deploy an interactive, high-performance public research dashboard at `
 1. Local testing against mock server (`benchmarks/server.py`).
 2. Verification across viewport sizes (mobile, tablet, desktop).
 3. Lighthouse performance and accessibility audit (> 95 score).
+
+---
+
+## Workflow State
+
+- **Current phase:** Done
+- **Pending decision:** None
+- **Execution blocked until:** None

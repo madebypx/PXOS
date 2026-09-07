@@ -117,11 +117,11 @@ Create a self-healing governance mechanism within PXOS that automatically detect
 
 ## Acceptance Criteria
 
-- [ ] `scripts/pxos-invariant.py` implements parsing, sequential ID assignment, and validation for `PROJECT_CONTEXT.md`.
-- [ ] `skills/review/SKILL.md` and `skills/compact/SKILL.md` include the Closed-Loop Invariant check on `rework_ratio > 20%`.
-- [ ] `pxos invariant --check` and `pxos invariant --add` exposed via `pxos/cli.py`.
-- [ ] Proposed invariants strictly adhere to the single-sentence imperative standard.
-- [ ] Full unit test suite in `tests/test_invariant_evolution.py` passes 100%.
+- [x] `scripts/pxos-invariant.py` implements parsing, sequential ID assignment, and validation for `PROJECT_CONTEXT.md`.
+- [x] `skills/review/SKILL.md` and `skills/compact/SKILL.md` include the Closed-Loop Invariant check on `rework_ratio > 20%`.
+- [x] `pxos invariant --check` and `pxos invariant --add` exposed via `pxos/cli.py`.
+- [x] Proposed invariants strictly adhere to the single-sentence imperative standard.
+- [x] Full unit test suite in `tests/test_invariant_evolution.py` passes 100%.
 
 ---
 
@@ -130,3 +130,11 @@ Create a self-healing governance mechanism within PXOS that automatically detect
 1. Test CLI parsing on valid and invalid `PROJECT_CONTEXT.md` files.
 2. Test sequential ID generation (`INV-006`, etc.).
 3. Test simulation with simulated rework session.
+
+---
+
+## Workflow State
+
+- **Current phase:** Done
+- **Pending decision:** None
+- **Execution blocked until:** None

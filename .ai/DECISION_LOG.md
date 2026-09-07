@@ -252,4 +252,83 @@ Modified `benchmarks/server.py`, `benchmarks/analyze.py`, `scripts/pxos-benchmar
 
 **Status:** Active
 
+---
+
+**Decision:**
+Formalize the Universal 5-State Matrix (`initial_idle`, `loading_pending`, `empty_data`, `error_recovery`, `destructive_action_guard`) across PXOS `/audit` and `/benchmark`, requiring agents to audit and document visual or structured state resilience for frontend tasks, and award +10 adherence points in empirical benchmarks.
+
+**Context:**
+A common defect pattern in AI-assisted frontend development is "happy-path bias" — agents style and declare interfaces complete after only rendering mock data in the idle state. Edge cases like unhandled empty screens, freezing during slow async loading, cryptic unformatted error messages, and accidental destructive actions without confirmation prompts frequently slip through to production.
+
+**Options considered:**
+- Option A — Rely solely on freeform agent prompts or manual developer review: Rejected because LLMs consistently overlook non-happy path states unless explicitly grounded by a structured audit matrix.
+- Option B — Mandate heavy headless browser automation frameworks (Playwright/Puppeteer) in core package dependencies: Rejected because it violates Critical Invariant INV-003 (Zero External Core Dependencies) and creates installation friction across disparate operating systems.
+- Chosen: Option C — Universal 5-State Matrix with hybrid text/multi-modal auditing and benchmark integration:
+  1. Formalized the 5 universal states in `docs/UI_5_STATES.md` with concrete specifications and reference patterns.
+  2. Mandated the 5-state checklist table in `skills/audit/SKILL.md` for UI scopes, with visual snapshot conventions (`.ai/audits/screenshots/<task_id>/`) for browser-equipped agents.
+  3. Integrated `--verify-ui` state extraction and scoring into `scripts/pxos-benchmark.py`, awarding +10 adherence points (capped at 100) for complete 5/5 audits and tracking `ux_state_completeness_score`.
+  4. Provided clean, accessible zero-dependency boilerplate templates in `templates/ui/` (`vanilla_5_states.html`, `react_5_states.jsx`).
+
+**Tradeoffs:**
+- Gains: Eliminates frontend edge-case blind spots, establishes objective UX completeness metrics in empirical benchmarks, and guides multi-modal browser subagents with structured visual snapshot artifacts.
+- Cost: Frontend audits require reviewing 5 distinct states rather than a single happy-path view.
+
+**Impact:**
+Created `docs/UI_5_STATES.md`, `templates/ui/README.md`, `templates/ui/vanilla_5_states.html`, `templates/ui/react_5_states.jsx`, `tests/test_multimodal_ui.py`, updated `skills/audit/SKILL.md`, `scripts/pxos-benchmark.py`, and synchronized package data in `pxos/`.
+
+**Status:** Active
+
+---
+
+**Decision:**
+Deploy the Public Benchmark Portal & Research Dashboard (`pxos.madebypx.com/benchmarks`) with client-side Open Science data export (JSON/CSV), responsive dark-mode visualizations, and backward-compatible model aggregation endpoints in `benchmarks/server.py`.
+
+**Context:**
+Developers and engineering leaders require objective, empirical proof of LLM performance under disciplined workflows rather than synthetic leaderboard vibes. To establish public trust and support academic AI research, PXOS needs a transparent, real-time public dashboard consuming verified Tier A telemetry, providing cross-model comparisons (Tokens/LOC, Code Churn, UX Completeness) and downloadable datasets.
+
+**Options considered:**
+- Option A — Heavy fullstack React/Next.js dashboard with server-side database rendering: Rejected because it introduces external server maintenance overhead, dependencies, and complex hosting infrastructure that violates simplicity and static hosting portability.
+- Option B — Static pre-rendered Markdown table updated only on releases: Rejected because it lacks real-time interactive model comparison, dynamic tier filtering, and interactive data exploration for community users.
+- Chosen: Option C — Zero-build static web dashboard (`templates/site/public/benchmarks/`) consuming `/api/v1/stats`:
+  1. Built responsive dark-mode dashboard in pure vanilla HTML5, CSS3, and ES6 JavaScript adhering to PROJECT/X design system.
+  2. Powered visualizations with Chart.js via CDN with pure SVG/CSS fallback for offline or blocked environments.
+  3. Enriched `/api/v1/stats` in `benchmarks/server.py` to support `?tier=all` vs `?tier=a`, returning model comparison aggregates (`models`) and anonymized recent runs stream (`recent_runs`) while preserving 100% backward compatibility for existing endpoints and tests.
+  4. Added client-side Open Science export generating sanitized RFC 4180 CSV and formatted JSON datasets directly in-browser.
+  5. Strictly enforced privacy under `INV-001` (only SHA-256 hashed project IDs, model names, numeric metrics; zero code or PII).
+
+**Tradeoffs:**
+- Gains: Instant, zero-cost static hosting on GitHub Pages / Cloudflare Pages, zero backend runtime dependencies (`INV-003`), real-time live telemetry visualization with offline resilience, and peer-auditable open research datasets.
+- Cost: Client browsers execute Chart.js rendering and CSV/JSON generation in memory.
+
+**Impact:**
+Created `templates/site/public/benchmarks/index.html`, `dashboard.css`, `dashboard.js`, `tests/test_benchmark_portal.py`, enriched `benchmarks/server.py` `/api/v1/stats`, updated `sitemap.xml`, `robots.txt`, and synchronized package data in `pxos/templates/`.
+
+**Status:** Active
+
+---
+
+**Decision:**
+Implement Closed-Loop Invariant Evolution and the Cognitive Post-Mortem Engine within PXOS (`scripts/pxos-invariant.py`, `pxos invariant`, `pxos doctor`), automatically triggering root-cause error analysis and candidate invariant synthesis during `/review` and `/compact` when rework churn exceeds 20% (`rework_ratio > 0.20`), gated by mandatory human confirmation.
+
+**Context:**
+AI coding agents frequently suffer from recurrent cognitive drift across sessions: assuming undocumented domain constants, committing partial CRUD operations that ignore background synchronization ("multi-node blindness"), or prematurely declaring completion before edge cases are verified. Without a closed feedback loop that translates rework into permanent system rules, developers must repeatedly correct the same agent mistakes.
+
+**Options considered:**
+- Option A — Autonomous self-modifying agent rules without human review: Strictly rejected because unvetted rule additions can introduce contradictory constraints, hallucinated requirements, or bloat prompt context.
+- Option B — Passive churn telemetry without actionable prompts: Rejected because passive metrics measure rework but do nothing to systematically prevent recurrence.
+- Chosen: Option C — Human-gated Closed-Loop Invariant Evolution:
+  1. Automated detection in `/review` and `/compact` when `rework_ratio > 0.20` triggers the cognitive post-mortem protocol.
+  2. Diagnostic classification into clear failure taxonomies: `ASSUMED_CONSTANT`, `MULTI_NODE_BLINDNESS`, and `PREMATURE_COMPLETION`.
+  3. Structured candidate synthesis with Jaccard keyword similarity checks to prevent duplicate or contradictory rules.
+  4. Monotonically sequential ID assignment (`INV-006`, etc.) and safe injection into `.ai/PROJECT_CONTEXT.md` only upon explicit developer approval.
+  5. Built-in health auditing via `pxos invariant --check` and `pxos doctor`.
+
+**Tradeoffs:**
+- Gains: Converts expensive agent hallucinations and rework loops into permanent, durable negative constraints, preventing rework from repeating across future sessions.
+- Cost: Requires brief developer interaction during `/compact` when high rework occurs.
+
+**Impact:**
+Created `scripts/pxos-invariant.py`, `pxos/scripts/pxos-invariant.py`, `docs/INVARIANT_EVOLUTION.md`, `tests/test_invariant_evolution.py`, updated `pxos/cli.py` (`pxos invariant` and `pxos doctor`), `skills/review/SKILL.md`, `skills/compact/SKILL.md`, and `WORKFLOWS.md`.
+
+**Status:** Active
 

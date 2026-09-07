@@ -31,5 +31,9 @@ Update workflow state & durable memory:
 3. **Architectural & Product Decision Check (Autonomous ADR):**
    - Did this session make or cement any durable architectural, structural, or product decisions (e.g., library choices, IPC/API protocols, rejected technical paths)?
    - If yes: Autonomously format an ADR entry (following the template in `.ai/DECISION_LOG.md`) and append it directly to the end of `.ai/DECISION_LOG.md`. Note the added ADR in the summary.
+4. **Closed-Loop Invariant Evolution Check:**
+   - Did this session incur significant rework (`rework_ratio > 20%`) or repeat an unstated assumption/failure pattern?
+   - If yes: Run post-mortem diagnosis (`python scripts/pxos-invariant.py --suggest --reason "<cause>"`) and propose a candidate `INV-###`.
+   - Upon developer confirmation, inject the invariant into `.ai/PROJECT_CONTEXT.md` using `python scripts/pxos-invariant.py --add --title "..." --rule "..."`.
 
 If `SPRINT.md` does not exist but this project has a sprint in progress, ask me if I want to create it.

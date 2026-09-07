@@ -18,9 +18,34 @@ Act as a Principal Auditor to inspect codebase subsystems against security, memo
    - **Performance & Memory:** Unbounded memory growth, event listeners not cleaned up, unclosed handles/streams, main-thread blocking operations.
    - **Architecture & Invariants:** Boundary violations, circular imports, tightly coupled components, violations of conventions in `PROJECT_CONTEXT.md` or active research invariants.
    - **Reliability & Errors:** Swallowed exceptions, unhandled promises, missing fallback/loading states.
-   - **UX & Interaction (if UI):** Destructive actions lacking confirmation, lack of loading indicators.
+   - **UX & Interaction (if UI):** Destructive actions lacking confirmation, lack of loading indicators, compliance with Universal 5 UI States.
 
-3. **Format Findings:**
+3. **Multi-Modal UI Verification (Mandatory for Frontend & UI Scopes):**
+   When inspecting user interface components, views, or web applications, the auditor must rigorously verify and document the **5 Universal UI States** (per `docs/UI_5_STATES.md`):
+   1. `initial_idle`: Standard populated view with clean layout, typography, and enabled controls.
+   2. `loading_pending`: Skeleton loaders or disabled interactive triggers with activity indicators.
+   3. `empty_data`: Informative zero-state card with helpful guidance and primary creation CTA.
+   4. `error_recovery`: Human-readable error banner with retry trigger or recovery pathway.
+   5. `destructive_action_guard`: Modal confirmation or undo toast guarding irreversible actions.
+
+   **Audit Matrix Table Requirement:**
+   Audit reports inspecting UI must include the 5-state matrix table:
+   ```markdown
+   ### UI 5-State Verification Matrix
+
+   | State | Status | Evidence / Implementation Details | Verified |
+   |---|---|---|:---:|
+   | `initial_idle` | PASS | Rendered cleanly with mock/active data | [x] |
+   | `loading_pending` | PASS | Skeleton loader visible during async fetch | [x] |
+   | `empty_data` | PASS | Empty state card with actionable CTA | [x] |
+   | `error_recovery` | PASS | Error banner on failure with Retry button | [x] |
+   | `destructive_action_guard` | PASS | Confirmation dialog guards delete action | [x] |
+   ```
+
+   **Visual Snapshot Capture (Multi-Modal Subagents):**
+   For subagents equipped with browser/visual tools, capture and store visual snapshots in `.ai/audits/screenshots/<task_id>/state_<state_name>.png`. Strictly adhere to `INV-001` (use mock data only; zero credentials or PII).
+
+4. **Format Findings:**
    Each finding must follow the standard structure:
    ```markdown
    ### [CATEGORY-ID]: [Short Title]
@@ -33,9 +58,11 @@ Act as a Principal Auditor to inspect codebase subsystems against security, memo
    - **Status:** Open
    ```
 
-4. **Output & Summary:**
+5. **Output & Summary:**
    - Save the report to `.ai/audits/PARTIAL_<subsystem>.md` or `.ai/audits/AUDIT_YYYY-MM-DD.md`.
    - Provide a concise executive summary to the user:
      - Total findings by severity (P0, P1, P2, P3)
+     - UI 5-State Verification status (if UI scope: x/5 states verified)
      - Immediate blocking items (if any P0/P1 exist)
      - Recommended next steps (e.g. create task specs to address P0 items)
+

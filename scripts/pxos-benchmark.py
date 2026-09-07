@@ -35,12 +35,20 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 DEFAULT_ENDPOINT = os.environ.get("PXOS_TELEMETRY_URL", "https://telemetry.madebypx.com/api/v1/telemetry")
 VALID_TIERS = {"tier_1_micro", "tier_2_medium", "tier_3_complex"}
 VALID_MODES = {"retrospective", "controlled_ab", "unknown"}
 VALID_QUALIFICATION_TIERS = {"tier_a_rigor", "tier_b_partial", "tier_c_noise"}
+
+UI_5_UNIVERSAL_STATES = [
+    "initial_idle",
+    "loading_pending",
+    "empty_data",
+    "error_recovery",
+    "destructive_action_guard",
+]
 
 
 def anonymize_project_name(name: str, salt: str = "pxos_default_salt") -> str:
@@ -152,7 +160,70 @@ def extract_git_metrics(repo_dir: Optional[Path] = None, base_ref: Optional[str]
     return metrics
 
 
-def calculate_adherence_score(repo_root: Path) -> Tuple[int, str, bool, Dict[str, int]]:
+def extract_ui_5_states(source: Union[str, Path]) -> Dict[str, bool]:
+    """Parses an audit markdown report or text and determines verification of the 5 Universal UI States."""
+    content = ""
+    if isinstance(source, Path):
+        try:
+            content = source.read_text(encoding="utf-8")
+        except Exception:
+            content = ""
+    elif isinstance(source, str):
+        if "\n" not in source and os.path.exists(source):
+            try:
+                content = Path(source).read_text(encoding="utf-8")
+            except Exception:
+                content = source
+        else:
+            content = source
+    else:
+        content = str(source)
+
+    results = {st: False for st in UI_5_UNIVERSAL_STATES}
+    if not content:
+        return results
+
+    lines = content.splitlines()
+    for line in lines:
+        line_clean = line.strip()
+        for st in UI_5_UNIVERSAL_STATES:
+            if st in line_clean or st.replace("_", " ") in line_clean.lower():
+                if re.search(r"(\[[xX]\]|\b(PASS|PASSED|VERIFIED|YES)\b)", line_clean, re.IGNORECASE):
+                    results[st] = True
+
+    return results
+
+
+def find_latest_ui_audit(repo_root: Path, task_id: Optional[str] = None) -> Optional[Path]:
+    """Finds the most relevant audit report in .ai/audits/ containing UI state audits."""
+    audits_dir = repo_root / ".ai" / "audits"
+    if not audits_dir.exists():
+        return None
+
+    candidates = []
+    for f in audits_dir.glob("*.md"):
+        if f.name.lower() == "readme.md":
+            continue
+        try:
+            txt = f.read_text(encoding="utf-8")
+            has_task = bool(task_id and (task_id.lower() in f.name.lower() or task_id.lower() in txt.lower()))
+            has_ui = any(st in txt for st in UI_5_UNIVERSAL_STATES)
+            mtime = f.stat().st_mtime
+            relevance = (3 if has_ui else 0) + (2 if has_task else 0)
+            candidates.append((relevance, mtime, f))
+        except Exception:
+            pass
+
+    if not candidates:
+        return None
+
+    candidates.sort(key=lambda x: (x[0], x[1]), reverse=True)
+    return candidates[0][2]
+
+
+def calculate_adherence_score(
+    repo_root: Path, ui_states_count: Optional[int] = None
+) -> Tuple[int, str, bool, Dict[str, int]]:
     """Calculates objective repository maturity and adherence to PXOS standards (0-100 pts)."""
     score = 0
     breakdown = {}
@@ -217,6 +288,24 @@ def calculate_adherence_score(repo_root: Path) -> Tuple[int, str, bool, Dict[str
     else:
         breakdown["architectural_tracking"] = 0
 
+    # 6. UI 5-State Verification (+10 bonus pts when all 5 universal states audited)
+    if ui_states_count is not None:
+        if ui_states_count >= 5:
+            score += 10
+            breakdown["ui_5_states_verified"] = 10
+        else:
+            breakdown["ui_5_states_verified"] = 0
+    else:
+        latest_audit = find_latest_ui_audit(repo_root)
+        if latest_audit:
+            audit_states = extract_ui_5_states(latest_audit)
+            if sum(1 for v in audit_states.values() if v) >= 5:
+                score += 10
+                breakdown["ui_5_states_verified"] = 10
+
+    # Cap adherence score at 100 points
+    score = min(100, score)
+
     if score >= 70:
         tier = "tier_a_rigor"
         is_qualified = True
@@ -237,10 +326,32 @@ def build_extracted_benchmark(
     complexity_tier: str = "tier_2_medium",
     primary_subsystem: str = "core",
     model: str = "unknown",
+    verify_ui: bool = False,
+    audit_file: Optional[str] = None,
 ) -> Dict[str, Any]:
     """Builds a structured Schema 2.0 benchmark dictionary from local git and repo evidence."""
     git_metrics = extract_git_metrics(repo_root)
-    score, tier, is_qualified, _ = calculate_adherence_score(repo_root)
+
+    # UI 5-State inspection
+    ui_states = {st: False for st in UI_5_UNIVERSAL_STATES}
+    ui_touched = False
+    ux_completeness = 1.0
+    ui_verified_count = 0
+
+    target_audit_path = None
+    if audit_file:
+        target_audit_path = Path(audit_file)
+    elif verify_ui:
+        target_audit_path = find_latest_ui_audit(repo_root, task_id=task_id)
+
+    if target_audit_path and target_audit_path.exists():
+        ui_states = extract_ui_5_states(target_audit_path)
+        ui_verified_count = sum(1 for v in ui_states.values() if v)
+        ui_touched = True
+        ux_completeness = round(ui_verified_count / 5.0, 2)
+        score, tier, is_qualified, _ = calculate_adherence_score(repo_root, ui_states_count=ui_verified_count)
+    else:
+        score, tier, is_qualified, _ = calculate_adherence_score(repo_root)
 
     repo_name = repo_root.name or "repository"
     proj_hash = anonymize_project_name(repo_name)
@@ -284,8 +395,9 @@ def build_extracted_benchmark(
             "merge_conflicts_encountered": 0
         },
         "product_design_and_ux": {
-            "ui_components_touched": False,
-            "ux_state_completeness_score": 1.0,
+            "ui_components_touched": ui_touched,
+            "ux_state_completeness_score": ux_completeness,
+            "ui_states_verified": ui_verified_count,
             "design_tokens_adhered": True
         },
         "architectural_fidelity": {
@@ -400,6 +512,7 @@ def sanitize_payload(raw: Dict[str, Any]) -> Tuple[bool, Optional[str], Optional
         "product_design_and_ux": {
             "ui_components_touched": bool(ux.get("ui_components_touched", False)),
             "ux_state_completeness_score": max(0.0, min(1.0, ux_completeness)),
+            "ui_states_verified": max(0, min(5, int(ux.get("ui_states_verified", 0)))),
             "design_tokens_adhered": bool(ux.get("design_tokens_adhered", True))
         },
         "architectural_fidelity": {
@@ -469,6 +582,8 @@ def main():
     parser.add_argument("--model", default="agent-evaluator", help="Evaluator model identifier")
     parser.add_argument("--output", "-o", help="Output file path to save extracted benchmark JSON")
     parser.add_argument("--url", default=DEFAULT_ENDPOINT, help=f"Ingestion server endpoint (default: {DEFAULT_ENDPOINT})")
+    parser.add_argument("--verify-ui", action="store_true", help="Audit 5 Universal UI States from .ai/audits/ reports")
+    parser.add_argument("--audit-file", help="Explicit path to audit report for UI state verification")
     parser.add_argument("--dry-run", action="store_true", help="Display sanitized payload without transmitting")
     parser.add_argument("--offline", action="store_true", help="Validate locally and do not transmit")
     parser.add_argument("--yes", "-y", action="store_true", help="Skip confirmation prompt and transmit immediately")
@@ -485,10 +600,15 @@ def main():
             task_id=args.task_id,
             repo_root=repo_root,
             complexity_tier=args.tier,
-            model=args.model
+            model=args.model,
+            verify_ui=args.verify_ui,
+            audit_file=args.audit_file,
         )
         git_m = extract_git_metrics(repo_root)
-        score, tier, is_q, breakdown = calculate_adherence_score(repo_root)
+        arch = benchmark_dict["architectural_fidelity"]
+        score = arch["adherence_score"]
+        tier = arch["qualification_tier"]
+        is_q = arch["is_qualified"]
 
         print(f"Task ID:             {args.task_id} ({args.tier})")
         print(f"Branch:              {git_m['branch']}")
@@ -498,8 +618,19 @@ def main():
         print(f"Measured Churn LOC:  {git_m['deleted_loc']} lines modified/deleted")
         print("-" * 65)
         print(f"PXOS Adherence Score:{score}/100 -> {tier.upper()} (Qualified: {is_q})")
-        for k, v in breakdown.items():
-            print(f"  + {k.replace('_', ' ').title()}: {v} pts")
+
+        ux_block = benchmark_dict.get("product_design_and_ux", {})
+        if ux_block.get("ui_components_touched") or args.verify_ui:
+            v_cnt = ux_block.get("ui_states_verified", 0)
+            ux_comp = ux_block.get("ux_state_completeness_score", 0.0)
+            print("-" * 65)
+            print(f"UI 5-State Verification: {v_cnt}/5 Verified ({ux_comp * 100:.1f}% UX Completeness)")
+            target_audit = Path(args.audit_file) if args.audit_file else find_latest_ui_audit(repo_root, task_id=args.task_id)
+            if target_audit and target_audit.exists():
+                states_map = extract_ui_5_states(target_audit)
+                for st in UI_5_UNIVERSAL_STATES:
+                    mark = "[x]" if states_map.get(st, False) else "[ ]"
+                    print(f"  {mark} {st}")
         print("=" * 65)
 
         if args.output:
