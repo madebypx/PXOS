@@ -356,3 +356,35 @@ Updated `benchmarks/server.py`, `tests/test_benchmark_portal.py`, `CHANGELOG.md`
 
 **Status:** Active
 
+---
+
+## 2026-09-20 — Modular Addon Architecture & Evidence-First Research Addon (v2.6.0)
+
+**Decision:**
+Introduce the official **PXOS Modular Addon Architecture (`pxos add <addon>`)** and implement the first official domain addon: the **Evidence Addon (`pxos add evidence` / `pxos init --evidence`)** alongside the global adversarial review skill (`/peer-review`).
+
+**Context:**
+As PXOS adoption broadens into scientific software engineering, academic Design Science Research (DSR), empirical case studies, and mission-critical architectural evaluations, teams require rigorous epistemological governance. However, embedding specialized scientific protocols (FAIR principles, 5-layer epistemic separation, citation registers, counterevidence tracking, and adversarial reviewer prompts) directly into the PXOS core would introduce cognitive overhead and prompt bloat for everyday software engineering tasks, violating the core philosophy of a minimal operating system (`INV-003`).
+
+**Options considered:**
+- Option A — Embed evidence protocols into core `templates/.ai/AI_BASE.md`: Rejected because it bloats baseline prompt context with scientific matrices for developers who only need standard software engineering workflows.
+- Option B — Distribute as an external third-party repository / git submodule: Rejected because git submodules introduce friction, lack zero-dependency CLI scaffolding, and complicate offline installation.
+- Chosen: Option C — First-class Modular Addon Architecture:
+  1. Implemented `pxos add <addon>` in the zero-dependency CLI (`pxos/cli.py`) with support for `evidence` and flags `--force`, `--ide`, and `--global`.
+  2. Supported dual-mode onboarding: `pxos init --evidence` to bootstrap a new project with evidence governance in one command.
+  3. Codified 5 Epistemic Layers (`Raw Data` ➔ `Finding` ➔ `Hypothesis` ➔ `ADR` ➔ `Conclusion`) with the mandatory stop gate `INSUFFICIENT EVIDENCE — DO NOT CONCLUDE` in `templates/addons/evidence/.ai/research/00-governance/research-protocol.md`.
+  4. Created system prompts for the `Evidence-First Research Agent` (`ai-governance.md`) and `Adversarial Methodological Reviewer` (`adversarial-reviewer.md`) with 5 canonical verdicts (`REMOVE`, `QUALIFY`, `VERIFY`, `REANALYZE`, `RETAIN`).
+  5. Codified CSV schemas for `evidence-matrix.csv` and `source-register.csv`, alongside `negative-cases.md` and `rejected-claims.md`.
+  6. Provided non-intrusive IDE rule injection into Cursor, Windsurf, Claude, Gemini, and Copilot within managed `<!-- pxos:evidence:start -->` blocks.
+  7. Added universal `/peer-review` workflow skill (`skills/peer-review/SKILL.md`).
+  8. Created `MANIFEST.in` and synchronized package parity for PyPI distribution.
+
+**Tradeoffs:**
+- Gains: Provides institutional-grade scientific rigor on demand; prevents LLM sycophancy, ungrounded claims, and hallucinated DOIs; preserves the zero-bloat core of PXOS; establishes an extensible architectural precedent for future modular addons (`security`, `compliance`).
+- Cost: Requires maintainers to manage addon template trees under `templates/addons/` and verify package data parity across releases.
+
+**Impact:**
+Touched `pxos/cli.py`, `templates/addons/evidence/`, `pxos/templates/addons/evidence/`, `skills/peer-review/SKILL.md`, `MANIFEST.in`, `pyproject.toml`, `README.md`, `WORKFLOWS.md`, `CHANGELOG.md`, and created `tests/test_evidence_addon.py`.
+
+**Status:** Active
+
