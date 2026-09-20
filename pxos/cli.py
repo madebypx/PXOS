@@ -12,7 +12,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-VERSION = "2.5.1"
+VERSION = "2.6.0"
 REPO_RAW_BASE = "https://raw.githubusercontent.com/madebypx/PXOS/main"
 
 # ANSI Color Codes
@@ -85,10 +85,31 @@ def download_or_copy(src_rel: str, dest_path: Path, overwrite: bool = False):
         ok(f"Created {dest_path}")
 
 
-def append_pxos_block(dest_path: Path, content: str):
-    """Append or replace a managed PXOS block inside an existing markdown file."""
-    start_marker = "<!-- pxos:start -->"
-    end_marker = "<!-- pxos:end -->"
+ADDONS = {
+    "evidence": {
+        "title": "Evidence-First Scientific & DSR Governance Addon",
+        "files": [
+            ("templates/addons/evidence/.ai/research/00-governance/research-protocol.md", Path(".ai/research/00-governance/research-protocol.md")),
+            ("templates/addons/evidence/.ai/research/00-governance/ai-governance.md", Path(".ai/research/00-governance/ai-governance.md")),
+            ("templates/addons/evidence/.ai/research/00-governance/adversarial-reviewer.md", Path(".ai/research/00-governance/adversarial-reviewer.md")),
+            ("templates/addons/evidence/.ai/research/evidence-matrix.csv", Path(".ai/research/evidence-matrix.csv")),
+            ("templates/addons/evidence/.ai/research/source-register.csv", Path(".ai/research/source-register.csv")),
+            ("templates/addons/evidence/.ai/research/negative-cases.md", Path(".ai/research/negative-cases.md")),
+            ("templates/addons/evidence/.ai/research/rejected-claims.md", Path(".ai/research/rejected-claims.md")),
+        ],
+        "rules": "templates/addons/evidence/rules/evidence_first_research.md",
+    }
+}
+
+
+def append_pxos_block(
+    dest_path: Path,
+    content: str,
+    start_marker: str = "<!-- pxos:start -->",
+    end_marker: str = "<!-- pxos:end -->",
+    block_name: str = "PXOS rules",
+):
+    """Append or replace a managed block inside an existing markdown file."""
     dest_path.parent.mkdir(parents=True, exist_ok=True)
 
     if dest_path.exists():
@@ -98,15 +119,122 @@ def append_pxos_block(dest_path: Path, content: str):
             replacement = f"{start_marker}\n{content}\n{end_marker}"
             new_text = pattern.sub(replacement, text)
             dest_path.write_text(new_text, encoding="utf-8")
-            ok(f"Updated PXOS rules block in {dest_path}")
+            ok(f"Updated {block_name} block in {dest_path}")
             return
         appended = f"{text}\n\n---\n\n{start_marker}\n{content}\n{end_marker}\n"
         dest_path.write_text(appended, encoding="utf-8")
-        ok(f"Appended PXOS rules to {dest_path}")
+        ok(f"Appended {block_name} to {dest_path}")
     else:
         initial = f"{start_marker}\n{content}\n{end_marker}\n"
         dest_path.write_text(initial, encoding="utf-8")
         ok(f"Created {dest_path}")
+
+
+def detect_ide() -> str:
+    """Auto-detect configured AI IDE in current workspace."""
+    if Path(".cursor").exists():
+        return "cursor"
+    if Path(".windsurf").exists():
+        return "windsurf"
+    if Path("CLAUDE.md").exists():
+        return "claude"
+    if Path("GEMINI.md").exists():
+        return "gemini"
+    if Path(".github/copilot-instructions.md").exists():
+        return "copilot"
+    return ""
+
+
+def configure_addon_ide_rules(addon_key: str, ide: str, global_mode: bool = False):
+    """Setup editor rules for a specific addon."""
+    addon = ADDONS.get(addon_key)
+    if not addon or "rules" not in addon:
+        return
+
+    rules_src = get_resource_path(addon["rules"])
+    content = ""
+    if rules_src.exists():
+        content = rules_src.read_text(encoding="utf-8")
+    else:
+        url = f"{REPO_RAW_BASE}/{addon['rules']}"
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": f"pxos-cli/{VERSION}"})
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                content = resp.read().decode("utf-8")
+        except Exception as e:
+            warn(f"Could not retrieve addon rules template from {url}: {e}")
+            return
+
+    if not content:
+        warn("Could not retrieve addon IDE rules template.")
+        return
+
+    user_home = Path.home()
+    ide = ide.lower()
+    start_marker = f"<!-- pxos:{addon_key}:start -->"
+    end_marker = f"<!-- pxos:{addon_key}:end -->"
+    block_name = f"PXOS {addon_key} rules"
+
+    if ide == "cursor":
+        rules_path = user_home / f".cursor/rules/pxos-{addon_key}.mdc" if global_mode else Path(f".cursor/rules/pxos-{addon_key}.mdc")
+        rules_path.parent.mkdir(parents=True, exist_ok=True)
+        rules_path.write_text(f"---\nalwaysApply: true\n---\n\n{content}", encoding="utf-8")
+        ok(f"Configured Cursor rules at {rules_path}")
+    elif ide == "windsurf":
+        rules_path = user_home / f".windsurf/rules/pxos-{addon_key}.md" if global_mode else Path(f".windsurf/rules/pxos-{addon_key}.md")
+        rules_path.parent.mkdir(parents=True, exist_ok=True)
+        rules_path.write_text(content, encoding="utf-8")
+        ok(f"Configured Windsurf rules at {rules_path}")
+    elif ide == "claude":
+        rules_path = user_home / ".claude/CLAUDE.md" if global_mode else Path("CLAUDE.md")
+        append_pxos_block(rules_path, content, start_marker, end_marker, block_name)
+    elif ide == "gemini":
+        rules_path = user_home / ".gemini/GEMINI.md" if global_mode else Path("GEMINI.md")
+        append_pxos_block(rules_path, content, start_marker, end_marker, block_name)
+    elif ide == "copilot":
+        rules_path = Path(".github/copilot-instructions.md")
+        append_pxos_block(rules_path, content, start_marker, end_marker, block_name)
+    else:
+        warn(f"Unknown IDE '{ide}'. Supported: cursor, windsurf, claude, gemini, copilot.")
+
+
+def install_addon(addon_key: str, force: bool = False, ide: str = None, global_mode: bool = False):
+    """Installs a modular PXOS addon into workspace."""
+    if addon_key not in ADDONS:
+        err(f"Unknown addon '{addon_key}'. Available addons: {', '.join(ADDONS.keys())}")
+        sys.exit(1)
+
+    addon = ADDONS[addon_key]
+    log(f"Installing {addon['title']}...")
+
+    for src_rel, dest_path in addon["files"]:
+        download_or_copy(src_rel, dest_path, overwrite=force)
+
+    # Scaffolding index link if .ai/research/INDEX.md exists
+    research_idx = Path(".ai/research/INDEX.md")
+    if research_idx.exists():
+        text = research_idx.read_text(encoding="utf-8")
+        if "00-governance/research-protocol.md" not in text:
+            entry = "| [Research Protocol](00-governance/research-protocol.md) | Epistemic Governance & FAIR | 5-Layer Epistemic Model (`INSUFFICIENT EVIDENCE — DO NOT CONCLUDE`) | Active | Initial |"
+            if "| *None yet*" in text:
+                text = text.replace("| *None yet* | *Initial project setup* | *No active research constraints registered* | Active | YYYY-MM-DD |", entry)
+            elif "## Active Research & Invariants" in text:
+                header_block = "## Active Research & Invariants\n\n| Document | Topic / Subsystem | Key Takeaway / Invariant | Status | Last Updated |\n|---|---|---|---|---|"
+                if header_block in text:
+                    text = text.replace(header_block, f"{header_block}\n{entry}")
+            research_idx.write_text(text, encoding="utf-8")
+            ok(f"Linked research protocol in {research_idx}")
+
+    target_ide = ide or detect_ide()
+    if target_ide:
+        configure_addon_ide_rules(addon_key, target_ide, global_mode=global_mode)
+
+    print(f"\n{BOLD}{GREEN}PXOS addon '{addon_key}' installed successfully.{RESET}\n")
+    if addon_key == "evidence":
+        print("  Next steps:")
+        print(f"  1. Consult {BOLD}.ai/research/00-governance/research-protocol.md{RESET} for epistemic guidelines.")
+        print(f"  2. Register findings in {BOLD}.ai/research/evidence-matrix.csv{RESET} and sources in {BOLD}source-register.csv{RESET}.")
+        print(f"  3. Use {BOLD}/peer-review{RESET} in your editor to adversarial stress-test claims before proposing ADRs.\n")
 
 
 def configure_ide_rules(ide: str, global_mode: bool = False):
@@ -157,6 +285,16 @@ def configure_ide_rules(ide: str, global_mode: bool = False):
         warn(f"Unknown IDE '{ide}'. Supported: cursor, windsurf, claude, gemini, copilot.")
 
 
+def cmd_add(args):
+    """Install a modular PXOS addon."""
+    install_addon(
+        addon_key=args.addon.lower(),
+        force=args.force,
+        ide=args.ide,
+        global_mode=args.global_mode,
+    )
+
+
 def cmd_init(args):
     """Initialize PXOS in the current workspace."""
     print(f"\n{BOLD}Installing PXOS v{VERSION}...{RESET}\n")
@@ -176,21 +314,12 @@ def cmd_init(args):
         download_or_copy("templates/ROADMAP.md", Path("ROADMAP.md"))
         download_or_copy("templates/SPRINT.md", Path("SPRINT.md"))
 
-    ide = args.ide
-    if not ide:
-        if Path(".cursor").exists():
-            ide = "cursor"
-        elif Path(".windsurf").exists():
-            ide = "windsurf"
-        elif Path("CLAUDE.md").exists():
-            ide = "claude"
-        elif Path("GEMINI.md").exists():
-            ide = "gemini"
-        elif Path(".github/copilot-instructions.md").exists():
-            ide = "copilot"
-
+    ide = args.ide or detect_ide()
     if ide:
         configure_ide_rules(ide, global_mode=args.global_mode)
+
+    if getattr(args, "evidence", False):
+        install_addon("evidence", force=False, ide=ide, global_mode=args.global_mode)
 
     print(f"\n{BOLD}{GREEN}PXOS v{VERSION} installed successfully.{RESET}\n")
     print("  Next steps:")
@@ -303,9 +432,18 @@ def main():
     # init
     p_init = subparsers.add_parser("init", help="Initialize PXOS in the current workspace")
     p_init.add_argument("--full", action="store_true", help="Install optional planning files (ROADMAP.md, SPRINT.md)")
+    p_init.add_argument("--evidence", action="store_true", help="Install scientific evidence-first research addon")
     p_init.add_argument("--ide", type=str, choices=["cursor", "windsurf", "claude", "gemini", "copilot"], help="Configure IDE rules")
     p_init.add_argument("--global", dest="global_mode", action="store_true", help="Install IDE rules globally to home directory")
     p_init.set_defaults(func=cmd_init)
+
+    # add (addons)
+    p_add = subparsers.add_parser("add", help="Install modular addons into the workspace")
+    p_add.add_argument("addon", choices=list(ADDONS.keys()), help="Name of addon to install (e.g. evidence)")
+    p_add.add_argument("--force", action="store_true", help="Overwrite existing files if already present")
+    p_add.add_argument("--ide", type=str, choices=["cursor", "windsurf", "claude", "gemini", "copilot"], help="Configure IDE rules for addon")
+    p_add.add_argument("--global", dest="global_mode", action="store_true", help="Install IDE rules globally to home directory")
+    p_add.set_defaults(func=cmd_add)
 
     # update
     p_update = subparsers.add_parser("update", help="Update operating rules to latest version without losing project context")

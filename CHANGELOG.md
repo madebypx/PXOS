@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.6.0] - 2026-09-20
+
+### Added
+- **PXOS Modular Addons Architecture (`pxos add <addon>`):**
+  - Introduces modular addon provisioning, allowing workspaces to install specialized domain governance, scientific protocols, or audit packages without framework bloat (`INV-003`).
+  - Added `pxos add <addon>` sub-command with `--force`, `--ide`, and `--global` flags.
+  - Added `--evidence` flag to `pxos init` to scaffold core PXOS and the evidence addon in a single operation.
+- **Evidence-First Research Addon (`pxos add evidence`):**
+  - **5-Layer Epistemic Model (`research-protocol.md`):** Strict separation between `Raw Data` (Layer 1), `Finding / Inference` (Layer 2), `Design Hypothesis` (Layer 3), `Architectural Decision (ADR)` (Layer 4), and `Validated Conclusion` (Layer 5).
+  - **Mandatory Epistemic Stop Gate:** Deterministic rule enforcing `INSUFFICIENT EVIDENCE — DO NOT CONCLUDE` whenever evidence is missing, ungrounded, or anecdotal.
+  - **AI Governance & Anti-Hallucination Mandate (`ai-governance.md`):** Prohibits inventing DOIs, quotes, papers, statistics, or user participants, and mandates structured analytical responses while eliminating sycophancy.
+  - **Adversarial Reviewer Protocol (`adversarial-reviewer.md`):** Codifies confirmation-bias hunting and the 5 canonical verdicts: `REMOVE`, `QUALIFY`, `VERIFY`, `REANALYZE`, and `RETAIN`.
+  - **Structured CSV Registers & Ledgers:** Standardized schemas in `evidence-matrix.csv` and `source-register.csv`, counterevidence tracking in `negative-cases.md`, and refuted claim tracking in `rejected-claims.md`.
+  - **IDE Rule Template (`rules/evidence_first_research.md`):** Non-intrusive rule injection across Cursor, Windsurf, Claude, Gemini, and Copilot using isolated `<!-- pxos:evidence:start -->` blocks.
+- **Global Skill `/peer-review` (`skills/peer-review/SKILL.md`):**
+  - Universal slash-command workflow enabling developers and AI agents to conduct methodological adversarial audits of claims and diffs before consolidating ADRs or writing production code.
+- **Automated Test Suite (`tests/test_evidence_addon.py`):**
+  - 11 comprehensive unit tests covering fresh addon installation, non-destructive idempotency, force overwrite, research index linking, editor rule injection, and invalid addon handling.
+
+### Changed
+- **Version Synchronization:** Bumped framework version to `2.6.0` across `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `install.sh`, `install.ps1`, `scripts/generate-llms-txt.py`, web metadata, and operational rules.
+- **Package Parity:** Synchronized package data with `scripts/sync-package-data.py`, bundling `pxos/templates/addons/evidence/` into PyPI distribution wheels.
+
+---
+
 ## [2.5.1] - 2026-09-07
 
 ### Fixed

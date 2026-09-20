@@ -355,9 +355,36 @@ python scripts/pxos-telemetry-monitor.py --max-latency-ms 300
 
 ---
 
+## `/peer-review` — Methodological adversarial review (Evidence Addon)
+
+**When to use:** When evaluating empirical research notes, design science conjectures, or architectural claims against source evidence and logical integrity before consolidating into ADRs or public documentation.
+
+```
+Operate as an Adversarial Methodological Reviewer to audit research and design claims:
+
+1. Locate Evidence Artifacts:
+   - Read .ai/research/00-governance/research-protocol.md, evidence-matrix.csv, source-register.csv, and negative-cases.md.
+   - Verify that information respects the 5 Epistemic Layers (Raw Data → Finding → Hypothesis → ADR → Conclusion).
+   - Enforce the stop gate: INSUFFICIENT EVIDENCE — DO NOT CONCLUDE when data is missing or weak.
+
+2. Adversarial Stress-Test Heuristics:
+   - Hunt for confirmation bias, selection/survivorship bias, sample size overconfidence, and unstated logical leaps.
+
+3. Assign Canonical Review Verdicts:
+   - REMOVE: Factually ungrounded or fabricated source. Log into rejected-claims.md.
+   - QUALIFY: Scope is overgeneralized. Restrict boundary conditions.
+   - VERIFY: Source cited exists but excerpt/metric requires independent line check.
+   - REANALYZE: Data valid, but statistical inference or causal deduction is flawed.
+   - RETAIN: Sound, reproducible, traceable, withstands adversarial stress.
+
+4. Produce structured audit report with claim-by-claim verdict table.
+```
+
+---
+
 ## Usage notes
 
-- These workflows cover the complete PXOS operating cycle: `/install` → `/start` → `/spec` → `/plan` → execute → `/review` → `/compact`, plus on-demand macro tools (`/decision`, `/audit`).
+- These workflows cover the complete PXOS operating cycle: `/install` → `/start` → `/spec` → `/plan` → execute → `/review` → `/compact`, plus on-demand macro tools (`/decision`, `/audit`, `/peer-review`).
 - In multi-agent parallel environments, each agent runs `/start` in its own worktree and automatically targets its own isolated spec.
 - `DECISION_LOG.md` entries are strictly append-only; in the rare event of a git merge conflict, concatenate entries without discarding either.
 - Do not create workflows for individual feature types or component patterns — that becomes a prompt library, which contradicts the PXOS principle of keeping the system minimal.

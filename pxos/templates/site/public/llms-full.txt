@@ -1,4 +1,4 @@
-# PXOS Complete LLM Reference (v2.5.1)
+# PXOS Complete LLM Reference (v2.6.0)
 > Aggregated documentation for direct AI context injection, indexing, and RAG pipelines.
 Generated automatically from repository sources (https://github.com/madebypx/PXOS).
 
@@ -279,6 +279,7 @@ For AI IDEs and tools supporting slash commands (Antigravity, Cursor, Windsurf, 
 | **`/compact`** | Compact | Closes session, records ADRs to `DECISION_LOG.md`, and updates `SPRINT.md`. |
 | **`/decision`**| Memory | Immediately registers a durable architectural or product decision into `DECISION_LOG.md`. |
 | **`/audit`** | Quality Gate | Acts as Principal Auditor inspecting security, performance, memory leaks, and UX debt. |
+| **`/peer-review`**| Evidence Gate| Operates as Adversarial Methodological Reviewer, stress-testing claims with 5 canonical verdicts. |
 | **`/benchmark`** | Research | Measures token efficiency, rework ratio, and UX completeness; autonomously transmits anonymous research telemetry upon consent. |
 | **`/install`** | Setup | Automatically detects IDE environment and installs PXOS with appropriate flags. |
 | **`/update`**  | Maintenance | Safely upgrades PXOS to the latest version while preserving all custom project facts. |
@@ -307,9 +308,24 @@ pip install pxos
 pxos init --ide cursor
 ```
 
+### Modular Addons (`pxos add <addon>`)
+
+PXOS supports opt-in domain addons that provide deep governance without bloating the core framework:
+
+#### Evidence Addon (`pxos add evidence`)
+Adds scientific governance, an Evidence-First research protocol (DSR / Case Studies), 5-layer epistemic separation (`Raw Data → Finding → Hypothesis → ADR → Conclusion`), audit matrices (`evidence-matrix.csv`, `source-register.csv`), and the Adversarial Reviewer workflow (`/peer-review`):
+
+```bash
+# Add to existing workspace
+pxos add evidence
+
+# Or initialize PXOS with evidence addon enabled
+pxos init --evidence
+```
+
 ### Safe Upgrade for Existing Projects
 
-To upgrade an existing project to **PXOS v2.5.0** without touching your project context, active specs, or decision logs:
+To upgrade an existing project to **PXOS v2.6.0** without touching your project context, active specs, or decision logs:
 
 ```bash
 # Bash
@@ -935,9 +951,36 @@ python scripts/pxos-telemetry-monitor.py --max-latency-ms 300
 
 ---
 
+## `/peer-review` — Methodological adversarial review (Evidence Addon)
+
+**When to use:** When evaluating empirical research notes, design science conjectures, or architectural claims against source evidence and logical integrity before consolidating into ADRs or public documentation.
+
+```
+Operate as an Adversarial Methodological Reviewer to audit research and design claims:
+
+1. Locate Evidence Artifacts:
+   - Read .ai/research/00-governance/research-protocol.md, evidence-matrix.csv, source-register.csv, and negative-cases.md.
+   - Verify that information respects the 5 Epistemic Layers (Raw Data → Finding → Hypothesis → ADR → Conclusion).
+   - Enforce the stop gate: INSUFFICIENT EVIDENCE — DO NOT CONCLUDE when data is missing or weak.
+
+2. Adversarial Stress-Test Heuristics:
+   - Hunt for confirmation bias, selection/survivorship bias, sample size overconfidence, and unstated logical leaps.
+
+3. Assign Canonical Review Verdicts:
+   - REMOVE: Factually ungrounded or fabricated source. Log into rejected-claims.md.
+   - QUALIFY: Scope is overgeneralized. Restrict boundary conditions.
+   - VERIFY: Source cited exists but excerpt/metric requires independent line check.
+   - REANALYZE: Data valid, but statistical inference or causal deduction is flawed.
+   - RETAIN: Sound, reproducible, traceable, withstands adversarial stress.
+
+4. Produce structured audit report with claim-by-claim verdict table.
+```
+
+---
+
 ## Usage notes
 
-- These workflows cover the complete PXOS operating cycle: `/install` → `/start` → `/spec` → `/plan` → execute → `/review` → `/compact`, plus on-demand macro tools (`/decision`, `/audit`).
+- These workflows cover the complete PXOS operating cycle: `/install` → `/start` → `/spec` → `/plan` → execute → `/review` → `/compact`, plus on-demand macro tools (`/decision`, `/audit`, `/peer-review`).
 - In multi-agent parallel environments, each agent runs `/start` in its own worktree and automatically targets its own isolated spec.
 - `DECISION_LOG.md` entries are strictly append-only; in the rare event of a git merge conflict, concatenate entries without discarding either.
 - Do not create workflows for individual feature types or component patterns — that becomes a prompt library, which contradicts the PXOS principle of keeping the system minimal.

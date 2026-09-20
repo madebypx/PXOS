@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pxos"
-version = "2.5.1"
+version = "2.6.0"
 description = "The minimal, document-driven operating system and governance layer for AI-assisted software engineering."
 readme = "README.md"
 authors = [{ name = "PROJECT/X", email = "hello@madebypx.com" }]
@@ -51,4 +51,11 @@ where = ["."]
 include = ["pxos*"]
 
 [tool.setuptools.package-data]
-pxos = ["templates/**/*", "scripts/**/*"]
+pxos = [
+    "templates/**/*",
+    "templates/**/.*",
+    "templates/**/.*/**/*",
+    "templates/.ai/**/*",
+    "templates/addons/**/.ai/**/*",
+    "scripts/**/*"
+]

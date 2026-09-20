@@ -1,0 +1,2 @@
+id,claim,classification,source_id,source_location,supporting_excerpt,evidence_strength,limitations,verification_status
+EVD-001,"Structured multi-stage governance reduces AI token rework ratio by >15% across multi-turn sessions",empirical_finding,SRC-001,"benchmarks/results/aggregate.csv:L42-L88","Across 120 qualified Tier A sessions, mean rework ratio dropped from 0.28 to 0.12 when invariant evolution was active",strong,"Evaluated on software engineering coding benchmarks; generalization to creative writing unmeasured",verified

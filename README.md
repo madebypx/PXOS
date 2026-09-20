@@ -1,6 +1,6 @@
 # PXOS — The AI Operating System for Product & Software Engineering
 
-[![Version](https://img.shields.io/badge/version-2.5.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
+[![Version](https://img.shields.io/badge/version-2.6.0-3b82f6.svg?style=flat-square)](https://github.com/madebypx/PXOS/releases)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](./LICENSE)
 [![Architecture](https://img.shields.io/badge/Architecture-Document--Driven-8b5cf6.svg?style=flat-square)](https://github.com/madebypx/PXOS)
 [![Multi-Agent](https://img.shields.io/badge/Multi--Agent-Git%20Worktrees-f59e0b.svg?style=flat-square)](https://github.com/madebypx/PXOS)
@@ -277,6 +277,7 @@ For AI IDEs and tools supporting slash commands (Antigravity, Cursor, Windsurf, 
 | **`/compact`** | Compact | Closes session, records ADRs to `DECISION_LOG.md`, and updates `SPRINT.md`. |
 | **`/decision`**| Memory | Immediately registers a durable architectural or product decision into `DECISION_LOG.md`. |
 | **`/audit`** | Quality Gate | Acts as Principal Auditor inspecting security, performance, memory leaks, and UX debt. |
+| **`/peer-review`**| Evidence Gate| Operates as Adversarial Methodological Reviewer, stress-testing claims with 5 canonical verdicts. |
 | **`/benchmark`** | Research | Measures token efficiency, rework ratio, and UX completeness; autonomously transmits anonymous research telemetry upon consent. |
 | **`/install`** | Setup | Automatically detects IDE environment and installs PXOS with appropriate flags. |
 | **`/update`**  | Maintenance | Safely upgrades PXOS to the latest version while preserving all custom project facts. |
@@ -305,9 +306,24 @@ pip install pxos
 pxos init --ide cursor
 ```
 
+### Modular Addons (`pxos add <addon>`)
+
+PXOS supports opt-in domain addons that provide deep governance without bloating the core framework:
+
+#### Evidence Addon (`pxos add evidence`)
+Adds scientific governance, an Evidence-First research protocol (DSR / Case Studies), 5-layer epistemic separation (`Raw Data → Finding → Hypothesis → ADR → Conclusion`), audit matrices (`evidence-matrix.csv`, `source-register.csv`), and the Adversarial Reviewer workflow (`/peer-review`):
+
+```bash
+# Add to existing workspace
+pxos add evidence
+
+# Or initialize PXOS with evidence addon enabled
+pxos init --evidence
+```
+
 ### Safe Upgrade for Existing Projects
 
-To upgrade an existing project to **PXOS v2.5.0** without touching your project context, active specs, or decision logs:
+To upgrade an existing project to **PXOS v2.6.0** without touching your project context, active specs, or decision logs:
 
 ```bash
 # Bash

@@ -1,0 +1,2 @@
+id,source_title,author_or_institution,year,type,url_or_filepath,access_date,verification_status,notes
+SRC-001,"PXOS Benchmark Ingestion & Telemetry Aggregates","PROJECT/X Research",2026,dataset,"https://telemetry.madebypx.com/api/v1/stats",2026-09-20,verified,"Empirical database containing Tier A qualified developer and agent sessions"
