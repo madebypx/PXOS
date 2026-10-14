@@ -1,27 +1,27 @@
-# Current Spec — Task T-15: PXOS Evidence Addon (`pxos add evidence`)
+# Current Spec — Task T-16: PXOS Swarm Protocol & Boundary Confinement (v2.7.1)
 <!-- pxos:spec-version 1.0.0 -->
 
-- **Branch:** `feat/evidence-addon`
+- **Branch:** `main`
 - **Status:** 🎉 Done
 - **Assignee / Agent:** Agent Flash / Rodrigo
-- **Related Issues / Tasks:** T-15, `.ai/specs/SPEC-evidence-addon.md`
-
-> **Active Spec Pointer:** Detailed requirements and acceptance criteria are maintained in [.ai/specs/SPEC-evidence-addon.md](.ai/specs/SPEC-evidence-addon.md).
+- **Related Issues / Tasks:** T-16, `pxos add maestri`
 
 ---
 
 ## Goal
 
-Create the first official modular addon for PXOS: the **Evidence Addon** (`pxos add evidence` / `pxos init --evidence`), adding scientific governance, an Evidence-First research protocol (DSR / Case Studies), 5-layer epistemic separation, structured audit matrices, and an Adversarial Reviewer workflow (`/peer-review`) without bloating PXOS core.
+Extend the **Maestri Spatial Canvas Addon** (`pxos add maestri`) with the official **PXOS Swarm Protocol** (v2.7.1): codifying Context Sharding, Single-Target Boundary Locks, Anti-Exploration Prohibitions, Capsule Briefing Schemas, and the Closed Dialectic Review Pipeline (Darwin/Munger/Veritas in 1 synchronous round) without creating a separate framework.
 
 ---
 
 ## Acceptance Criteria
 
-- [x] Canonical Addon templates created in `templates/addons/evidence/` (protocol, governance, adversarial reviewer, CSV registers, negative cases, rejected claims, IDE rule).
-- [x] Global skill created in `skills/peer-review/SKILL.md`.
-- [x] CLI evolved in `pxos/cli.py` with `pxos add <addon>` and `pxos init --evidence`.
-- [x] Package data mirrored via `scripts/sync-package-data.py` to `pxos/templates/addons/evidence/`.
-- [x] Comprehensive unit tests added in `tests/test_evidence_addon.py`.
-- [x] `scripts/sync-package-data.py --check` and `pxos doctor` pass cleanly.
-- [x] Documentation updated in `README.md` and `CHANGELOG.md`.
+- [x] Canonical template created in `templates/addons/maestri/.ai/canvas/swarm-protocol.md`.
+- [x] Editor rule updated in `templates/addons/maestri/rules/maestri_bridge.md` (Sections 6–9).
+- [x] CLI manifest in `pxos/cli.py` (`ADDONS["maestri"]["files"]`) updated to provision `swarm-protocol.md`.
+- [x] Package parity verified and synchronized via `scripts/sync-package-data.py` (0 drift).
+- [x] Automated test suite expanded in `tests/test_maestri_addon.py` (78 tests passing).
+- [x] Audit report generated in `.ai/audits/AUDIT_2026-10-14_SWARM.md` (P0: 0, P1: 0, P2: 0, P3: 0).
+- [x] ADR appended chronologically to `.ai/DECISION_LOG.md`.
+- [x] Version synchronized to `v2.7.1` across all files, installers, and crawler docs (`llms.txt`).
+- [x] Committed and tagged `v2.7.1`, pushed to GitHub, and official GitHub Release published with binary assets.
