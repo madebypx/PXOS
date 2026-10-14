@@ -1,5 +1,5 @@
 # PXOS — Operating Rules
-<!-- pxos:version 2.7.0 -->
+<!-- pxos:version 2.7.1 -->
 
 This project adheres to the PXOS framework (v2.7).
 

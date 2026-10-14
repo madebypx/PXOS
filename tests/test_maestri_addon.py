@@ -29,6 +29,7 @@ class TestMaestriAddonTemplates(unittest.TestCase):
             maestri_dir / "rules" / "maestri_bridge.md",
             maestri_dir / ".ai" / "canvas" / "operational-board.md",
             maestri_dir / ".ai" / "canvas" / "architecture-board.md",
+            maestri_dir / ".ai" / "canvas" / "swarm-protocol.md",
         ]
         for f in required_files:
             self.assertTrue(f.exists(), f"Missing template file: {f}")
@@ -44,10 +45,16 @@ class TestMaestriAddonTemplates(unittest.TestCase):
         self.assertIn("Architecture Board", content)
         self.assertIn("maestri ask --batch", content)
         self.assertIn("Ask-Back", content)
+        self.assertIn("Context Sharding", content)
+        self.assertIn("Boundary Locks", content)
+        self.assertIn("Anti-Exploration", content)
+        self.assertIn("Capsule Briefing", content)
+        self.assertIn("Closed Dialectic", content)
 
     def test_canvas_templates_structure(self):
         op_board = REPO_ROOT / "templates" / "addons" / "maestri" / ".ai" / "canvas" / "operational-board.md"
         arch_board = REPO_ROOT / "templates" / "addons" / "maestri" / ".ai" / "canvas" / "architecture-board.md"
+        swarm_board = REPO_ROOT / "templates" / "addons" / "maestri" / ".ai" / "canvas" / "swarm-protocol.md"
 
         op_text = op_board.read_text(encoding="utf-8")
         self.assertIn("<!-- pxos:canvas:operational-board -->", op_text)
@@ -56,6 +63,11 @@ class TestMaestriAddonTemplates(unittest.TestCase):
         arch_text = arch_board.read_text(encoding="utf-8")
         self.assertIn("<!-- pxos:canvas:architecture-board -->", arch_text)
         self.assertIn("Active Architectural Invariants", arch_text)
+
+        swarm_text = swarm_board.read_text(encoding="utf-8")
+        self.assertIn("<!-- pxos:canvas:swarm-protocol -->", swarm_text)
+        self.assertIn("Confinement Principles", swarm_text)
+        self.assertIn("Capsule Briefing Schema", swarm_text)
 
 
 class TestMaestriAddonCLI(unittest.TestCase):
@@ -77,6 +89,7 @@ class TestMaestriAddonCLI(unittest.TestCase):
         expected_files = [
             Path(".ai/canvas/operational-board.md"),
             Path(".ai/canvas/architecture-board.md"),
+            Path(".ai/canvas/swarm-protocol.md"),
         ]
         for f in expected_files:
             self.assertTrue(f.exists(), f"Expected file not created: {f}")

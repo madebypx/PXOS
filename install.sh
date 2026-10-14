@@ -20,7 +20,7 @@
 
 set -e
 
-PXOS_VERSION="2.7.0"
+PXOS_VERSION="2.7.1"
 PXOS_REPO="https://raw.githubusercontent.com/madebypx/PXOS/main"
 TARGET_DIR=".ai"
 FULL=false

@@ -5,6 +5,17 @@ All notable changes to the **PXOS** framework are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.1] - 2026-10-14
+
+### Added
+- **PXOS Swarm Protocol & Boundary Confinement (Maestri Addon):**
+  - **Context Sharding:** Enforces strict domain sharding so swarm specialists (e.g. UX, Solver, Fintech) load only their assigned domain spec, preventing context bloat across 8+ parallel agents.
+  - **Boundary Locks:** Mandates strict single-target write isolation per agent, eliminating scope creep and cross-agent merge conflicts.
+  - **Anti-Exploration Prohibition:** Forbids expensive repository-wide directory crawls, enforcing immediate task execution.
+  - **Capsule Briefing Schema:** Standardizes the 4-tuple briefing format (`Target`, `Invariants`, `Context`, `Report-back`) for `maestri ask` and `maestri ask --batch`.
+  - **Closed Dialectic Review Pipeline:** Codifies the Escalão 2 triad (Darwin, Munger, Veritas) executing in exactly 1 synchronous parallel batch round without open-ended circular debates.
+  - **Swarm Protocol Canvas Template (`.ai/canvas/swarm-protocol.md`):** Canonical projection template for role boundaries, context shard allocation, and review pipelines.
+
 ## [2.7.0] - 2026-10-14
 
 ### Added

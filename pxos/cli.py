@@ -12,7 +12,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-VERSION = "2.7.0"
+VERSION = "2.7.1"
 REPO_RAW_BASE = "https://raw.githubusercontent.com/madebypx/PXOS/main"
 
 # ANSI Color Codes
@@ -104,6 +104,7 @@ ADDONS = {
         "files": [
             ("templates/addons/maestri/.ai/canvas/operational-board.md", Path(".ai/canvas/operational-board.md")),
             ("templates/addons/maestri/.ai/canvas/architecture-board.md", Path(".ai/canvas/architecture-board.md")),
+            ("templates/addons/maestri/.ai/canvas/swarm-protocol.md", Path(".ai/canvas/swarm-protocol.md")),
         ],
         "rules": "templates/addons/maestri/rules/maestri_bridge.md",
     },

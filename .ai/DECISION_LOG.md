@@ -38,6 +38,36 @@ Multi-Agent Note: Entries are strictly additive and chronological. If a Git merg
 
 <!-- Add decisions below this line, most recent first -->
 
+## 2026-10-14 — PXOS Swarm Protocol, Micro-Context Confinement, and Closed Dialectic Review
+
+**Decision:**
+Extend the Maestri spatial canvas addon (`pxos add maestri`) with the official **PXOS Swarm Protocol** (v2.7.1), codifying:
+1. **Context Sharding:** Specialized agents in multi-agent swarms (8+ parallel agents) are prohibited from loading the monolithic `.ai/` directory tree and must load only their designated domain shard (e.g. `DESIGN.md`, `DOMAIN_RULES.md`, `DATA_MODEL.md`).
+2. **Boundary Locks:** Specialists are confined to write access on exactly one assigned target file or isolated directory, eliminating cross-agent merge conflicts and scope creep.
+3. **Anti-Exploration Prohibition:** Prohibit exploratory workspace crawling (`ls -R`, broad grepping), requiring agents to execute immediately upon receiving their brief.
+4. **Capsule Briefing Schema:** Mandate a 4-tuple briefing format (`Target`, `Invariants`, `Context`, `Report-back`) for all `maestri ask` and `maestri ask --batch` invocations.
+5. **Closed Dialectic Review Pipeline:** Bound Escalão 2 peer reviews (Darwin empirical audit, Munger risk attack, Veritas arbitration) to 1 synchronous batch round, preventing open-ended circular debates.
+6. **Swarm Protocol Canvas Projection:** Distribute `.ai/canvas/swarm-protocol.md` as the canonical visual projection of active roles, boundary locks, and invariants.
+
+**Context:**
+As workflows evolved to parallel swarms of 8–11 agents operating simultaneously on complex architectures (e.g. the iMarket case study), standard single-agent context patterns generated three critical failure modes: context bloat (>150k redundant prompt tokens/turn across agents), tool-hunting latency (2–5 min spent exploring workspace files), and boundary collisions. Rather than inventing a fractured, separate framework, PXOS encapsulated these confinement rules natively inside the Maestri bridge.
+
+**Options considered:**
+- Option A — Create a separate framework ("PXOS-Swarm"): Rejected because duplicating operating rules, commit conventions, and core invariants would cause fragmentation, maintenance drift, and violate Single Source of Truth.
+- Option B — Retain unrestricted workspace exploration: Rejected due to prohibitive token waste, degraded LLM attention, and race conditions.
+- Chosen: Option C — Extend `templates/addons/maestri/` with the PXOS Swarm Protocol, distributing canonical canvas cards, updating editor rules (`maestri_bridge.md`), and standardizing the Capsule Briefing schema.
+
+**Tradeoffs:**
+- Gains: Eliminates token bloat; cuts 2–5 min of exploration latency per agent; preserves Git SSOT; prevents circular chat loops.
+- Cost: Requires the orchestrating architect to provide well-formed 4-tuple Capsule Briefings.
+
+**Impact:**
+Updated `templates/addons/maestri/rules/maestri_bridge.md`, created `templates/addons/maestri/.ai/canvas/swarm-protocol.md`, updated `pxos/cli.py` and `tests/test_maestri_addon.py`, synchronized package data, and released v2.7.1.
+
+**Status:** Active
+
+---
+
 ## 2026-09-07 — Standardized GitHub Releases Procedure & Release Governance Lifecycle
 
 **Decision:**

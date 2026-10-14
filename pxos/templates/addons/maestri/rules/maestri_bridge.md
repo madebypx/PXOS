@@ -1,8 +1,8 @@
 # PXOS Maestri Bridge — Spatial Canvas & Swarm Rules
-<!-- pxos:version 2.7.0 -->
+<!-- pxos:version 2.8.0 -->
 
 This rule governs collaboration when developing inside the **Maestri** spatial canvas environment.
-It enforces non-intrusive, bidirectional synchronization between the local Git repository and connected canvas notes/terminals.
+It enforces non-intrusive, bidirectional synchronization between the local Git repository and connected canvas notes/terminals, while providing strict confinement protocols for multi-agent spatial swarms.
 
 ---
 
@@ -60,6 +60,9 @@ During the standard PXOS 6-phase lifecycle (`Discover → Plan → Execute → V
      - **Impact:** [Subsystems touched]
      ```
 
+### Swarm Protocol Board (Roles & Boundaries)
+- Synchronize `.ai/canvas/swarm-protocol.md` with the connected canvas card for swarm roles, active boundary locks, and invariant assignments.
+
 ---
 
 ## 5. Parallel Swarm Task Orchestration (/plan Phase)
@@ -86,3 +89,62 @@ When formulating an implementation plan in `/plan` for complex, parallelizable t
    When finished, report your verified findings via: maestri ask "<Architect Name>" "DONE: [Brief summary and test verification]"
    ```
    Do not poll terminals in a tight loop. Wait for the ask-back notification.
+
+---
+
+## 6. Swarm Micro-Context & Boundary Confinement (Pillars 1, 3 & 4)
+
+In multi-agent swarm deployments (8+ specialized agents running in parallel), traditional full-context loading causes severe context bloat and tool hunting. All swarm agents must strictly follow:
+
+1. **Context Sharding:**
+   - Specialists must NOT read the entire `.ai/` directory tree or full repository context.
+   - Each specialist loads ONLY their assigned shard (e.g., UX Lead loads `DESIGN.md`; Solver/Logistics loads `DOMAIN_RULES.md`; Catalog Engineer loads `DATA_MODEL.md`).
+2. **Boundary Locks (Strict Write Isolation):**
+   - Each specialist is granted write access to **EXATAMENTE um arquivo alvo** (or isolated component directory).
+   - Any modification, refactoring, or creation outside the designated boundary is strictly forbidden without architect re-delegation.
+3. **Anti-Exploration Prohibition:**
+   - Agents are forbidden from performing exploratory workspace discovery (`ls -R`, recursive grepping, probing unrelated `package.json`/configs).
+   - All necessary constraints and operational facts must be supplied in the Capsule Briefing.
+
+---
+
+## 7. Capsule Briefing Protocol (Pillar 2)
+
+When the Maestro or Architect delegates tasks to swarm specialists via `maestri ask` or `maestri ask --batch`, every prompt must use the compact Capsule Briefing format:
+
+```text
+Capsule:
+- [Target]: <Exact target file path or isolated directory>
+- [Invariants]: <Active invariant IDs to uphold, e.g. INV-001, INV-002>
+- [Context]: <3 to 5 distilled facts/constraints essential for this execution>
+- [Report-back]: maestri ask "<Architect Name>" "DONE: [Brief summary and test verification]"
+```
+
+Swarm agents receiving a Capsule Briefing must execute immediately against `[Target]` without initiating repository discovery phases.
+
+---
+
+## 8. Closed Dialectic Peer-Review Cycle (Pillar 5)
+
+To prevent circular chatter and endless multi-agent chat loops, the Dialectic Council operates in a closed, single-round synchronous batch:
+
+1. **Synchronous Batch Dispatch:**
+   The Maestro sends the combined output of specialists to the review triad in parallel:
+   ```bash
+   maestri ask --batch '{"Darwin": "Review empirical claims against evidence-matrix.csv...", "Munger": "Attack economic viability and margin cannibalization..."}'
+   ```
+2. **Specialized Scrutiny:**
+   - **Darwin (Empirical Auditor):** Verifies evidence rigor, detects unsupported claims, and checks data integrity.
+   - **Munger (Devil's Advocate / Business Stress-Tester):** Attacks incentive alignment, churn risks, operational debt, and unit economics.
+3. **Epistemic Synthesis & Verdict (Veritas):**
+   - Veritas arbitrates conflicting findings and issues formal verdicts: `RETAIN`, `QUALIFY`, `REANALYZE`, or `REMOVE`.
+   - Veritas drafts the *Honest Trade-offs* section and commits durable ADRs directly to `.ai/DECISION_LOG.md`.
+4. **Zero Open Chat:**
+   Debates are strictly capped at 1 batch review round. There are no iterative conversational counter-arguments between review agents.
+
+---
+
+## 9. Canvas Notes as Live Shared Projections
+
+- Swarm agents should reference the high-level projections on the canvas (`Architecture Board` and `Operational Board`) for global alignment instead of reloading massive raw log files.
+- The repository remains the definitive truth; canvas notes serve as low-overhead, synchronized shared memory.
