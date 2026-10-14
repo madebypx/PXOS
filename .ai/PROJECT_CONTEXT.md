@@ -1,5 +1,5 @@
 # Project Context
-<!-- pxos:version 2.6.0 -->
+<!-- pxos:version 2.7.0 -->
 
 This file contains durable, project-specific facts for PXOS development.
 

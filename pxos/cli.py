@@ -12,7 +12,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-VERSION = "2.6.0"
+VERSION = "2.7.0"
 REPO_RAW_BASE = "https://raw.githubusercontent.com/madebypx/PXOS/main"
 
 # ANSI Color Codes
@@ -98,7 +98,15 @@ ADDONS = {
             ("templates/addons/evidence/.ai/research/rejected-claims.md", Path(".ai/research/rejected-claims.md")),
         ],
         "rules": "templates/addons/evidence/rules/evidence_first_research.md",
-    }
+    },
+    "maestri": {
+        "title": "Maestri Spatial Canvas & Multi-Agent Swarm Addon",
+        "files": [
+            ("templates/addons/maestri/.ai/canvas/operational-board.md", Path(".ai/canvas/operational-board.md")),
+            ("templates/addons/maestri/.ai/canvas/architecture-board.md", Path(".ai/canvas/architecture-board.md")),
+        ],
+        "rules": "templates/addons/maestri/rules/maestri_bridge.md",
+    },
 }
 
 
@@ -235,6 +243,11 @@ def install_addon(addon_key: str, force: bool = False, ide: str = None, global_m
         print(f"  1. Consult {BOLD}.ai/research/00-governance/research-protocol.md{RESET} for epistemic guidelines.")
         print(f"  2. Register findings in {BOLD}.ai/research/evidence-matrix.csv{RESET} and sources in {BOLD}source-register.csv{RESET}.")
         print(f"  3. Use {BOLD}/peer-review{RESET} in your editor to adversarial stress-test claims before proposing ADRs.\n")
+    elif addon_key == "maestri":
+        print("  Next steps:")
+        print(f"  1. Ensure the {BOLD}maestri{RESET} CLI is available on your PATH or via $MAESTRI_CLI.")
+        print(f"  2. Consult your editor rules (e.g. {BOLD}.cursor/rules/pxos-maestri.mdc{RESET}) for spatial swarm guidelines.")
+        print(f"  3. Use {BOLD}maestri list{RESET} and link {BOLD}.ai/canvas/operational-board.md{RESET} to your canvas.\n")
 
 
 def configure_ide_rules(ide: str, global_mode: bool = False):
@@ -320,6 +333,9 @@ def cmd_init(args):
 
     if getattr(args, "evidence", False):
         install_addon("evidence", force=False, ide=ide, global_mode=args.global_mode)
+
+    if getattr(args, "maestri", False):
+        install_addon("maestri", force=False, ide=ide, global_mode=args.global_mode)
 
     print(f"\n{BOLD}{GREEN}PXOS v{VERSION} installed successfully.{RESET}\n")
     print("  Next steps:")
@@ -433,6 +449,7 @@ def main():
     p_init = subparsers.add_parser("init", help="Initialize PXOS in the current workspace")
     p_init.add_argument("--full", action="store_true", help="Install optional planning files (ROADMAP.md, SPRINT.md)")
     p_init.add_argument("--evidence", action="store_true", help="Install scientific evidence-first research addon")
+    p_init.add_argument("--maestri", action="store_true", help="Install Maestri spatial canvas and multi-agent swarm addon")
     p_init.add_argument("--ide", type=str, choices=["cursor", "windsurf", "claude", "gemini", "copilot"], help="Configure IDE rules")
     p_init.add_argument("--global", dest="global_mode", action="store_true", help="Install IDE rules globally to home directory")
     p_init.set_defaults(func=cmd_init)

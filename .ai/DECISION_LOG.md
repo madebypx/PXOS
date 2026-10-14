@@ -388,3 +388,34 @@ Touched `pxos/cli.py`, `templates/addons/evidence/`, `pxos/templates/addons/evid
 
 **Status:** Active
 
+---
+
+## 2026-10-14 — Modular Addon Architecture for Spatial Canvas & Swarm Environments (v2.7.0)
+
+**Decision:**
+Implement the **Maestri Spatial Canvas & Multi-Agent Swarm Addon (`pxos add maestri` / `pxos init --maestri`)** as an official domain addon of the PXOS framework, introducing real-time telemetry, live note synchronization, and parallel task dispatching while preserving strict Git repository Single Source of Truth (SSOT) and zero lock-in.
+
+**Context:**
+Modern development teams leverage spatial development workspaces (such as Maestri) connecting autonomous agent terminals, visual canvas notes, and operational chats. Incorporating these capabilities directly into the core `templates/.ai/AI_BASE.md` would violate PXOS Priority #6 (Context efficiency) by permanently injecting tool-specific CLI instructions and rules into every agent's baseline context, even in vanilla terminal, VS Code, Cursor, or CI/CD environments. At the same time, spatial multi-agent workflows require strict governance to avoid merge collisions, context contamination, and divergence between visual notes and local repository code.
+
+**Options considered:**
+- Option A — Embed Maestri CLI commands directly into core `AI_BASE.md` with conditional clauses: Rejected because it introduces unnecessary token overhead for projects that do not use spatial workspaces, violating framework neutrality and context economy.
+- Option B — Keep Maestri completely external as unmanaged user prompts: Rejected because it leaves spatial multi-agent coordination without standardized Git SSOT priority, leading to notes drifting out of sync with `SPRINT.md` and `DECISION_LOG.md`.
+- Chosen: Option C — Official Modular Addon (`pxos add maestri`):
+  1. Registered `maestri` in the zero-dependency CLI `ADDONS` registry (`pxos/cli.py`) with support for dual-mode initialization (`pxos init --maestri`).
+  2. Codified non-destructive file protection: existing user notes or canvas boards are strictly preserved unless `--force` is provided.
+  3. Codified editor rules in `templates/addons/maestri/rules/maestri_bridge.md` establishing the local Git repository as the canonical SSOT, using canvas notes (`operational-board.md`, `architecture-board.md`) strictly as live mirrors.
+  4. Established real-time interim telemetry conventions using non-intrusive `maestri say --progress 'Phase: [Phase] — [Status]'` across the 6-phase cycle.
+  5. Codified parallel batch task dispatch in `/plan` (`maestri ask --batch`) with mandatory report-back etiquette (`Ask-Back`) while enforcing physical Git worktree / floor isolation.
+  6. Provided automated unit test suite (`tests/test_maestri_addon.py`) verifying template integrity, file preservation, and rule demarcations across IDEs.
+
+**Tradeoffs:**
+- Gains: Delivers a seamless visual multi-agent experience in spatial environments with zero token waste for standard terminal developers; guarantees that canvas notes never supersede or corrupt the Git repository; maintains 100% zero lock-in.
+- Cost: Requires maintainers to verify spatial bridge rule compatibility as IDE rule formats evolve.
+
+**Impact:**
+Touched `pxos/cli.py`, `templates/addons/maestri/`, `pxos/templates/addons/maestri/`, `tests/test_maestri_addon.py`, `README.md`, `CHANGELOG.md`, and bumped framework version to `2.7.0`.
+
+**Status:** Active
+
+

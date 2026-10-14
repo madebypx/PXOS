@@ -1,4 +1,4 @@
-# PXOS Complete LLM Reference (v2.6.0)
+# PXOS Complete LLM Reference (v2.7.0)
 > Aggregated documentation for direct AI context injection, indexing, and RAG pipelines.
 Generated automatically from repository sources (https://github.com/madebypx/PXOS).
 
@@ -323,9 +323,20 @@ pxos add evidence
 pxos init --evidence
 ```
 
+#### Maestri Spatial Canvas Addon (`pxos add maestri`)
+Adds native support for spatial development environments and multi-agent swarms (**Maestri**), enabling real-time telemetry (`maestri say --progress`), bidirectional live note syncing (`operational-board.md` ↔ `SPRINT.md`, `architecture-board.md` ↔ `DECISION_LOG.md`), and parallel task dispatching (`maestri ask --batch`) while maintaining strict Git SSOT and zero lock-in:
+
+```bash
+# Add to existing workspace
+pxos add maestri
+
+# Or initialize PXOS with maestri addon enabled
+pxos init --maestri
+```
+
 ### Safe Upgrade for Existing Projects
 
-To upgrade an existing project to **PXOS v2.6.0** without touching your project context, active specs, or decision logs:
+To upgrade an existing project to **PXOS v2.7.0** without touching your project context, active specs, or decision logs:
 
 ```bash
 # Bash

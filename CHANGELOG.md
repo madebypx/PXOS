@@ -5,6 +5,23 @@ All notable changes to the **PXOS** framework are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-10-14
+
+### Added
+- **Maestri Spatial Canvas & Multi-Agent Swarm Addon (`pxos add maestri`):**
+  - Introduces native support for spatial development environments and multi-agent canvas workspaces (Maestri) without coupling or bloating the core PXOS framework (`INV-003`).
+  - **Single Source of Truth (SSOT) Priority:** The local Git repository remains the immutable source of truth; canvas notes and cards operate strictly as live projections.
+  - **Non-Destructive File Protection Engine:** Automatically detects and preserves existing user notes and customized canvas files; never overwrites existing project assets unless `--force` is explicitly provided.
+  - **Live Note Projection Templates:** Adds canonical board templates in `.ai/canvas/operational-board.md` (live mirror of `SPRINT.md` and active tasks) and `.ai/canvas/architecture-board.md` (live mirror of `.ai/DECISION_LOG.md` ADRs).
+  - **Real-Time Telemetry & Phase Reporting:** Non-intrusive lifecycle status updates via `maestri say --progress 'Phase: [Phase] — [Status]'` across the 6-phase cycle (`Discover → Plan → Execute → Validate → Review → Compact`).
+  - **Multi-Agent Batch Dispatch (/plan Phase):** Enables parallel task delegation via `maestri ask --batch` paired with mandatory report-back etiquette (`Ask-Back`), while strictly preserving Git worktree and floor isolation.
+  - **CLI Integration:** Added `--maestri` flag to `pxos init` and registered `maestri` in `pxos add`.
+  - **Comprehensive Test Suite (`tests/test_maestri_addon.py`):** 7 automated unit tests covering template presence, non-destructive file preservation, force update, and IDE rule generation.
+
+### Changed
+- **Version Synchronization:** Bumped framework version to `2.7.0` across `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `install.sh`, `install.ps1`, `scripts/generate-llms-txt.py`, web metadata, and operational rules.
+- **Package Parity:** Synchronized package data with `scripts/sync-package-data.py`, bundling `pxos/templates/addons/maestri/` into PyPI distribution wheels.
+
 ---
 
 ## [2.6.0] - 2026-09-20
