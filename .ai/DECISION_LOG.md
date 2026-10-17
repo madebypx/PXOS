@@ -449,3 +449,26 @@ Touched `pxos/cli.py`, `templates/addons/maestri/`, `pxos/templates/addons/maest
 **Status:** Active
 
 
+---
+
+## 2026-10-17 — Cognitive Skills Router as Modular Addon (v2.8.0)
+
+**Decision:**
+Implement the Cognitive Skills Router as a dedicated PXOS addon (`pxos add skills`) rather than as hardcoded content inside the global PXOS rules (`GEMINI.md`, `CLAUDE.md`, `templates/rules/pxos.md`).
+
+**Context:**
+The Skills Router Decision Matrix (~1,200–1,500 tokens) was being injected inline into every global config file (`~/.gemini/GEMINI.md`, `~/.gemini/config/GEMINI.md`, `~/.claude/CLAUDE.md`), resulting in 3× token duplication per request. Additionally, the inline router hardcoded skills specific to a single machine profile (design/mobile/Maestri), making the content non-portable for other PXOS users who may not have those skills installed. The core PXOS framework is stack-neutral and must not reference domain-specific toolchains.
+
+**Options considered:**
+- Option A — Keep router hardcoded inside global GEMINI.md / CLAUDE.md: Rejected. Token cost is excessive (3× duplication), non-portable across machines, and violates the PXOS stack neutrality invariant.
+- Option B — Embed a minimal router into `templates/rules/pxos.md` (core rules): Rejected. Core rules should be governance-only and free of domain-specific toolchain references (Expo, Maestri, design skills, etc.).
+- **Option C (Chosen)** — Modular addon (`pxos add skills`): Workspace-opt-in, idempotent, machine-portable, follows the existing pattern established by `evidence` and `maestri` addons. Global config files replace the full inline table with either a single-file reference (`rules/skills-router.md`) or a one-liner blockquote note.
+
+**Tradeoffs accepted:**
+- Existing users who had the router inline must either run `pxos add skills` or keep their manual setup. There is no auto-migration path (acceptable — PXOS upgrades are always opt-in for addons).
+- Claude Code (CLAUDE.md) receives only a compact blockquote note instead of the full router, as Claude Code has no `rules/` directory support for automatic file loading.
+
+**Impact:**
+Touched `pxos/cli.py` (ADDONS dict, cmd_init, install_addon, p_init parser), `templates/addons/skills/` (2 new canonical files), `pxos/templates/addons/skills/` (package mirror), `tests/test_skills_addon.py` (7 new tests), `README.md`, `CHANGELOG.md`, and bumped framework version to `2.8.0`. Sanitized `~/.gemini/GEMINI.md`, `~/.gemini/config/GEMINI.md`, and `~/.claude/CLAUDE.md` to remove duplicate inline blocks.
+
+**Status:** Active
