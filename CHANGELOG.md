@@ -5,6 +5,25 @@ All notable changes to the **PXOS** framework are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.8.0] - 2026-10-17
+
+### Added
+- **Cognitive Skills Router & Just-in-Time Activation Addon (`pxos add skills`):**
+  - **Decision Matrix & Cognitive Routing:** Maps common software engineering scenarios (Zero-to-One UI, Design Systems, Mobile, Accessibility, Browser Automation, Brand Kits, Swarm Orchestration, Governance) to dedicated agentic skills (`skills/*/SKILL.md`).
+  - **Just-in-Time (JIT) Activation Protocol:** Eliminates context pollution and token exhaustion by preventing proactive, eager loading of heavy skill files; agents read skill instructions only when a task enters that domain.
+  - **Zero Overhead on Trivial Edits:** Enforces immediate native edits for localized bugfixes, variable renames, and single-line CSS adjustments without skill loading overhead.
+  - **Precedence of Local Repository Context:** Codifies that local repository rules (`.ai/DESIGN.md`, `.ai/PROJECT_CONTEXT.md`, `.ai/DOMAIN_RULES.md`) strictly take precedence over external/global skill instructions.
+  - **Project-Level Routing Spec Template (`.ai/skills/SKILLS_ROUTER.md`):** Canonical template with extensibility table for registering repository-specific local skills (`.agents/skills/`).
+  - **Editor Rule Integration:** Canonical rule template (`templates/addons/skills/rules/skills_router.md`) supporting Cursor (`.cursor/rules/pxos-skills.mdc`), Windsurf (`.windsurf/rules/pxos-skills.md`), Claude (`CLAUDE.md`), Gemini (`GEMINI.md`), and Copilot (`.github/copilot-instructions.md`) via isolated `<!-- pxos:skills:start -->` blocks.
+  - **CLI Workflow:** Added `skills` to `pxos add` and `--skills` flag to `pxos init`.
+  - **Comprehensive Test Suite (`tests/test_skills_addon.py`):** 7 unit tests verifying template presence, content invariants, idempotent non-destructive installation, force overwrite, and IDE rule generation.
+
+### Changed
+- **Version Synchronization:** Bumped framework version to `2.8.0` across `pyproject.toml`, `pxos/__init__.py`, `pxos/cli.py`, `install.sh`, `install.ps1`, `scripts/generate-llms-txt.py`, web metadata, and operational rules.
+- **Package Parity:** Synchronized package data with `scripts/sync-package-data.py`, bundling `pxos/templates/addons/skills/` into distribution wheels.
+
+---
+
 ## [2.7.1] - 2026-10-14
 
 ### Added

@@ -1,4 +1,4 @@
-# PXOS Complete LLM Reference (v2.7.1)
+# PXOS Complete LLM Reference (v2.8.0)
 > Aggregated documentation for direct AI context injection, indexing, and RAG pipelines.
 Generated automatically from repository sources (https://github.com/madebypx/PXOS).
 
@@ -334,9 +334,20 @@ pxos add maestri
 pxos init --maestri
 ```
 
+#### Cognitive Skills Router Addon (`pxos add skills`)
+Adds intelligent agentic skill routing and Just-in-Time (JIT) activation protocols (`.ai/skills/SKILLS_ROUTER.md`), eliminating context pollution and token exhaustion by activating specialized skills only when relevant while keeping trivial edits overhead-free:
+
+```bash
+# Add to existing workspace
+pxos add skills
+
+# Or initialize PXOS with skills addon enabled
+pxos init --skills
+```
+
 ### Safe Upgrade for Existing Projects
 
-To upgrade an existing project to **PXOS v2.7.1** without touching your project context, active specs, or decision logs:
+To upgrade an existing project to **PXOS v2.8.0** without touching your project context, active specs, or decision logs:
 
 ```bash
 # Bash

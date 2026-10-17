@@ -12,7 +12,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
-VERSION = "2.7.1"
+VERSION = "2.8.0"
 REPO_RAW_BASE = "https://raw.githubusercontent.com/madebypx/PXOS/main"
 
 # ANSI Color Codes
@@ -107,6 +107,13 @@ ADDONS = {
             ("templates/addons/maestri/.ai/canvas/swarm-protocol.md", Path(".ai/canvas/swarm-protocol.md")),
         ],
         "rules": "templates/addons/maestri/rules/maestri_bridge.md",
+    },
+    "skills": {
+        "title": "Cognitive Skills Router & Just-in-Time Activation Addon",
+        "files": [
+            ("templates/addons/skills/.ai/skills/SKILLS_ROUTER.md", Path(".ai/skills/SKILLS_ROUTER.md")),
+        ],
+        "rules": "templates/addons/skills/rules/skills_router.md",
     },
 }
 
@@ -249,6 +256,11 @@ def install_addon(addon_key: str, force: bool = False, ide: str = None, global_m
         print(f"  1. Ensure the {BOLD}maestri{RESET} CLI is available on your PATH or via $MAESTRI_CLI.")
         print(f"  2. Consult your editor rules (e.g. {BOLD}.cursor/rules/pxos-maestri.mdc{RESET}) for spatial swarm guidelines.")
         print(f"  3. Use {BOLD}maestri list{RESET} and link {BOLD}.ai/canvas/operational-board.md{RESET} to your canvas.\n")
+    elif addon_key == "skills":
+        print("  Next steps:")
+        print(f"  1. Review cognitive skill routing matrix in {BOLD}.ai/skills/SKILLS_ROUTER.md{RESET}.")
+        print(f"  2. Follow the Just-in-Time activation protocol to eliminate context and token waste.")
+        print(f"  3. Configure your editor rules (e.g. {BOLD}.cursor/rules/pxos-skills.mdc{RESET}) for automatic skill guidance.\n")
 
 
 def configure_ide_rules(ide: str, global_mode: bool = False):
@@ -337,6 +349,9 @@ def cmd_init(args):
 
     if getattr(args, "maestri", False):
         install_addon("maestri", force=False, ide=ide, global_mode=args.global_mode)
+
+    if getattr(args, "skills", False):
+        install_addon("skills", force=False, ide=ide, global_mode=args.global_mode)
 
     print(f"\n{BOLD}{GREEN}PXOS v{VERSION} installed successfully.{RESET}\n")
     print("  Next steps:")
@@ -451,6 +466,7 @@ def main():
     p_init.add_argument("--full", action="store_true", help="Install optional planning files (ROADMAP.md, SPRINT.md)")
     p_init.add_argument("--evidence", action="store_true", help="Install scientific evidence-first research addon")
     p_init.add_argument("--maestri", action="store_true", help="Install Maestri spatial canvas and multi-agent swarm addon")
+    p_init.add_argument("--skills", action="store_true", help="Install cognitive skills router and just-in-time activation addon")
     p_init.add_argument("--ide", type=str, choices=["cursor", "windsurf", "claude", "gemini", "copilot"], help="Configure IDE rules")
     p_init.add_argument("--global", dest="global_mode", action="store_true", help="Install IDE rules globally to home directory")
     p_init.set_defaults(func=cmd_init)
